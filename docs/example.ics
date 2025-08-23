@@ -1,0 +1,38 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Rhiz//Calendar Example//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:meeting-1@rhiz.ai
+DTSTART:20240115T100000Z
+DTEND:20240115T110000Z
+SUMMARY:Product Strategy Meeting
+DESCRIPTION:Discuss Q1 product roadmap and feature priorities
+LOCATION:Conference Room A
+ORGANIZER;CN=John Doe:mailto:john.doe@company.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Sarah Chen:mailto:sarah.chen@acme.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Mike Rodriguez:mailto:mike@techstartup.io
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-2@rhiz.ai
+DTSTART:20240116T140000Z
+DTEND:20240116T150000Z
+SUMMARY:Investor Pitch Practice
+DESCRIPTION:Practice pitch deck for Series A fundraising
+LOCATION:Zoom Meeting
+ORGANIZER;CN=John Doe:mailto:john.doe@company.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Alex Johnson:mailto:alex.johnson@venture.com
+END:VEVENT
+BEGIN:VEVENT
+UID:meeting-3@rhiz.ai
+DTSTART:20240117T090000Z
+DTEND:20240117T100000Z
+SUMMARY:Engineering Team Standup
+DESCRIPTION:Daily standup with engineering team
+LOCATION:Slack Huddle
+ORGANIZER;CN=John Doe:mailto:john.doe@company.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=David Kim:mailto:david.kim@company.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;CN=Lisa Wang:mailto:lisa.wang@company.com
+END:VEVENT
+END:VCALENDAR
