@@ -31,7 +31,8 @@ import {
   LogOut,
   Moon,
   Sun,
-  BarChart3
+  BarChart3,
+  Share2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
@@ -50,6 +51,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
     { href: '/people', label: 'People', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },
+    { href: '/referrals', label: 'Referrals', icon: Share2 },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 

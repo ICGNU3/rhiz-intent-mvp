@@ -110,3 +110,81 @@ INSERT INTO oauth_token (id, workspace_id, provider, access_token, refresh_token
 INSERT INTO crm_contact_sync (id, workspace_id, crm_id, rhiz_person_id, crm_provider, last_synced_at, sync_status, metadata) VALUES 
 ('550e8400-e29b-41d4-a716-446655440160', '550e8400-e29b-41d4-a716-446655440001', 'hubspot_contact_123', '550e8400-e29b-41d4-a716-446655440020', 'hubspot', NOW() - INTERVAL '1 day', 'synced', '{"last_sync_direction": "to_crm", "sync_errors": []}'),
 ('550e8400-e29b-41d4-a716-446655440161', '550e8400-e29b-41d4-a716-446655440001', 'hubspot_contact_456', '550e8400-e29b-41d4-a716-446655440021', 'hubspot', NOW() - INTERVAL '2 days', 'synced', '{"last_sync_direction": "to_crm", "sync_errors": []}');
+
+-- Referral System Seed Data
+
+-- Create referral codes for demo users
+INSERT INTO referral_code (id, code, creator_id, max_uses, used, reward_type, reward_value, created_at, expires_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440170', 'ALICE123', 'alice-user-id', 10, 3, 'upgrade', 30, NOW() - INTERVAL '7 days', NULL),
+('550e8400-e29b-41d4-a716-446655440171', 'BOB456', 'bob-user-id', 5, 2, 'invite', 1, NOW() - INTERVAL '5 days', NULL),
+('550e8400-e29b-41d4-a716-446655440172', 'CAROL789', 'carol-user-id', 15, 1, 'credit', 100, NOW() - INTERVAL '3 days', NULL);
+
+-- Create referral edges (invite tree) - Alice has 3 direct invites, 2 of which have their own invites
+INSERT INTO referral_edge (id, inviter_id, invitee_id, referral_code_id, created_at) VALUES 
+-- Alice's direct invitees
+('550e8400-e29b-41d4-a716-446655440180', 'alice-user-id', 'david-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '6 days'),
+('550e8400-e29b-41d4-a716-446655440181', 'alice-user-id', 'emma-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '5 days'),
+('550e8400-e29b-41d4-a716-446655440182', 'alice-user-id', 'frank-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '4 days'),
+
+-- David's invitees (level 2 from Alice)
+('550e8400-e29b-41d4-a716-446655440183', 'david-user-id', 'grace-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '3 days'),
+('550e8400-e29b-41d4-a716-446655440184', 'david-user-id', 'henry-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '2 days'),
+
+-- Emma's invitees (level 2 from Alice)
+('550e8400-e29b-41d4-a716-446655440185', 'emma-user-id', 'iris-user-id', '550e8400-e29b-41d4-a716-446655440170', NOW() - INTERVAL '1 day'),
+
+-- Bob's direct invitees
+('550e8400-e29b-41d4-a716-446655440186', 'bob-user-id', 'jack-user-id', '550e8400-e29b-41d4-a716-446655440171', NOW() - INTERVAL '4 days'),
+('550e8400-e29b-41d4-a716-446655440187', 'bob-user-id', 'kate-user-id', '550e8400-e29b-41d4-a716-446655440171', NOW() - INTERVAL '3 days'),
+
+-- Carol's direct invitee
+('550e8400-e29b-41d4-a716-446655440188', 'carol-user-id', 'leo-user-id', '550e8400-e29b-41d4-a716-446655440172', NOW() - INTERVAL '2 days');
+
+-- Create growth events for viral analytics
+INSERT INTO growth_event (id, user_id, type, meta, created_at) VALUES 
+-- Alice's events
+('550e8400-e29b-41d4-a716-446655440190', 'alice-user-id', 'invite_sent', '{"code": "ALICE123", "rewardType": "upgrade"}', NOW() - INTERVAL '7 days'),
+('550e8400-e29b-41d4-a716-446655440191', 'alice-user-id', 'invite_redeemed', '{"code": "ALICE123", "inviteeId": "david-user-id"}', NOW() - INTERVAL '6 days'),
+('550e8400-e29b-41d4-a716-446655440192', 'alice-user-id', 'invite_redeemed', '{"code": "ALICE123", "inviteeId": "emma-user-id"}', NOW() - INTERVAL '5 days'),
+('550e8400-e29b-41d4-a716-446655440193', 'alice-user-id', 'invite_redeemed', '{"code": "ALICE123", "inviteeId": "frank-user-id"}', NOW() - INTERVAL '4 days'),
+
+-- David's events
+('550e8400-e29b-41d4-a716-446655440194', 'david-user-id', 'signup', '{"referredBy": "alice-user-id", "code": "ALICE123"}', NOW() - INTERVAL '6 days'),
+('550e8400-e29b-41d4-a716-446655440195', 'david-user-id', 'invite_sent', '{"code": "DAVID456", "rewardType": "upgrade"}', NOW() - INTERVAL '5 days'),
+('550e8400-e29b-41d4-a716-446655440196', 'david-user-id', 'invite_redeemed', '{"code": "DAVID456", "inviteeId": "grace-user-id"}', NOW() - INTERVAL '3 days'),
+('550e8400-e29b-41d4-a716-446655440197', 'david-user-id', 'invite_redeemed', '{"code": "DAVID456", "inviteeId": "henry-user-id"}', NOW() - INTERVAL '2 days'),
+
+-- Emma's events
+('550e8400-e29b-41d4-a716-446655440198', 'emma-user-id', 'signup', '{"referredBy": "alice-user-id", "code": "ALICE123"}', NOW() - INTERVAL '5 days'),
+('550e8400-e29b-41d4-a716-446655440199', 'emma-user-id', 'invite_sent', '{"code": "EMMA789", "rewardType": "upgrade"}', NOW() - INTERVAL '4 days'),
+('550e8400-e29b-41d4-a716-446655440200', 'emma-user-id', 'invite_redeemed', '{"code": "EMMA789", "inviteeId": "iris-user-id"}', NOW() - INTERVAL '1 day'),
+
+-- Frank's events
+('550e8400-e29b-41d4-a716-446655440201', 'frank-user-id', 'signup', '{"referredBy": "alice-user-id", "code": "ALICE123"}', NOW() - INTERVAL '4 days'),
+
+-- Grace's events
+('550e8400-e29b-41d4-a716-446655440202', 'grace-user-id', 'signup', '{"referredBy": "david-user-id", "code": "DAVID456"}', NOW() - INTERVAL '3 days'),
+
+-- Henry's events
+('550e8400-e29b-41d4-a716-446655440203', 'henry-user-id', 'signup', '{"referredBy": "david-user-id", "code": "DAVID456"}', NOW() - INTERVAL '2 days'),
+
+-- Iris's events
+('550e8400-e29b-41d4-a716-446655440204', 'iris-user-id', 'signup', '{"referredBy": "emma-user-id", "code": "EMMA789"}', NOW() - INTERVAL '1 day'),
+
+-- Bob's events
+('550e8400-e29b-41d4-a716-446655440205', 'bob-user-id', 'invite_sent', '{"code": "BOB456", "rewardType": "invite"}', NOW() - INTERVAL '5 days'),
+('550e8400-e29b-41d4-a716-446655440206', 'bob-user-id', 'invite_redeemed', '{"code": "BOB456", "inviteeId": "jack-user-id"}', NOW() - INTERVAL '4 days'),
+('550e8400-e29b-41d4-a716-446655440207', 'bob-user-id', 'invite_redeemed', '{"code": "BOB456", "inviteeId": "kate-user-id"}', NOW() - INTERVAL '3 days'),
+
+-- Jack's events
+('550e8400-e29b-41d4-a716-446655440208', 'jack-user-id', 'signup', '{"referredBy": "bob-user-id", "code": "BOB456"}', NOW() - INTERVAL '4 days'),
+
+-- Kate's events
+('550e8400-e29b-41d4-a716-446655440209', 'kate-user-id', 'signup', '{"referredBy": "bob-user-id", "code": "BOB456"}', NOW() - INTERVAL '3 days'),
+
+-- Carol's events
+('550e8400-e29b-41d4-a716-446655440210', 'carol-user-id', 'invite_sent', '{"code": "CAROL789", "rewardType": "credit"}', NOW() - INTERVAL '3 days'),
+('550e8400-e29b-41d4-a716-446655440211', 'carol-user-id', 'invite_redeemed', '{"code": "CAROL789", "inviteeId": "leo-user-id"}', NOW() - INTERVAL '2 days'),
+
+-- Leo's events
+('550e8400-e29b-41d4-a716-446655440212', 'leo-user-id', 'signup', '{"referredBy": "carol-user-id", "code": "CAROL789"}', NOW() - INTERVAL '2 days');

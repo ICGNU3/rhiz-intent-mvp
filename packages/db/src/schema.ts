@@ -335,6 +335,49 @@ export const crmContactSync = pgTable('crm_contact_sync', {
   providerIdx: index('crm_contact_sync_provider_idx').on(table.crmProvider),
 }));
 
+// Referral code table
+export const referralCode = pgTable('referral_code', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  code: text('code').notNull().unique(),
+  creatorId: text('creator_id').notNull(), // User who created the code
+  maxUses: integer('max_uses'), // null = unlimited
+  used: integer('used').notNull().default(0),
+  rewardType: text('reward_type').notNull(), // 'credit', 'upgrade', 'invite'
+  rewardValue: integer('reward_value'), // Amount of reward (credits, days, invites)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at'), // null = never expires
+}, (table) => ({
+  codeIdx: index('referral_code_code_idx').on(table.code),
+  creatorIdx: index('referral_code_creator_idx').on(table.creatorId),
+  usedIdx: index('referral_code_used_idx').on(table.used),
+}));
+
+// Referral edge table (invite tree)
+export const referralEdge = pgTable('referral_edge', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  inviterId: text('inviter_id').notNull(), // User who sent the invite
+  inviteeId: text('invitee_id').notNull(), // User who was invited
+  referralCodeId: uuid('referral_code_id').references(() => referralCode.id),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  inviterIdx: index('referral_edge_inviter_idx').on(table.inviterId),
+  inviteeIdx: index('referral_edge_invitee_idx').on(table.inviteeId),
+  codeIdx: index('referral_edge_code_idx').on(table.referralCodeId),
+}));
+
+// Growth event table (viral analytics)
+export const growthEvent = pgTable('growth_event', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  type: text('type').notNull(), // 'signup', 'invite_sent', 'invite_redeemed', 'share_clicked'
+  meta: jsonb('meta'), // Additional event metadata
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index('growth_event_user_idx').on(table.userId),
+  typeIdx: index('growth_event_type_idx').on(table.type),
+  createdIdx: index('growth_event_created_idx').on(table.createdAt),
+}));
+
 // Zod schemas for validation
 export const insertWorkspaceSchema = createInsertSchema(workspace);
 export const selectWorkspaceSchema = createSelectSchema(workspace);
@@ -360,6 +403,15 @@ export const selectOauthTokenSchema = createSelectSchema(oauthToken);
 export const insertCrmContactSyncSchema = createInsertSchema(crmContactSync);
 export const selectCrmContactSyncSchema = createSelectSchema(crmContactSync);
 
+export const insertReferralCodeSchema = createInsertSchema(referralCode);
+export const selectReferralCodeSchema = createSelectSchema(referralCode);
+
+export const insertReferralEdgeSchema = createInsertSchema(referralEdge);
+export const selectReferralEdgeSchema = createSelectSchema(referralEdge);
+
+export const insertGrowthEventSchema = createInsertSchema(growthEvent);
+export const selectGrowthEventSchema = createSelectSchema(growthEvent);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
@@ -369,6 +421,9 @@ export type Suggestion = z.infer<typeof selectSuggestionSchema>;
 export type Integration = z.infer<typeof selectIntegrationSchema>;
 export type OauthToken = z.infer<typeof selectOauthTokenSchema>;
 export type CrmContactSync = z.infer<typeof selectCrmContactSyncSchema>;
+export type ReferralCode = z.infer<typeof selectReferralCodeSchema>;
+export type ReferralEdge = z.infer<typeof selectReferralEdgeSchema>;
+export type GrowthEvent = z.infer<typeof selectGrowthEventSchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {

@@ -38,7 +38,9 @@
     "@hookform/resolvers": "^3.3.0",
     "react-dropzone": "^14.2.0",
     "ics": "^3.1.0",
-    "vaul": "^0.8.0"
+    "vaul": "^0.8.0",
+    "recharts": "^2.8.0",
+    "nanoid": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
