@@ -12,6 +12,8 @@
     "db:seed": "pnpm --filter db seed",
     "workers:start": "pnpm --filter workers start",
     "test": "pnpm --recursive test",
+    "test:api": "pnpm --filter web test",
+    "test:e2e": "pnpm --filter web playwright test",
     "lint": "pnpm --recursive lint",
     "type-check": "pnpm --recursive type-check"
   },

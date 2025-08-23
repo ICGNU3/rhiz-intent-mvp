@@ -9,26 +9,27 @@ import { cn } from '@/lib/utils'
 
 interface IntentCard {
   id: string
-  kind: IntentKind
-  title: string
-  description: string
-  status: 'active' | 'completed' | 'archived'
-  createdAt: Date
-  updatedAt: Date
-  actions: Array<{
+  goalTitle: string
+  goalKind: string
+  goalStatus: 'active' | 'completed' | 'archived'
+  suggestions: Array<{
     id: string
-    label: string
-    description: string
-    kind: 'suggestion' | 'task' | 'insight'
-    data: Record<string, any>
+    personAName: string
+    personBName: string
+    score: number
+    why?: {
+      mutualInterests: string[];
+      recency: number;
+      frequency: number;
+      affiliation: number;
+      goalAlignment: number;
+    };
   }>
-  insights: Array<{
-    id: string
-    title: string
-    description: string
-    kind: 'progress' | 'opportunity' | 'risk'
-    data: Record<string, any>
-  }>
+  insight?: {
+    type: 'network_gap' | 'opportunity' | 'trend';
+    message: string;
+    confidence: number;
+  }
 }
 
 export function IntentCards() {
@@ -99,65 +100,75 @@ export function IntentCards() {
           <CardHeader>
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">{card.title}</CardTitle>
+                <CardTitle className="text-lg">{card.goalTitle}</CardTitle>
                 <CardDescription className="mt-1">
-                  {card.description}
+                  {card.goalKind.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </CardDescription>
               </div>
               <Badge 
-                variant={card.status === 'active' ? 'default' : 'secondary'}
+                variant={card.goalStatus === 'active' ? 'default' : 'secondary'}
                 className="ml-2"
               >
-                {card.status}
+                {card.goalStatus}
               </Badge>
             </div>
           </CardHeader>
           
           <CardContent className="space-y-4">
-            {/* Actions */}
-            {card.actions.length > 0 && (
+            {/* Top 2 Suggestions */}
+            {card.suggestions.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium mb-2">Actions</h4>
+                <h4 className="text-sm font-medium mb-2">Top Suggestions</h4>
                 <div className="space-y-2">
-                  {card.actions.slice(0, 2).map((action) => (
-                    <Button
-                      key={action.id}
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start"
-                    >
-                      {action.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Insights */}
-            {card.insights.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium mb-2">Insights</h4>
-                <div className="space-y-2">
-                  {card.insights.slice(0, 1).map((insight) => (
+                  {card.suggestions.slice(0, 2).map((suggestion) => (
                     <div
-                      key={insight.id}
-                      className={cn(
-                        'p-3 rounded-lg text-sm',
-                        insight.kind === 'opportunity' && 'bg-green-50 text-green-700',
-                        insight.kind === 'risk' && 'bg-red-50 text-red-700',
-                        insight.kind === 'progress' && 'bg-blue-50 text-blue-700'
-                      )}
+                      key={suggestion.id}
+                      className="p-3 border rounded-lg"
                     >
-                      <div className="font-medium">{insight.title}</div>
-                      <div className="text-xs opacity-75">{insight.description}</div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">
+                          {suggestion.personAName} ↔ {suggestion.personBName}
+                        </span>
+                        <Badge variant="outline" className="text-xs">
+                          {suggestion.score}
+                        </Badge>
+                      </div>
+                      {suggestion.why?.mutualInterests.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {suggestion.why.mutualInterests.slice(0, 2).join(', ')}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
             
-            <div className="text-xs text-muted-foreground">
-              Updated {new Date(card.updatedAt).toLocaleDateString()}
+            {/* 1 Insight */}
+            {card.insight && (
+              <div>
+                <h4 className="text-sm font-medium mb-2">Insight</h4>
+                <div
+                  className={cn(
+                    'p-3 rounded-lg text-sm',
+                    card.insight.type === 'opportunity' && 'bg-green-50 text-green-700',
+                    card.insight.type === 'network_gap' && 'bg-blue-50 text-blue-700',
+                    card.insight.type === 'trend' && 'bg-purple-50 text-purple-700'
+                  )}
+                >
+                  <div className="text-xs opacity-75 mb-1">
+                    {card.insight.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} 
+                    ({card.insight.confidence}% confidence)
+                  </div>
+                  <div>{card.insight.message}</div>
+                </div>
+              </div>
+            )}
+            
+            <div className="pt-2">
+              <Button variant="outline" size="sm" className="w-full">
+                View Details
+              </Button>
             </div>
           </CardContent>
         </Card>

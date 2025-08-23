@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
     "typescript": "^5.0.0"
   }
 }

@@ -1,7 +1,10 @@
 import { startAgent } from './queue';
 import { intentRouterHandler } from './agents/intent-router';
 import { captureHandler } from './agents/capture';
+import { enrichmentHandler } from './agents/enrichment';
 import { matchingHandler } from './agents/matching';
+import { introWriterHandler } from './agents/intro-writer';
+import { followUpHandler } from './agents/followup';
 
 // Agent roles
 const ROLES = {
@@ -44,8 +47,10 @@ switch (role) {
     
   case ROLES.ENRICHMENT:
     console.log('Starting EnrichmentAgent...');
-    // TODO: Implement enrichment agent
-    console.log('EnrichmentAgent not implemented in MVP');
+    startAgent('enrich', enrichmentHandler, {
+      concurrency: 2,
+      maxAttempts: 3,
+    });
     break;
     
   case ROLES.MATCHING:
@@ -58,14 +63,18 @@ switch (role) {
     
   case ROLES.INTRO:
     console.log('Starting IntroWriter agent...');
-    // TODO: Implement intro writer agent
-    console.log('IntroWriter agent not implemented in MVP');
+    startAgent('intro', introWriterHandler, {
+      concurrency: 1,
+      maxAttempts: 3,
+    });
     break;
     
   case ROLES.FOLLOWUP:
     console.log('Starting FollowUp agent...');
-    // TODO: Implement follow-up agent
-    console.log('FollowUp agent not implemented in MVP');
+    startAgent('followup', followUpHandler, {
+      concurrency: 1,
+      maxAttempts: 3,
+    });
     break;
     
   default:
@@ -85,5 +94,5 @@ process.on('SIGINT', async () => {
 });
 
 // Keep the process alive
-console.log(`✅ Worker started successfully with role: ${role}`);
+console.log(`✅ [${role.toUpperCase()}] agent online`);
 console.log('Press Ctrl+C to stop');

@@ -1,72 +1,82 @@
-import { NextResponse } from 'next/server'
-import { db, goal, suggestion, person } from '@rhiz/db'
-import { eq } from 'drizzle-orm'
+import { NextRequest, NextResponse } from 'next/server';
+import { db, goal, suggestion, person } from '@rhiz/db';
+import { eq, and, desc } from 'drizzle-orm';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // For demo purposes, use a fixed user ID
-    const demoUserId = 'demo-user-123'
+    // For demo purposes, use the demo user ID
+    const ownerId = 'demo-user-id';
     
-    // Get goals for the user
+    // Get active goals
     const goals = await db
       .select()
       .from(goal)
-      .where(eq(goal.ownerId, demoUserId))
-      .orderBy(goal.createdAt);
+      .where(
+        and(
+          eq(goal.ownerId, ownerId),
+          eq(goal.status, 'active')
+        )
+      )
+      .orderBy(desc(goal.createdAt));
     
-    // Get suggestions for these goals
-    const goalIds = goals.map(g => g.id);
-    const suggestions = goalIds.length > 0 ? await db
+    // Get suggestions for each goal
+    const allSuggestions = await db
       .select()
       .from(suggestion)
-      .where(eq(suggestion.ownerId, demoUserId))
-      .orderBy(suggestion.score) : [];
+      .where(eq(suggestion.ownerId, ownerId));
     
-    // Get people for context
+    // Get people for person details
     const people = await db
       .select()
       .from(person)
-      .where(eq(person.ownerId, demoUserId));
+      .where(eq(person.ownerId, ownerId));
     
-    // Transform goals into intent cards
-    const cards = goals.map(goal => {
-      const goalSuggestions = suggestions.filter(s => s.goalId === goal.id);
+    // Build Intent Cards with enhanced format
+    const intentCards = goals.map(goal => {
+      const goalSuggestions = allSuggestions
+        .filter(s => s.goalId === goal.id)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2); // Top 2 suggestions
+      
+      const suggestionsWithDetails = goalSuggestions.map(suggestion => {
+        const personA = people.find(p => p.id === suggestion.aId);
+        const personB = people.find(p => p.id === suggestion.bId);
+        
+        return {
+          id: suggestion.id,
+          personAName: personA?.fullName || 'Unknown',
+          personBName: personB?.fullName || 'Unknown',
+          score: suggestion.score,
+          why: suggestion.why,
+        };
+      });
+      
+      // Generate insight based on suggestions
+      const insight = {
+        type: 'opportunity' as const,
+        message: `Found ${suggestionsWithDetails.length} high-quality introduction opportunities for your "${goal.title}" goal. The top suggestion has a score of ${suggestionsWithDetails[0]?.score || 0}/100.`,
+        confidence: Math.min(95, 70 + (suggestionsWithDetails.length * 10)),
+      };
       
       return {
         id: goal.id,
-        kind: goal.kind,
-        title: goal.title,
-        description: goal.details || `Working on ${goal.kind.replace('_', ' ')}`,
-        status: goal.status,
-        createdAt: goal.createdAt,
-        updatedAt: goal.createdAt, // Using createdAt as updatedAt for demo
-        actions: goalSuggestions.slice(0, 2).map((suggestion, index) => ({
-          id: `action-${suggestion.id}`,
-          label: `Review Introduction (${suggestion.score}/100)`,
-          description: `High-scoring match for your goal`,
-          kind: 'suggestion' as const,
-          data: { suggestionId: suggestion.id }
-        })),
-        insights: [
-          {
-            id: `insight-${goal.id}`,
-            title: goalSuggestions.length > 0 ? 'New Opportunities' : 'Getting Started',
-            description: goalSuggestions.length > 0 
-              ? `${goalSuggestions.length} potential introductions found`
-              : 'Add more people to your network to see suggestions',
-            kind: goalSuggestions.length > 0 ? 'opportunity' as const : 'progress' as const,
-            data: { suggestionCount: goalSuggestions.length }
-          }
-        ]
+        goalTitle: goal.title,
+        goalKind: goal.kind,
+        goalStatus: goal.status,
+        suggestions: suggestionsWithDetails,
+        insight,
       };
     });
     
-    return NextResponse.json({ cards });
+    return NextResponse.json({
+      success: true,
+      cards: intentCards,
+    });
     
   } catch (error) {
     console.error('Failed to fetch intent cards:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch intent cards' },
+      { success: false, error: 'Failed to fetch intent cards' },
       { status: 500 }
     );
   }

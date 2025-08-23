@@ -2,20 +2,52 @@ import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, index } from '
 import { pgVector } from 'pgvector/drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
+import { createCipherGCM, createDecipherGCM, randomBytes } from 'crypto';
 
-// Encryption helper
+// Encryption helpers with AES-256-GCM
 const encryptField = (value: string | null, encryptionKey?: string): string | null => {
   if (!value || !encryptionKey) return value;
-  // In production, use proper encryption like AES-256-GCM
-  // For MVP, we'll use a simple base64 encoding as placeholder
-  return Buffer.from(value).toString('base64');
+  
+  try {
+    const iv = randomBytes(16);
+    const cipher = createCipherGCM('aes-256-gcm', encryptionKey);
+    
+    let encrypted = cipher.update(value, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    const authTag = cipher.getAuthTag();
+    
+    // Return: iv:authTag:encrypted
+    return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    return null;
+  }
 };
 
 const decryptField = (value: string | null, encryptionKey?: string): string | null => {
   if (!value || !encryptionKey) return value;
+  
   try {
-    return Buffer.from(value, 'base64').toString();
-  } catch {
+    const parts = value.split(':');
+    if (parts.length !== 3) {
+      // Fallback for old base64 format
+      return Buffer.from(value, 'base64').toString();
+    }
+    
+    const [ivHex, authTagHex, encrypted] = parts;
+    const iv = Buffer.from(ivHex, 'hex');
+    const authTag = Buffer.from(authTagHex, 'hex');
+    
+    const decipher = createDecipherGCM('aes-256-gcm', encryptionKey);
+    decipher.setAuthTag(authTag);
+    
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    
+    return decrypted;
+  } catch (error) {
+    console.error('Decryption failed:', error);
     return null;
   }
 };
