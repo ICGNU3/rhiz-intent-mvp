@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { Navigation } from '@/components/navigation';
+import { Search, Calendar, Target, Users } from 'lucide-react';
 
 interface Person {
   id: string;
@@ -22,11 +26,26 @@ interface Person {
 
 export default function PeoplePage() {
   const [people, setPeople] = useState<Person[]>([]);
+  const [filteredPeople, setFilteredPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetchPeople();
   }, []);
+
+  useEffect(() => {
+    const filtered = people.filter(person =>
+      person.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.primaryEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      person.claims.some(claim => 
+        claim.value.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    setFilteredPeople(filtered);
+  }, [people, searchTerm]);
 
   const fetchPeople = async () => {
     try {
@@ -54,6 +73,15 @@ export default function PeoplePage() {
     return 'Weak';
   };
 
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const handlePersonClick = (person: Person) => {
+    setSelectedPerson(person);
+    setIsDrawerOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -76,24 +104,44 @@ export default function PeoplePage() {
           </p>
         </div>
 
+        {/* Search Bar */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search people by name, email, or role..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {people.map((person) => (
-            <Card key={person.id} className="hover:shadow-lg transition-shadow">
+          {filteredPeople.map((person) => (
+            <Card key={person.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handlePersonClick(person)}>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{person.fullName}</CardTitle>
-                  {person.relationshipStrength && (
-                    <Badge className={getStrengthColor(person.relationshipStrength)}>
-                      {getStrengthLabel(person.relationshipStrength)}
-                    </Badge>
-                  )}
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-12 w-12">
+                    <AvatarFallback>{getInitials(person.fullName)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{person.fullName}</CardTitle>
+                      {person.relationshipStrength && (
+                        <Badge className={getStrengthColor(person.relationshipStrength)}>
+                          {getStrengthLabel(person.relationshipStrength)}
+                        </Badge>
+                      )}
+                    </div>
+                    {person.primaryEmail && (
+                      <p className="text-sm text-gray-600">{person.primaryEmail}</p>
+                    )}
+                    {person.location && (
+                      <p className="text-sm text-gray-500">{person.location}</p>
+                    )}
+                  </div>
                 </div>
-                {person.primaryEmail && (
-                  <p className="text-sm text-gray-600">{person.primaryEmail}</p>
-                )}
-                {person.location && (
-                  <p className="text-sm text-gray-500">{person.location}</p>
-                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -121,7 +169,7 @@ export default function PeoplePage() {
                   
                   <div className="pt-2">
                     <Button variant="outline" size="sm" className="w-full">
-                      View Details
+                      Click to view details
                     </Button>
                   </div>
                 </div>
@@ -130,17 +178,96 @@ export default function PeoplePage() {
           ))}
         </div>
 
-        {people.length === 0 && (
+        {filteredPeople.length === 0 && (
           <Card className="text-center py-12">
             <CardContent>
-              <p className="text-gray-600 mb-4">No people found</p>
+              <p className="text-gray-600 mb-4">
+                {searchTerm ? 'No people match your search' : 'No people found'}
+              </p>
               <p className="text-sm text-gray-500">
-                Upload calendar events or record voice notes to start building your network
+                {searchTerm ? 'Try adjusting your search terms' : 'Upload calendar events or record voice notes to start building your network'}
               </p>
             </CardContent>
           </Card>
         )}
       </div>
+
+      {/* Person Detail Drawer */}
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>
+              {selectedPerson && (
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-16 w-16">
+                    <AvatarFallback className="text-lg">{getInitials(selectedPerson.fullName)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h2 className="text-xl font-semibold">{selectedPerson.fullName}</h2>
+                    {selectedPerson.primaryEmail && (
+                      <p className="text-gray-600">{selectedPerson.primaryEmail}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </DrawerTitle>
+          </DrawerHeader>
+          
+          {selectedPerson && (
+            <div className="p-6 space-y-6">
+              {/* Facts Timeline */}
+              <div>
+                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Facts & Claims
+                </h3>
+                <div className="space-y-2">
+                  {selectedPerson.claims.map((claim, index) => (
+                    <div key={index} className="p-3 border rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium capitalize">{claim.key}</p>
+                          <p className="text-gray-600">{claim.value}</p>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          {claim.confidence}% confidence
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Encounters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Recent Encounters
+                </h3>
+                {selectedPerson.lastEncounter ? (
+                  <div className="p-3 border rounded-lg">
+                    <p className="font-medium">Last encounter</p>
+                    <p className="text-gray-600">
+                      {new Date(selectedPerson.lastEncounter).toLocaleDateString()}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No recent encounters</p>
+                )}
+              </div>
+
+              {/* Related Goals */}
+              <div>
+                <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Related Goals
+                </h3>
+                <p className="text-gray-500">No related goals yet</p>
+              </div>
+            </div>
+          )}
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

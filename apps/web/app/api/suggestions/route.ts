@@ -7,11 +7,21 @@ export async function GET(request: NextRequest) {
     // For demo purposes, use the demo user ID
     const ownerId = 'demo-user-id';
     
-    // Get all suggestions for the owner
+    // Get goalId from query params
+    const { searchParams } = new URL(request.url);
+    const goalId = searchParams.get('goalId');
+    
+    // Build where clause
+    let whereClause = eq(suggestion.ownerId, ownerId);
+    if (goalId) {
+      whereClause = and(eq(suggestion.ownerId, ownerId), eq(suggestion.goalId, goalId));
+    }
+    
+    // Get suggestions for the owner
     const suggestions = await db
       .select()
       .from(suggestion)
-      .where(eq(suggestion.ownerId, ownerId))
+      .where(whereClause)
       .orderBy(desc(suggestion.createdAt));
     
     // Get all people for person details
