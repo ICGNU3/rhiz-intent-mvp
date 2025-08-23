@@ -1,0 +1,23 @@
+{
+  "name": "@rhiz/workers",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.0",
+    "@rhiz/db": "workspace:*",
+    "@rhiz/core": "workspace:*",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "typescript": "^5.0.0"
+  }
+}
