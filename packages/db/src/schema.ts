@@ -380,6 +380,98 @@ export const growthEvent = pgTable('growth_event', {
   createdIdx: index('growth_event_created_idx').on(table.createdAt),
 }));
 
+// Graph metrics table (computed metrics for each person)
+export const graphMetrics = pgTable('graph_metrics', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  ownerId: text('owner_id').notNull(),
+  personId: uuid('person_id').references(() => person.id).notNull(),
+  metric: text('metric').notNull(), // 'degree_centrality', 'betweenness_centrality', 'community_id', 'edge_freshness'
+  value: jsonb('value').notNull(), // Can be number, string, or object depending on metric
+  calculatedAt: timestamp('calculated_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('graph_metrics_workspace_idx').on(table.workspaceId),
+  ownerIdx: index('graph_metrics_owner_idx').on(table.ownerId),
+  personIdx: index('graph_metrics_person_idx').on(table.personId),
+  metricIdx: index('graph_metrics_metric_idx').on(table.metric),
+  uniqueMetric: index('graph_metrics_unique_idx').on(table.personId, table.metric),
+}));
+
+// Graph insights table (AI-generated insights)
+export const graphInsight = pgTable('graph_insight', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  ownerId: text('owner_id').notNull(),
+  type: text('type').notNull(), // 'opportunity_gap', 'bridge_builder', 'cluster_insight', 'goal_alignment_gap'
+  title: text('title').notNull(),
+  detail: text('detail').notNull(),
+  personId: uuid('person_id').references(() => person.id),
+  goalId: uuid('goal_id').references(() => goal.id),
+  score: integer('score').notNull().default(50), // 1-100 relevance score
+  provenance: jsonb('provenance'), // {metric, value, reason_generated}
+  state: text('state').notNull().default('active'), // 'active', 'dismissed', 'acted_upon'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at'), // When insight becomes stale
+}, (table) => ({
+  workspaceIdx: index('graph_insight_workspace_idx').on(table.workspaceId),
+  ownerIdx: index('graph_insight_owner_idx').on(table.ownerId),
+  typeIdx: index('graph_insight_type_idx').on(table.type),
+  personIdx: index('graph_insight_person_idx').on(table.personId),
+  goalIdx: index('graph_insight_goal_idx').on(table.goalId),
+  stateIdx: index('graph_insight_state_idx').on(table.state),
+}));
+
+// Insight sharing table
+export const insightShare = pgTable('insight_share', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  insightId: uuid('insight_id').references(() => graphInsight.id).notNull(),
+  sharedBy: text('shared_by').notNull(), // User who shared the insight
+  sharedWith: text('shared_with').notNull(), // 'workspace' or specific user_id
+  visibility: text('visibility').notNull().default('workspace'), // 'private', 'workspace', 'public'
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  insightIdx: index('insight_share_insight_idx').on(table.insightId),
+  sharedByIdx: index('insight_share_shared_by_idx').on(table.sharedBy),
+  sharedWithIdx: index('insight_share_shared_with_idx').on(table.sharedWith),
+  workspaceIdx: index('insight_share_workspace_idx').on(table.workspaceId),
+  visibilityIdx: index('insight_share_visibility_idx').on(table.visibility),
+}));
+
+// Cross-workspace overlaps table
+export const crossWorkspaceOverlap = pgTable('cross_workspace_overlap', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  personId: uuid('person_id').references(() => person.id).notNull(),
+  workspaces: jsonb('workspaces').notNull(), // Array of workspace IDs
+  overlapType: text('overlap_type').notNull(), // 'email', 'linkedin', 'phone'
+  confidence: integer('confidence').notNull().default(80), // 0-100
+  detectedAt: timestamp('detected_at').defaultNow().notNull(),
+  state: text('state').notNull().default('active'), // 'active', 'resolved', 'ignored'
+}, (table) => ({
+  personIdx: index('cross_workspace_overlap_person_idx').on(table.personId),
+  overlapTypeIdx: index('cross_workspace_overlap_type_idx').on(table.overlapType),
+  stateIdx: index('cross_workspace_overlap_state_idx').on(table.state),
+}));
+
+// Collective opportunities table
+export const collectiveOpportunity = pgTable('collective_opportunity', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  type: text('type').notNull(), // 'investor_founder_match', 'skill_exchange', 'resource_sharing'
+  workspaces: jsonb('workspaces').notNull(), // Array of workspace IDs involved
+  clusters: jsonb('clusters').notNull(), // Array of cluster descriptions
+  score: integer('score').notNull().default(50), // 1-100 opportunity score
+  status: text('status').notNull().default('proposed'), // 'proposed', 'active', 'completed', 'dismissed'
+  createdBy: text('created_by').notNull(), // System or user who created it
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  expiresAt: timestamp('expires_at'), // When opportunity becomes stale
+}, (table) => ({
+  typeIdx: index('collective_opportunity_type_idx').on(table.type),
+  statusIdx: index('collective_opportunity_status_idx').on(table.status),
+  createdByIdx: index('collective_opportunity_created_by_idx').on(table.createdBy),
+}));
+
 // Zod schemas for validation
 export const insertWorkspaceSchema = createInsertSchema(workspace);
 export const selectWorkspaceSchema = createSelectSchema(workspace);
@@ -417,6 +509,21 @@ export const selectGrowthEventSchema = createSelectSchema(growthEvent);
 export const insertEdgeSchema = createInsertSchema(edge);
 export const selectEdgeSchema = createSelectSchema(edge);
 
+export const insertGraphMetricsSchema = createInsertSchema(graphMetrics);
+export const selectGraphMetricsSchema = createSelectSchema(graphMetrics);
+
+export const insertGraphInsightSchema = createInsertSchema(graphInsight);
+export const selectGraphInsightSchema = createSelectSchema(graphInsight);
+
+export const insertInsightShareSchema = createInsertSchema(insightShare);
+export const selectInsightShareSchema = createSelectSchema(insightShare);
+
+export const insertCrossWorkspaceOverlapSchema = createInsertSchema(crossWorkspaceOverlap);
+export const selectCrossWorkspaceOverlapSchema = createSelectSchema(crossWorkspaceOverlap);
+
+export const insertCollectiveOpportunitySchema = createInsertSchema(collectiveOpportunity);
+export const selectCollectiveOpportunitySchema = createSelectSchema(collectiveOpportunity);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
@@ -430,6 +537,11 @@ export type ReferralCode = z.infer<typeof selectReferralCodeSchema>;
 export type ReferralEdge = z.infer<typeof selectReferralEdgeSchema>;
 export type GrowthEvent = z.infer<typeof selectGrowthEventSchema>;
 export type Edge = z.infer<typeof selectEdgeSchema>;
+export type GraphMetrics = z.infer<typeof selectGraphMetricsSchema>;
+export type GraphInsight = z.infer<typeof selectGraphInsightSchema>;
+export type InsightShare = z.infer<typeof selectInsightShareSchema>;
+export type CrossWorkspaceOverlap = z.infer<typeof selectCrossWorkspaceOverlapSchema>;
+export type CollectiveOpportunity = z.infer<typeof selectCollectiveOpportunitySchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {

@@ -97,7 +97,27 @@ INSERT INTO workspace_activity (id, workspace_id, user_id, action, entity_type, 
 -- Create notifications
 INSERT INTO notification (id, workspace_id, user_id, type, message, created_at) VALUES 
 ('550e8400-e29b-41d4-a716-446655440120', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'new_suggestion', 'New introduction suggestion: Sarah Chen ↔ Michael Rodriguez (Score: 85)', NOW() - INTERVAL '1 hour'),
-('550e8400-e29b-41d4-a716-446655440121', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'new_suggestion', 'New introduction suggestion: Emily Johnson ↔ Lisa Wang (Score: 78)', NOW() - INTERVAL '30 minutes'),
+('550e8400-e29b-41d4-a716-446655440121', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'new_suggestion', 'New introduction suggestion: Emily Johnson ↔ Lisa Wang (Score: 78)', NOW() - INTERVAL '30 minutes');
+
+-- Create demo graph insights
+INSERT INTO graph_insight (id, workspace_id, owner_id, type, title, detail, person_id, goal_id, score, provenance, state, created_at, expires_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440130', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'opportunity_gap', 'Dormant but valuable contact', 'Sarah Chen (high influence, 75 days since last activity). Suggest reactivation.', '550e8400-e29b-41d4-a716-446655440020', NULL, 85, '{"metric": "degree_centrality", "value": {"value": 0.8, "normalized": true}, "reason_generated": "High centrality (0.8) but dormant for 75 days"}', 'active', NOW(), NOW() + INTERVAL '30 days'),
+('550e8400-e29b-41d4-a716-446655440131', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'bridge_builder', 'Bridge Builder', 'Michael Rodriguez connects different parts of your network. Consider leveraging his connections.', '550e8400-e29b-41d4-a716-446655440021', NULL, 78, '{"metric": "betweenness_centrality", "value": {"value": 0.6, "normalized": true}, "reason_generated": "High betweenness centrality (0.6) indicates bridge role"}', 'active', NOW(), NOW() + INTERVAL '30 days'),
+('550e8400-e29b-41d4-a716-446655440132', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'cluster_insight', 'Large community detected', 'Community of 5 people including Sarah Chen, Michael Rodriguez, David Kim. Consider group engagement strategies.', NULL, NULL, 72, '{"metric": "community_id", "value": {"communityId": "cluster_1", "size": 5}, "reason_generated": "Large community (5 members) detected via Louvain algorithm"}', 'active', NOW(), NOW() + INTERVAL '30 days'),
+('550e8400-e29b-41d4-a716-446655440133', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'goal_alignment_gap', 'Goal-relevant contact not engaged', 'Emily Johnson (Head of Innovation) appears relevant to goal "Raise $2M Seed Round" but is not connected.', '550e8400-e29b-41d4-a716-446655440022', '550e8400-e29b-41d4-a716-446655440050', 70, '{"metric": "goal_alignment", "value": {"goalId": "550e8400-e29b-41d4-a716-446655440050", "relevantClaim": {"key": "title", "value": "Head of Innovation"}}, "reason_generated": "Person has title=\"Head of Innovation\" relevant to goal \"Raise $2M Seed Round\""}', 'active', NOW(), NOW() + INTERVAL '30 days');
+
+-- Create demo shared insights
+INSERT INTO insight_share (id, insight_id, shared_by, shared_with, visibility, workspace_id, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440140', '550e8400-e29b-41d4-a716-446655440130', 'alice-user-id', 'workspace', 'workspace', '550e8400-e29b-41d4-a716-446655440001', NOW() - INTERVAL '2 hours'),
+('550e8400-e29b-41d4-a716-446655440141', '550e8400-e29b-41d4-a716-446655440131', 'alice-user-id', 'bob-user-id', 'private', '550e8400-e29b-41d4-a716-446655440001', NOW() - INTERVAL '1 hour');
+
+-- Create demo cross-workspace overlaps
+INSERT INTO cross_workspace_overlap (id, person_id, workspaces, overlap_type, confidence, detected_at, state) VALUES 
+('550e8400-e29b-41d4-a716-446655440150', '550e8400-e29b-41d4-a716-446655440020', '["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]', 'email', 95, NOW() - INTERVAL '1 day', 'active');
+
+-- Create demo collective opportunities
+INSERT INTO collective_opportunity (id, title, description, type, workspaces, clusters, score, status, created_by, created_at, expires_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440160', 'Investor-Founder Match Opportunity', 'Match 3 investors from TechCorp cluster with 2 founders from StartupHub cluster', 'investor_founder_match', '["550e8400-e29b-41d4-a716-446655440001", "550e8400-e29b-41d4-a716-446655440002"]', '[{"workspaceId": "550e8400-e29b-41d4-a716-446655440001", "clusterId": "investors", "size": 3, "description": "Sarah Chen, Michael Rodriguez, David Kim", "tags": ["investor", "ai", "tech"]}, {"workspaceId": "550e8400-e29b-41d4-a716-446655440002", "clusterId": "founders", "size": 2, "description": "Emily Johnson, Lisa Wang", "tags": ["founder", "startup", "innovation"]}]', 82, 'proposed', 'system', NOW(), NOW() + INTERVAL '90 days');
 ('550e8400-e29b-41d4-a716-446655440122', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_accepted', 'Introduction accepted: Sarah Chen ↔ Michael Rodriguez', NOW() - INTERVAL '15 minutes');
 
 -- Create event logs with workspace_id

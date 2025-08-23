@@ -54,6 +54,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },
     { href: '/graph', label: 'Graph', icon: Network },
+    { href: '/insights', label: 'Insights', icon: Lightbulb },
     { href: '/referrals', label: 'Referrals', icon: Share2 },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ];
