@@ -40,7 +40,10 @@
     "ics": "^3.1.0",
     "vaul": "^0.8.0",
     "recharts": "^2.8.0",
-    "nanoid": "^5.0.0"
+    "nanoid": "^5.0.0",
+    "react-force-graph-2d": "^1.25.0",
+    "cmdk": "^0.2.0",
+    "@radix-ui/react-popover": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, suggestion, workspaceActivity, notification, workspaceMember } from '@rhiz/db';
 import { eq, and } from 'drizzle-orm';
+import { GraphBuilder } from '@rhiz/workers/src/agents/graph-builder';
 
 export async function POST(
   request: NextRequest,
@@ -52,6 +53,9 @@ export async function POST(
         person_b: updatedSuggestion.bId,
       },
     });
+    
+    // Create graph edge for the accepted intro
+    await GraphBuilder.createIntroEdge(suggestionId, workspaceId, userId);
     
     // Create notification for workspace members
     const workspaceMembers = await db

@@ -53,13 +53,28 @@ INSERT INTO claim (id, workspace_id, owner_id, subject_type, subject_id, key, va
 ('550e8400-e29b-41d4-a716-446655440069', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440024', 'title', 'Product Manager', 90, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
 ('550e8400-e29b-41d4-a716-446655440070', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440024', 'company', 'StartupHub', 95, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
 ('550e8400-e29b-41d4-a716-446655440071', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'location', 'San Francisco, CA', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
-('550e8400-e29b-41d4-a716-446655440072', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'location', 'New York, NY', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}');
+('550e8400-e29b-41d4-a716-446655440072', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'location', 'New York, NY', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
 
--- Create edges (relationships) with workspace_id
-INSERT INTO edge (id, workspace_id, owner_id, a_id, b_id, kind, strength, last_signal_at, meta) VALUES 
-('550e8400-e29b-41d4-a716-446655440080', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440023', 'colleague', 7, NOW(), '{"shared_projects": ["AI Platform"]}'),
-('550e8400-e29b-41d4-a716-446655440081', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440024', 'colleague', 6, NOW(), '{"shared_projects": ["Partnership Initiative"]}'),
-('550e8400-e29b-41d4-a716-446655440082', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440022', 'mentor', 8, NOW(), '{"mentorship_area": "AI Strategy"}');
+-- Add tag claims for graph visualization
+('550e8400-e29b-41d4-a716-446655440073', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'tag', 'engineer', 90, 'manual', 'legitimate_interest', NOW(), '{"source": "manual", "reason": "graph_tagging"}'),
+('550e8400-e29b-41d4-a716-446655440074', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'tag', 'investor', 85, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "reason": "graph_tagging"}'),
+('550e8400-e29b-41d4-a716-446655440075', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'tag', 'investor', 90, 'manual', 'legitimate_interest', NOW(), '{"source": "manual", "reason": "graph_tagging"}'),
+('550e8400-e29b-41d4-a716-446655440076', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440022', 'tag', 'advisor', 90, 'manual', 'legitimate_interest', NOW(), '{"source": "manual", "reason": "graph_tagging"}'),
+('550e8400-e29b-41d4-a716-446655440077', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440023', 'tag', 'engineer', 90, 'manual', 'legitimate_interest', NOW(), '{"source": "manual", "reason": "graph_tagging"}'),
+('550e8400-e29b-41d4-a716-446655440078', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440024', 'tag', 'advisor', 85, 'manual', 'legitimate_interest', NOW(), '{"source": "manual", "reason": "graph_tagging"}');
+
+-- Create graph edges with new structure
+INSERT INTO edge (id, workspace_id, owner_id, from_id, to_id, type, strength, metadata, created_at) VALUES 
+-- Encounter edges (people who met)
+('550e8400-e29b-41d4-a716-446655440080', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440023', 'encounter', 5, '{"encounterId": "550e8400-e29b-41d4-a716-446655440030", "shared_projects": ["AI Platform"]}', NOW() - INTERVAL '2 days'),
+('550e8400-e29b-41d4-a716-446655440081', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440024', 'encounter', 5, '{"encounterId": "550e8400-e29b-41d4-a716-446655440031", "shared_projects": ["Partnership Initiative"]}', NOW() - INTERVAL '1 day'),
+
+-- Intro edges (accepted introductions)
+('550e8400-e29b-41d4-a716-446655440082', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440021', 'intro', 8, '{"suggestionId": "550e8400-e29b-41d4-a716-446655440090", "goalId": "550e8400-e29b-41d4-a716-446655440050", "score": 85, "why": {"mutual_interests": ["AI/ML", "Product Development"]}}', NOW() - INTERVAL '6 hours'),
+
+-- Goal link edges (people connected to goals)
+('550e8400-e29b-41d4-a716-446655440083', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440050', 'goal_link', 6, '{"goalId": "550e8400-e29b-41d4-a716-446655440050", "role": "potential_investor"}', NOW() - INTERVAL '1 day'),
+('550e8400-e29b-41d4-a716-446655440084', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440050', 'goal_link', 6, '{"goalId": "550e8400-e29b-41d4-a716-446655440050", "role": "potential_investor"}', NOW() - INTERVAL '1 day');
 
 -- Create suggestions with workspace_id
 INSERT INTO suggestion (id, workspace_id, owner_id, kind, a_id, b_id, goal_id, score, why, draft, state, created_at) VALUES 

@@ -32,11 +32,13 @@ import {
   Moon,
   Sun,
   BarChart3,
-  Share2
+  Share2,
+  Network
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
 import { Notifications } from '@/components/Notifications';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 interface NavigationProps {
   currentWorkspaceId?: string;
@@ -51,6 +53,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
     { href: '/people', label: 'People', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },
+    { href: '/graph', label: 'Graph', icon: Network },
     { href: '/referrals', label: 'Referrals', icon: Share2 },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ];
@@ -88,6 +91,11 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
             );
           })}
         </nav>
+        
+        {/* Global Search */}
+        <div className="px-4 py-2">
+          <GlobalSearch />
+        </div>
         
         <div className="p-4 border-t">
           <DropdownMenu>

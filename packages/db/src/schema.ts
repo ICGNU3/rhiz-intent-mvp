@@ -169,16 +169,18 @@ export const edge = pgTable('edge', {
   id: uuid('id').primaryKey().defaultRandom(),
   workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
-  aId: uuid('a_id').references(() => person.id).notNull(),
-  bId: uuid('b_id').references(() => person.id).notNull(),
-  kind: text('kind').notNull(), // 'colleague', 'friend', 'mentor', 'investor'
-  strength: integer('strength').notNull().default(1), // 1-10 scale
-  lastSignalAt: timestamp('last_signal_at').defaultNow().notNull(),
-  meta: jsonb('meta'), // Additional relationship metadata
+  fromId: uuid('from_id').references(() => person.id).notNull(),
+  toId: uuid('to_id').references(() => person.id).notNull(),
+  type: text('type').notNull(), // 'encounter', 'intro', 'goal_link'
+  strength: integer('strength').notNull().default(1), // 0-10 scale
+  metadata: jsonb('metadata'), // Additional relationship metadata
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   workspaceIdx: index('edge_workspace_idx').on(table.workspaceId),
   ownerIdx: index('edge_owner_idx').on(table.ownerId),
-  pairIdx: index('edge_pair_idx').on(table.aId, table.bId),
+  fromIdx: index('edge_from_idx').on(table.fromId),
+  toIdx: index('edge_to_idx').on(table.toId),
+  typeIdx: index('edge_type_idx').on(table.type),
 }));
 
 // Claims table (facts about people/orgs)
@@ -412,6 +414,9 @@ export const selectReferralEdgeSchema = createSelectSchema(referralEdge);
 export const insertGrowthEventSchema = createInsertSchema(growthEvent);
 export const selectGrowthEventSchema = createSelectSchema(growthEvent);
 
+export const insertEdgeSchema = createInsertSchema(edge);
+export const selectEdgeSchema = createSelectSchema(edge);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
@@ -424,6 +429,7 @@ export type CrmContactSync = z.infer<typeof selectCrmContactSyncSchema>;
 export type ReferralCode = z.infer<typeof selectReferralCodeSchema>;
 export type ReferralEdge = z.infer<typeof selectReferralEdgeSchema>;
 export type GrowthEvent = z.infer<typeof selectGrowthEventSchema>;
+export type Edge = z.infer<typeof selectEdgeSchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {
