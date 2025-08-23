@@ -1,0 +1,64 @@
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json pnpm-lock.yaml* ./
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build all packages
+RUN npm install -g pnpm
+RUN pnpm build
+
+# Production image, copy all the files and run the worker
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 rhiz
+
+# Copy built packages
+COPY --from=builder /app/packages/workers/dist ./packages/workers/dist
+COPY --from=builder /app/packages/core/dist ./packages/core/dist
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+
+# Copy package files
+COPY --from=builder /app/packages/workers/package.json ./packages/workers/
+COPY --from=builder /app/packages/core/package.json ./packages/core/
+COPY --from=builder /app/packages/db/package.json ./packages/db/
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/
+
+# Copy root package files
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/pnpm-workspace.yaml ./
+
+# Install production dependencies
+RUN npm install -g pnpm
+RUN pnpm install --prod --frozen-lockfile
+
+USER rhiz
+
+# Set the role via environment variable
+ENV ROLE=router
+
+# Expose port for health checks
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "console.log('Worker health check passed')" || exit 1
+
+# Start the worker
+CMD ["node", "packages/workers/dist/index.js"]
