@@ -1,0 +1,27 @@
+{
+  "name": "@rhiz/db",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "migrate": "drizzle-kit push",
+    "generate": "drizzle-kit generate",
+    "seed": "tsx src/seed.ts",
+    "studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.29.0",
+    "postgres": "^3.4.0",
+    "pgvector": "^0.2.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.0",
+    "drizzle-kit": "^0.20.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
