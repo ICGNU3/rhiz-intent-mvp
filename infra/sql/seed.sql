@@ -91,3 +91,22 @@ INSERT INTO event_log (id, workspace_id, owner_id, event, entity_type, entity_id
 ('550e8400-e29b-41d4-a716-446655440131', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_drafted', 'suggestion', '550e8400-e29b-41d4-a716-446655440090', '{"model": "gpt-4", "tokens_used": 500, "cost": 0.05}', NOW() - INTERVAL '2 hours'),
 ('550e8400-e29b-41d4-a716-446655440132', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'voice_transcribed', 'encounter', '550e8400-e29b-41d4-a716-446655440032', '{"model": "whisper", "duration": 120, "cost": 0.02}', NOW() - INTERVAL '12 hours'),
 ('550e8400-e29b-41d4-a716-446655440133', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_accepted', 'suggestion', '550e8400-e29b-41d4-a716-446655440090', '{"accepted_by": "alice-user-id", "accepted_at": "2024-01-17T15:30:00Z"}', NOW() - INTERVAL '15 minutes');
+
+-- Add Slack user IDs to workspace members
+UPDATE workspace_member SET slack_user_id = 'U1234567890' WHERE user_id = 'alice-user-id';
+UPDATE workspace_member SET slack_user_id = 'U0987654321' WHERE user_id = 'bob-user-id';
+
+-- Create integration records for demo
+INSERT INTO integration (id, workspace_id, provider, status, config, last_sync_at, created_at, updated_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440140', '550e8400-e29b-41d4-a716-446655440001', 'slack', 'connected', '{"teamId": "T1234567890", "teamName": "Demo Workspace"}', NOW(), NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440141', '550e8400-e29b-41d4-a716-446655440001', 'google', 'connected', '{"type": "calendar", "calendarId": "primary"}', NOW() - INTERVAL '1 day', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440142', '550e8400-e29b-41d4-a716-446655440001', 'hubspot', 'disconnected', NULL, NULL, NOW(), NOW());
+
+-- Create demo OAuth tokens (encrypted)
+INSERT INTO oauth_token (id, workspace_id, provider, access_token, refresh_token, expires_at, scope, created_at, updated_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440150', '550e8400-e29b-41d4-a716-446655440001', 'google', 'encrypted_access_token_here', 'encrypted_refresh_token_here', NOW() + INTERVAL '1 hour', 'calendar.readonly calendar.events.readonly', NOW(), NOW());
+
+-- Create demo CRM contact sync records
+INSERT INTO crm_contact_sync (id, workspace_id, crm_id, rhiz_person_id, crm_provider, last_synced_at, sync_status, metadata) VALUES 
+('550e8400-e29b-41d4-a716-446655440160', '550e8400-e29b-41d4-a716-446655440001', 'hubspot_contact_123', '550e8400-e29b-41d4-a716-446655440020', 'hubspot', NOW() - INTERVAL '1 day', 'synced', '{"last_sync_direction": "to_crm", "sync_errors": []}'),
+('550e8400-e29b-41d4-a716-446655440161', '550e8400-e29b-41d4-a716-446655440001', 'hubspot_contact_456', '550e8400-e29b-41d4-a716-446655440021', 'hubspot', NOW() - INTERVAL '2 days', 'synced', '{"last_sync_direction": "to_crm", "sync_errors": []}');

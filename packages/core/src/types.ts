@@ -154,6 +154,8 @@ export const EnrichmentProvider = z.enum([
   'clearbit',
   'apollo',
   'hunter',
+  'slack',
+  'google',
 ]);
 
 export type EnrichmentProvider = z.infer<typeof EnrichmentProvider>;

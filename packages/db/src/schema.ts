@@ -68,11 +68,13 @@ export const workspaceMember = pgTable('workspace_member', {
   id: uuid('id').primaryKey().defaultRandom(),
   workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   userId: text('user_id').notNull(),
+  slackUserId: text('slack_user_id'), // Slack user ID for notifications
   role: text('role').notNull().default('member'), // 'admin', 'member'
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
   workspaceIdx: index('workspace_member_workspace_idx').on(table.workspaceId),
   userIdx: index('workspace_member_user_idx').on(table.userId),
+  slackUserIdx: index('workspace_member_slack_user_idx').on(table.slackUserId),
   uniqueMember: index('workspace_member_unique_idx').on(table.workspaceId, table.userId),
 }));
 
@@ -284,6 +286,55 @@ export const eventLog = pgTable('event_log', {
   eventIdx: index('event_log_event_idx').on(table.event),
 }));
 
+// Integration tables
+export const integration = pgTable('integration', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  provider: text('provider').notNull(), // 'slack', 'google', 'hubspot', 'salesforce'
+  status: text('status').notNull().default('disconnected'), // 'connected', 'disconnected', 'error'
+  config: jsonb('config'), // Provider-specific configuration
+  lastSyncAt: timestamp('last_sync_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('integration_workspace_idx').on(table.workspaceId),
+  providerIdx: index('integration_provider_idx').on(table.provider),
+  statusIdx: index('integration_status_idx').on(table.status),
+}));
+
+// OAuth tokens table (encrypted at rest)
+export const oauthToken = pgTable('oauth_token', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  provider: text('provider').notNull(), // 'google', 'slack', 'hubspot'
+  accessToken: text('access_token').notNull(), // Encrypted
+  refreshToken: text('refresh_token'), // Encrypted
+  expiresAt: timestamp('expires_at'),
+  scope: text('scope').notNull(), // OAuth scopes granted
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('oauth_token_workspace_idx').on(table.workspaceId),
+  providerIdx: index('oauth_token_provider_idx').on(table.provider),
+}));
+
+// CRM contact sync table
+export const crmContactSync = pgTable('crm_contact_sync', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  crmId: text('crm_id').notNull(), // External CRM contact ID
+  rhizPersonId: uuid('rhiz_person_id').references(() => person.id).notNull(),
+  crmProvider: text('crm_provider').notNull(), // 'hubspot', 'salesforce'
+  lastSyncedAt: timestamp('last_synced_at').defaultNow().notNull(),
+  syncStatus: text('sync_status').notNull().default('synced'), // 'synced', 'pending', 'error'
+  metadata: jsonb('metadata'), // Additional sync metadata
+}, (table) => ({
+  workspaceIdx: index('crm_contact_sync_workspace_idx').on(table.workspaceId),
+  crmIdIdx: index('crm_contact_sync_crm_id_idx').on(table.crmId),
+  personIdx: index('crm_contact_sync_person_idx').on(table.rhizPersonId),
+  providerIdx: index('crm_contact_sync_provider_idx').on(table.crmProvider),
+}));
+
 // Zod schemas for validation
 export const insertWorkspaceSchema = createInsertSchema(workspace);
 export const selectWorkspaceSchema = createSelectSchema(workspace);
@@ -300,12 +351,24 @@ export const selectGoalSchema = createSelectSchema(goal);
 export const insertSuggestionSchema = createInsertSchema(suggestion);
 export const selectSuggestionSchema = createSelectSchema(suggestion);
 
+export const insertIntegrationSchema = createInsertSchema(integration);
+export const selectIntegrationSchema = createSelectSchema(integration);
+
+export const insertOauthTokenSchema = createInsertSchema(oauthToken);
+export const selectOauthTokenSchema = createSelectSchema(oauthToken);
+
+export const insertCrmContactSyncSchema = createInsertSchema(crmContactSync);
+export const selectCrmContactSyncSchema = createSelectSchema(crmContactSync);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
 export type Person = z.infer<typeof selectPersonSchema>;
 export type Goal = z.infer<typeof selectGoalSchema>;
 export type Suggestion = z.infer<typeof selectSuggestionSchema>;
+export type Integration = z.infer<typeof selectIntegrationSchema>;
+export type OauthToken = z.infer<typeof selectOauthTokenSchema>;
+export type CrmContactSync = z.infer<typeof selectCrmContactSyncSchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {
@@ -316,4 +379,14 @@ export const encryptPhone = (phone: string | null): string | null => {
 export const decryptPhone = (phone: string | null): string | null => {
   const key = process.env.ENCRYPTION_KEY;
   return decryptField(phone, key);
+};
+
+export const encryptOAuthToken = (token: string | null): string | null => {
+  const key = process.env.ENCRYPTION_KEY;
+  return encryptField(token, key);
+};
+
+export const decryptOAuthToken = (token: string | null): string | null => {
+  const key = process.env.ENCRYPTION_KEY;
+  return decryptField(token, key);
 };
