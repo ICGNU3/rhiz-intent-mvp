@@ -1,0 +1,29 @@
+{
+  "name": "rhiz-intent-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Intent-first relationship intelligence platform",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter web start",
+    "db:migrate": "pnpm --filter db migrate",
+    "db:generate": "pnpm --filter db generate",
+    "db:seed": "pnpm --filter db seed",
+    "workers:start": "pnpm --filter workers start",
+    "test": "pnpm --recursive test",
+    "lint": "pnpm --recursive lint",
+    "type-check": "pnpm --recursive type-check"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.0.0"
+}
