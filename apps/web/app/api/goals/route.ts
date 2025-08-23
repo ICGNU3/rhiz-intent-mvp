@@ -1,24 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, goal, suggestion } from '@rhiz/db';
-import { eq, desc } from 'drizzle-orm';
+import { db, goal, suggestion, workspaceActivity } from '@rhiz/db';
+import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    // For demo purposes, use the demo user ID
-    const ownerId = 'demo-user-id';
+    const { searchParams } = new URL(request.url);
+    const workspaceId = searchParams.get('workspaceId');
+    const ownerId = 'alice-user-id'; // TODO: Get from auth context
     
-    // Get all goals for the owner
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Workspace ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Get all goals for the workspace
     const goals = await db
       .select()
       .from(goal)
-      .where(eq(goal.ownerId, ownerId))
+      .where(eq(goal.workspaceId, workspaceId))
       .orderBy(desc(goal.createdAt));
     
     // Get suggestion counts for each goal
     const allSuggestions = await db
       .select()
       .from(suggestion)
-      .where(eq(suggestion.ownerId, ownerId));
+      .where(eq(suggestion.workspaceId, workspaceId));
     
     // Build response with goals and suggestion counts
     const goalsWithCounts = goals.map(g => {
@@ -31,6 +39,7 @@ export async function GET(request: NextRequest) {
         details: g.details,
         status: g.status,
         createdAt: g.createdAt,
+        ownerId: g.ownerId,
         suggestionsCount: suggestionCount,
       };
     });
@@ -52,10 +61,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { kind, title, details } = body;
+    const { kind, title, details, workspaceId } = body;
+    const ownerId = 'alice-user-id'; // TODO: Get from auth context
     
-    // For demo purposes, use the demo user ID
-    const ownerId = 'demo-user-id';
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Workspace ID is required' },
+        { status: 400 }
+      );
+    }
     
     // Validate required fields
     if (!kind || !title) {
@@ -69,6 +83,7 @@ export async function POST(request: NextRequest) {
     const [newGoal] = await db
       .insert(goal)
       .values({
+        workspaceId,
         ownerId,
         kind,
         title,
@@ -76,6 +91,16 @@ export async function POST(request: NextRequest) {
         status: 'active',
       })
       .returning();
+    
+    // Log activity
+    await db.insert(workspaceActivity).values({
+      workspaceId,
+      userId: ownerId,
+      action: 'created_goal',
+      entityType: 'goal',
+      entityId: newGoal.id,
+      metadata: { goal_title: title },
+    });
     
     return NextResponse.json({
       success: true,

@@ -34,8 +34,15 @@ import {
   BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
+import { Notifications } from '@/components/Notifications';
 
-export function Navigation() {
+interface NavigationProps {
+  currentWorkspaceId?: string;
+  onWorkspaceChange?: (workspaceId: string) => void;
+}
+
+export function Navigation({ currentWorkspaceId, onWorkspaceChange }: NavigationProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -43,6 +50,7 @@ export function Navigation() {
     { href: '/people', label: 'People', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },
+    { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
   return (
@@ -156,6 +164,15 @@ export function Navigation() {
               </Link>
             </div>
             <div className="flex items-center space-x-2">
+              {currentWorkspaceId && (
+                <WorkspaceSwitcher 
+                  currentWorkspaceId={currentWorkspaceId}
+                  onWorkspaceChange={onWorkspaceChange || (() => {})}
+                />
+              )}
+              {currentWorkspaceId && (
+                <Notifications workspaceId={currentWorkspaceId} />
+              )}
               <Button variant="ghost" size="sm">
                 <Sun className="h-4 w-4" />
               </Button>

@@ -4,14 +4,21 @@ import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    // For demo purposes, use the demo user ID
-    const ownerId = 'demo-user-id';
+    const { searchParams } = new URL(request.url);
+    const workspaceId = searchParams.get('workspaceId');
     
-    // Get all people for the owner
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Workspace ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Get all people for the workspace
     const people = await db
       .select()
       .from(person)
-      .where(eq(person.ownerId, ownerId))
+      .where(eq(person.workspaceId, workspaceId))
       .orderBy(desc(person.createdAt));
     
     // Get claims for all people
@@ -20,7 +27,7 @@ export async function GET(request: NextRequest) {
       .from(claim)
       .where(
         and(
-          eq(claim.ownerId, ownerId),
+          eq(claim.workspaceId, workspaceId),
           eq(claim.subjectType, 'person')
         )
       );
@@ -29,7 +36,7 @@ export async function GET(request: NextRequest) {
     const encounters = await db
       .select()
       .from(encounter)
-      .where(eq(encounter.ownerId, ownerId))
+      .where(eq(encounter.workspaceId, workspaceId))
       .orderBy(desc(encounter.occurredAt));
     
     // Get person-encounter relationships
@@ -64,6 +71,7 @@ export async function GET(request: NextRequest) {
         location: p.location,
         lastEncounter: lastEncounter?.occurredAt,
         relationshipStrength,
+        ownerId: p.ownerId,
         claims: personClaims.map(c => ({
           key: c.key,
           value: c.value,

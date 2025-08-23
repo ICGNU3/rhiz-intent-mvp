@@ -27,7 +27,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <PostHogProvider>
-          <Navigation />
+          <Navigation 
+            currentWorkspaceId="550e8400-e29b-41d4-a716-446655440001"
+            onWorkspaceChange={(workspaceId) => {
+              // TODO: Handle workspace change
+              console.log('Workspace changed to:', workspaceId);
+            }}
+          />
           <div className="lg:ml-64">
             <main className="min-h-screen bg-background p-6">
               {children}

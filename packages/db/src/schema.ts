@@ -52,9 +52,65 @@ const decryptField = (value: string | null, encryptionKey?: string): string | nu
   }
 };
 
+// Workspace table
+export const workspace = pgTable('workspace', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  ownerId: text('owner_id').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  ownerIdx: index('workspace_owner_idx').on(table.ownerId),
+}));
+
+// Workspace members table
+export const workspaceMember = pgTable('workspace_member', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  userId: text('user_id').notNull(),
+  role: text('role').notNull().default('member'), // 'admin', 'member'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('workspace_member_workspace_idx').on(table.workspaceId),
+  userIdx: index('workspace_member_user_idx').on(table.userId),
+  uniqueMember: index('workspace_member_unique_idx').on(table.workspaceId, table.userId),
+}));
+
+// Workspace activity feed
+export const workspaceActivity = pgTable('workspace_activity', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(), // 'created_goal', 'accepted_intro', 'added_person'
+  entityType: text('entity_type'), // 'goal', 'suggestion', 'person'
+  entityId: uuid('entity_id'),
+  metadata: jsonb('metadata'), // Additional context
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('workspace_activity_workspace_idx').on(table.workspaceId),
+  userIdx: index('workspace_activity_user_idx').on(table.userId),
+  createdIdx: index('workspace_activity_created_idx').on(table.createdAt),
+}));
+
+// Notifications table
+export const notification = pgTable('notification', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  userId: text('user_id').notNull(),
+  type: text('type').notNull(), // 'new_suggestion', 'intro_accepted', 'goal_completed'
+  message: text('message').notNull(),
+  readAt: timestamp('read_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('notification_workspace_idx').on(table.workspaceId),
+  userIdx: index('notification_user_idx').on(table.userId),
+  readIdx: index('notification_read_idx').on(table.readAt),
+}));
+
 // People table
 export const person = pgTable('person', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(), // RLS partition key
   fullName: text('full_name').notNull(),
   primaryEmail: text('primary_email'),
@@ -63,6 +119,7 @@ export const person = pgTable('person', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
+  workspaceIdx: index('person_workspace_idx').on(table.workspaceId),
   ownerIdx: index('person_owner_idx').on(table.ownerId),
   emailIdx: index('person_email_idx').on(table.primaryEmail),
 }));
@@ -81,6 +138,7 @@ export const org = pgTable('org', {
 // Encounters table (meetings, calls, etc.)
 export const encounter = pgTable('encounter', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   kind: text('kind').notNull(), // 'meeting', 'call', 'voice_note', 'email'
   occurredAt: timestamp('occurred_at').notNull(),
@@ -88,6 +146,7 @@ export const encounter = pgTable('encounter', {
   raw: jsonb('raw'), // Raw event data
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
+  workspaceIdx: index('encounter_workspace_idx').on(table.workspaceId),
   ownerIdx: index('encounter_owner_idx').on(table.ownerId),
   occurredIdx: index('encounter_occurred_idx').on(table.occurredAt),
 }));
@@ -106,6 +165,7 @@ export const personEncounter = pgTable('person_encounter', {
 // Edges table (relationships between people)
 export const edge = pgTable('edge', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   aId: uuid('a_id').references(() => person.id).notNull(),
   bId: uuid('b_id').references(() => person.id).notNull(),
@@ -114,6 +174,7 @@ export const edge = pgTable('edge', {
   lastSignalAt: timestamp('last_signal_at').defaultNow().notNull(),
   meta: jsonb('meta'), // Additional relationship metadata
 }, (table) => ({
+  workspaceIdx: index('edge_workspace_idx').on(table.workspaceId),
   ownerIdx: index('edge_owner_idx').on(table.ownerId),
   pairIdx: index('edge_pair_idx').on(table.aId, table.bId),
 }));
@@ -121,6 +182,7 @@ export const edge = pgTable('edge', {
 // Claims table (facts about people/orgs)
 export const claim = pgTable('claim', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   subjectType: text('subject_type').notNull(), // 'person', 'org'
   subjectId: uuid('subject_id').notNull(),
@@ -133,6 +195,7 @@ export const claim = pgTable('claim', {
   expiresAt: timestamp('expires_at'),
   provenance: jsonb('provenance'), // How we got this information
 }, (table) => ({
+  workspaceIdx: index('claim_workspace_idx').on(table.workspaceId),
   ownerIdx: index('claim_owner_idx').on(table.ownerId),
   subjectIdx: index('claim_subject_idx').on(table.subjectType, table.subjectId),
   keyIdx: index('claim_key_idx').on(table.key),
@@ -141,6 +204,7 @@ export const claim = pgTable('claim', {
 // Goals table (user intents)
 export const goal = pgTable('goal', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   kind: text('kind').notNull(), // 'raise_seed', 'hire_engineer', 'break_into_city'
   title: text('title').notNull(),
@@ -148,6 +212,7 @@ export const goal = pgTable('goal', {
   status: text('status').notNull().default('active'), // 'active', 'completed', 'archived'
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
+  workspaceIdx: index('goal_workspace_idx').on(table.workspaceId),
   ownerIdx: index('goal_owner_idx').on(table.ownerId),
   kindIdx: index('goal_kind_idx').on(table.kind),
 }));
@@ -155,6 +220,7 @@ export const goal = pgTable('goal', {
 // Suggestions table (intro recommendations)
 export const suggestion = pgTable('suggestion', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   kind: text('kind').notNull(), // 'introduction', 'follow_up', 'reconnect'
   aId: uuid('a_id').references(() => person.id).notNull(),
@@ -166,6 +232,7 @@ export const suggestion = pgTable('suggestion', {
   state: text('state').notNull().default('proposed'), // 'proposed', 'accepted', 'sent', 'completed'
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
+  workspaceIdx: index('suggestion_workspace_idx').on(table.workspaceId),
   ownerIdx: index('suggestion_owner_idx').on(table.ownerId),
   goalIdx: index('suggestion_goal_idx').on(table.goalId),
   stateIdx: index('suggestion_state_idx').on(table.state),
@@ -174,12 +241,14 @@ export const suggestion = pgTable('suggestion', {
 // Consent table
 export const consent = pgTable('consent', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   subjectId: uuid('subject_id').references(() => person.id).notNull(),
   scope: text('scope').notNull(), // 'data_processing', 'communications'
   grantedAt: timestamp('granted_at').defaultNow().notNull(),
   policyVersion: text('policy_version').notNull(),
 }, (table) => ({
+  workspaceIdx: index('consent_workspace_idx').on(table.workspaceId),
   ownerIdx: index('consent_owner_idx').on(table.ownerId),
   subjectIdx: index('consent_subject_idx').on(table.subjectId),
 }));
@@ -187,12 +256,14 @@ export const consent = pgTable('consent', {
 // Tasks table (follow-ups, reminders)
 export const task = pgTable('task', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   title: text('title').notNull(),
   dueAt: timestamp('due_at'),
   data: jsonb('data'), // Task-specific data
   completed: boolean('completed').notNull().default(false),
 }, (table) => ({
+  workspaceIdx: index('task_workspace_idx').on(table.workspaceId),
   ownerIdx: index('task_owner_idx').on(table.ownerId),
   dueIdx: index('task_due_idx').on(table.dueAt),
 }));
@@ -200,6 +271,7 @@ export const task = pgTable('task', {
 // Event log for audit trail
 export const eventLog = pgTable('event_log', {
   id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
   ownerId: text('owner_id').notNull(),
   event: text('event').notNull(),
   entityType: text('entity_type'),
@@ -207,11 +279,18 @@ export const eventLog = pgTable('event_log', {
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => ({
+  workspaceIdx: index('event_log_workspace_idx').on(table.workspaceId),
   ownerIdx: index('event_log_owner_idx').on(table.ownerId),
   eventIdx: index('event_log_event_idx').on(table.event),
 }));
 
 // Zod schemas for validation
+export const insertWorkspaceSchema = createInsertSchema(workspace);
+export const selectWorkspaceSchema = createSelectSchema(workspace);
+
+export const insertWorkspaceMemberSchema = createInsertSchema(workspaceMember);
+export const selectWorkspaceMemberSchema = createSelectSchema(workspaceMember);
+
 export const insertPersonSchema = createInsertSchema(person);
 export const selectPersonSchema = createSelectSchema(person);
 
@@ -222,6 +301,8 @@ export const insertSuggestionSchema = createInsertSchema(suggestion);
 export const selectSuggestionSchema = createSelectSchema(suggestion);
 
 // Types
+export type Workspace = z.infer<typeof selectWorkspaceSchema>;
+export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
 export type Person = z.infer<typeof selectPersonSchema>;
 export type Goal = z.infer<typeof selectGoalSchema>;
 export type Suggestion = z.infer<typeof selectSuggestionSchema>;

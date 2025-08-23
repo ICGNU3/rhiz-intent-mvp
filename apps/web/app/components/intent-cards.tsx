@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { IntentCard } from '@/components/IntentCard'
 
 interface IntentCard {
@@ -29,14 +30,18 @@ interface IntentCard {
   }
 }
 
-export function IntentCards() {
+interface IntentCardsProps {
+  workspaceId: string;
+}
+
+export function IntentCards({ workspaceId }: IntentCardsProps) {
   const [cards, setCards] = useState<IntentCard[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchIntentCards() {
       try {
-        const response = await fetch('/api/intent-cards')
+        const response = await fetch(`/api/intent-cards?workspaceId=${workspaceId}`)
         if (response.ok) {
           const data = await response.json()
           setCards(data.cards)
@@ -48,8 +53,10 @@ export function IntentCards() {
       }
     }
 
-    fetchIntentCards()
-  }, [])
+    if (workspaceId) {
+      fetchIntentCards()
+    }
+  }, [workspaceId])
 
   if (loading) {
     return (

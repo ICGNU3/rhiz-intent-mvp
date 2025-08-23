@@ -4,16 +4,23 @@ import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    // For demo purposes, use the demo user ID
-    const ownerId = 'demo-user-id';
+    const { searchParams } = new URL(request.url);
+    const workspaceId = searchParams.get('workspaceId');
     
-    // Get active goals
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Workspace ID is required' },
+        { status: 400 }
+      );
+    }
+    
+    // Get active goals for the workspace
     const goals = await db
       .select()
       .from(goal)
       .where(
         and(
-          eq(goal.ownerId, ownerId),
+          eq(goal.workspaceId, workspaceId),
           eq(goal.status, 'active')
         )
       )
@@ -23,13 +30,13 @@ export async function GET(request: NextRequest) {
     const allSuggestions = await db
       .select()
       .from(suggestion)
-      .where(eq(suggestion.ownerId, ownerId));
+      .where(eq(suggestion.workspaceId, workspaceId));
     
     // Get people for person details
     const people = await db
       .select()
       .from(person)
-      .where(eq(person.ownerId, ownerId));
+      .where(eq(person.workspaceId, workspaceId));
     
     // Build Intent Cards with enhanced format
     const intentCards = goals.map(goal => {

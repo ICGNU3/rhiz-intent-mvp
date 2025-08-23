@@ -1,163 +1,93 @@
--- Seed data for Rhiz MVP
--- This creates a complete demo environment with visible Intent Card data
+-- Seed data for Rhiz MVP with workspace support
 
--- Demo user
-INSERT INTO person (id, owner_id, full_name, primary_email, location, created_at, updated_at)
-VALUES (
-  'demo-user-id',
-  'demo-user-id',
-  'Demo User',
-  'demo@rhiz.ai',
-  'San Francisco, CA',
-  NOW(),
-  NOW()
-);
+-- Create demo workspace
+INSERT INTO workspace (id, name, owner_id, created_at, updated_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440001', 'Rhiz Demo Workspace', 'alice-user-id', NOW(), NOW());
 
--- Demo organizations
-INSERT INTO org (id, name, domain, created_at, updated_at)
-VALUES 
-  ('org-1', 'TechCorp', 'techcorp.com', NOW(), NOW()),
-  ('org-2', 'StartupHub', 'startuphub.io', NOW(), NOW()),
-  ('org-3', 'Innovation Labs', 'innovationlabs.co', NOW(), NOW());
+-- Create workspace members (Alice as admin, Bob as member)
+INSERT INTO workspace_member (id, workspace_id, user_id, role, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440002', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'admin', NOW()),
+('550e8400-e29b-41d4-a716-446655440003', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'member', NOW());
 
--- Demo people
-INSERT INTO person (id, owner_id, full_name, primary_email, primary_phone, location, created_at, updated_at)
-VALUES 
-  ('person-1', 'demo-user-id', 'Sarah Chen', 'sarah@techcorp.com', '+1-555-0101', 'San Francisco, CA', NOW(), NOW()),
-  ('person-2', 'demo-user-id', 'Michael Rodriguez', 'michael@startuphub.io', '+1-555-0102', 'New York, NY', NOW(), NOW()),
-  ('person-3', 'demo-user-id', 'Emily Johnson', 'emily@innovationlabs.co', '+1-555-0103', 'Austin, TX', NOW(), NOW()),
-  ('person-4', 'demo-user-id', 'David Kim', 'david@techcorp.com', '+1-555-0104', 'Seattle, WA', NOW(), NOW()),
-  ('person-5', 'demo-user-id', 'Lisa Wang', 'lisa@startuphub.io', '+1-555-0105', 'Boston, MA', NOW(), NOW());
+-- Create organizations
+INSERT INTO org (id, name, domain, created_at, updated_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440010', 'TechCorp', 'techcorp.com', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440011', 'StartupHub', 'startuphub.io', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440012', 'Innovation Labs', 'innovationlabs.co', NOW(), NOW());
 
--- Demo encounters
-INSERT INTO encounter (id, owner_id, kind, occurred_at, summary, raw, created_at)
-VALUES 
-  ('encounter-1', 'demo-user-id', 'meeting', '2024-01-15 10:00:00', 'Product strategy meeting with Sarah Chen', 
-   '{"attendees": ["sarah@techcorp.com"], "duration": 60, "location": "San Francisco"}', NOW()),
-  ('encounter-2', 'demo-user-id', 'call', '2024-01-20 14:00:00', 'Investment discussion with Michael Rodriguez', 
-   '{"attendees": ["michael@startuphub.io"], "duration": 45, "location": "Zoom"}', NOW()),
-  ('encounter-3', 'demo-user-id', 'meeting', '2024-01-25 11:00:00', 'Technical review with Emily Johnson', 
-   '{"attendees": ["emily@innovationlabs.co"], "duration": 90, "location": "Austin"}', NOW());
+-- Create people with workspace_id
+INSERT INTO person (id, workspace_id, owner_id, full_name, primary_email, primary_phone, location, created_at, updated_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'Sarah Chen', 'sarah@techcorp.com', '+1-555-0101', 'San Francisco, CA', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'Michael Rodriguez', 'michael@startuphub.io', '+1-555-0102', 'New York, NY', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440022', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'Emily Johnson', 'emily@innovationlabs.co', '+1-555-0103', 'Austin, TX', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440023', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'David Kim', 'david@techcorp.com', '+1-555-0104', 'Seattle, WA', NOW(), NOW()),
+('550e8400-e29b-41d4-a716-446655440024', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'Lisa Wang', 'lisa@startuphub.io', '+1-555-0105', 'Boston, MA', NOW(), NOW());
 
--- Person-encounter relationships
-INSERT INTO person_encounter (id, person_id, encounter_id, role)
-VALUES 
-  ('pe-1', 'person-1', 'encounter-1', 'attendee'),
-  ('pe-2', 'person-2', 'encounter-2', 'attendee'),
-  ('pe-3', 'person-3', 'encounter-3', 'attendee');
+-- Create encounters with workspace_id
+INSERT INTO encounter (id, workspace_id, owner_id, kind, occurred_at, summary, raw, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440030', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'meeting', '2024-01-15 10:00:00', 'Product strategy discussion with Sarah', '{"location": "Zoom", "duration": 60}', NOW()),
+('550e8400-e29b-41d4-a716-446655440031', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'call', '2024-01-16 14:00:00', 'Follow-up call with Michael about partnership', '{"location": "Phone", "duration": 30}', NOW()),
+('550e8400-e29b-41d4-a716-446655440032', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'voice_note', '2024-01-17 09:00:00', 'Voice note about Emily Johnson from Innovation Labs', '{"duration": 120, "transcription": "Emily is interested in our AI platform"}', NOW());
 
--- Demo goal
-INSERT INTO goal (id, owner_id, kind, title, details, status, created_at)
-VALUES (
-  'goal-1',
-  'demo-user-id',
-  'raise_seed',
-  'Raise $2M Seed Round',
-  'Looking to raise a seed round to scale our AI-powered networking platform. Need introductions to VCs and angel investors.',
-  'active',
-  NOW()
-);
+-- Create person-encounter relationships
+INSERT INTO person_encounter (id, person_id, encounter_id, role) VALUES 
+('550e8400-e29b-41d4-a716-446655440040', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440030', 'attendee'),
+('550e8400-e29b-41d4-a716-446655440041', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440031', 'attendee'),
+('550e8400-e29b-41d4-a716-446655440042', '550e8400-e29b-41d4-a716-446655440022', '550e8400-e29b-41d4-a716-446655440032', 'mentioned');
 
--- Demo claims (facts about people)
-INSERT INTO claim (id, owner_id, subject_type, subject_id, key, value, confidence, source, lawful_basis, observed_at, provenance)
-VALUES 
-  -- Sarah Chen
-  ('claim-1', 'demo-user-id', 'person', 'person-1', 'title', 'VP of Product', 90, 'calendar', 'legitimate_interest', NOW(), 
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-15T10:00:00Z", "metadata": {"event": "Product strategy meeting"}}'),
-  ('claim-2', 'demo-user-id', 'person', 'person-1', 'company', 'TechCorp', 95, 'calendar', 'legitimate_interest', NOW(),
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-15T10:00:00Z", "metadata": {"email_domain": "techcorp.com"}}'),
-  ('claim-3', 'demo-user-id', 'person', 'person-1', 'expertise', 'Product Management', 85, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-15T10:00:00Z", "metadata": {"provider": "null"}}'),
-  
-  -- Michael Rodriguez
-  ('claim-4', 'demo-user-id', 'person', 'person-2', 'title', 'Managing Partner', 90, 'calendar', 'legitimate_interest', NOW(),
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-20T14:00:00Z", "metadata": {"event": "Investment discussion"}}'),
-  ('claim-5', 'demo-user-id', 'person', 'person-2', 'company', 'StartupHub', 95, 'calendar', 'legitimate_interest', NOW(),
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-20T14:00:00Z", "metadata": {"email_domain": "startuphub.io"}}'),
-  ('claim-6', 'demo-user-id', 'person', 'person-2', 'expertise', 'Venture Capital', 90, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-20T14:00:00Z", "metadata": {"provider": "null"}}'),
-  
-  -- Emily Johnson
-  ('claim-7', 'demo-user-id', 'person', 'person-3', 'title', 'CTO', 90, 'calendar', 'legitimate_interest', NOW(),
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-25T11:00:00Z", "metadata": {"event": "Technical review"}}'),
-  ('claim-8', 'demo-user-id', 'person', 'person-3', 'company', 'Innovation Labs', 95, 'calendar', 'legitimate_interest', NOW(),
-   '{"source": "calendar", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-25T11:00:00Z", "metadata": {"email_domain": "innovationlabs.co"}}'),
-  ('claim-9', 'demo-user-id', 'person', 'person-3', 'expertise', 'Software Engineering', 90, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-25T11:00:00Z", "metadata": {"provider": "null"}}'),
-  
-  -- David Kim
-  ('claim-10', 'demo-user-id', 'person', 'person-4', 'title', 'Senior Engineer', 85, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-26T12:00:00Z", "metadata": {"provider": "null"}}'),
-  ('claim-11', 'demo-user-id', 'person', 'person-4', 'company', 'TechCorp', 90, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-26T12:00:00Z", "metadata": {"provider": "null"}}'),
-  
-  -- Lisa Wang
-  ('claim-12', 'demo-user-id', 'person', 'person-5', 'title', 'Investment Associate', 85, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-26T12:00:00Z", "metadata": {"provider": "null"}}'),
-  ('claim-13', 'demo-user-id', 'person', 'person-5', 'company', 'StartupHub', 90, 'enrichment', 'legitimate_interest', NOW(),
-   '{"source": "enrichment", "lawful_basis": "legitimate_interest", "observed_at": "2024-01-26T12:00:00Z", "metadata": {"provider": "null"}}');
+-- Create shared goal (belongs to workspace)
+INSERT INTO goal (id, workspace_id, owner_id, kind, title, details, status, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440050', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'raise_seed', 'Raise $2M Seed Round', 'Looking to raise seed funding for our AI platform', 'active', NOW());
 
--- Demo edges (relationships)
-INSERT INTO edge (id, owner_id, a_id, b_id, kind, strength, last_signal_at, meta)
-VALUES 
-  ('edge-1', 'demo-user-id', 'person-1', 'person-4', 'colleague', 8, NOW(), '{"shared_company": "TechCorp"}'),
-  ('edge-2', 'demo-user-id', 'person-2', 'person-5', 'colleague', 7, NOW(), '{"shared_company": "StartupHub"}'),
-  ('edge-3', 'demo-user-id', 'person-1', 'person-2', 'professional', 6, NOW(), '{"mutual_interest": "startups"}');
+-- Create claims with workspace_id and provenance
+INSERT INTO claim (id, workspace_id, owner_id, subject_type, subject_id, key, value, confidence, source, lawful_basis, observed_at, provenance) VALUES 
+('550e8400-e29b-41d4-a716-446655440060', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'title', 'VP of Engineering', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
+('550e8400-e29b-41d4-a716-446655440061', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'company', 'TechCorp', 95, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
+('550e8400-e29b-41d4-a716-446655440062', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'expertise', 'AI/ML, Product Development', 85, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
+('550e8400-e29b-41d4-a716-446655440063', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'title', 'Founder & CEO', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
+('550e8400-e29b-41d4-a716-446655440064', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'company', 'StartupHub', 95, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
+('550e8400-e29b-41d4-a716-446655440065', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440022', 'title', 'Head of Innovation', 90, 'voice', 'legitimate_interest', NOW(), '{"source": "voice", "provider": "whisper", "reason": "voice_note", "cost": 0.02, "tokens": 200}'),
+('550e8400-e29b-41d4-a716-446655440066', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440022', 'company', 'Innovation Labs', 95, 'voice', 'legitimate_interest', NOW(), '{"source": "voice", "provider": "whisper", "reason": "voice_note", "cost": 0.02, "tokens": 200}'),
+('550e8400-e29b-41d4-a716-446655440067', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440023', 'title', 'Senior Engineer', 90, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
+('550e8400-e29b-41d4-a716-446655440068', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440023', 'company', 'TechCorp', 95, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
+('550e8400-e29b-41d4-a716-446655440069', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440024', 'title', 'Product Manager', 90, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
+('550e8400-e29b-41d4-a716-446655440070', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'person', '550e8400-e29b-41d4-a716-446655440024', 'company', 'StartupHub', 95, 'enrichment', 'legitimate_interest', NOW(), '{"source": "enrichment", "provider": "linkedin", "reason": "relationship_building", "cost": 0.05, "tokens": 500}'),
+('550e8400-e29b-41d4-a716-446655440071', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440020', 'location', 'San Francisco, CA', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}'),
+('550e8400-e29b-41d4-a716-446655440072', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person', '550e8400-e29b-41d4-a716-446655440021', 'location', 'New York, NY', 90, 'calendar', 'legitimate_interest', NOW(), '{"source": "calendar", "provider": "google", "reason": "meeting_attendee", "cost": 0.001, "tokens": 10}');
 
--- Demo suggestions
-INSERT INTO suggestion (id, owner_id, kind, a_id, b_id, goal_id, score, why, draft, state, created_at)
-VALUES (
-  'suggestion-1',
-  'demo-user-id',
-  'introduction',
-  'person-1',
-  'person-2',
-  'goal-1',
-  85,
-  '{"mutualInterests": ["startups", "product management", "venture capital"], "recency": 8, "frequency": 6, "affiliation": 7, "goalAlignment": 9}',
-  '{"preIntroPing": "Hi Sarah, I think you and Michael would have a great conversation about product strategy and startup growth. Would you be open to an intro?", "doubleOptIntro": "Hi Sarah and Michael, I wanted to connect you both. Sarah leads product at TechCorp and Michael is a managing partner at StartupHub. I think you could have a valuable discussion about product-market fit and scaling strategies.", "generatedAt": "2024-01-26T12:00:00Z", "cost": 25, "tokens": 500}',
-  'ready',
-  NOW()
-),
-(
-  'suggestion-2',
-  'demo-user-id',
-  'introduction',
-  'person-3',
-  'person-4',
-  'goal-1',
-  78,
-  '{"mutualInterests": ["software engineering", "technical architecture", "AI"], "recency": 7, "frequency": 5, "affiliation": 6, "goalAlignment": 8}',
-  '{"preIntroPing": "Hi Emily, I think you and David would have an interesting technical discussion. Would you be open to an intro?", "doubleOptIntro": "Hi Emily and David, I wanted to connect you both. Emily is CTO at Innovation Labs and David is a senior engineer at TechCorp. I think you could have a great discussion about technical architecture and engineering best practices.", "generatedAt": "2024-01-26T12:00:00Z", "cost": 25, "tokens": 500}',
-  'ready',
-  NOW()
-),
-(
-  'suggestion-3',
-  'demo-user-id',
-  'introduction',
-  'person-2',
-  'person-5',
-  'goal-1',
-  92,
-  '{"mutualInterests": ["venture capital", "startup investing", "due diligence"], "recency": 9, "frequency": 8, "affiliation": 9, "goalAlignment": 9}',
-  '{"preIntroPing": "Hi Michael, I think you and Lisa would have a valuable discussion about investment strategies. Would you be open to an intro?", "doubleOptIntro": "Hi Michael and Lisa, I wanted to connect you both. Michael is managing partner at StartupHub and Lisa is an investment associate there. I think you could have a great discussion about investment thesis and portfolio strategy.", "generatedAt": "2024-01-26T12:00:00Z", "cost": 25, "tokens": 500}',
-  'proposed',
-  NOW()
-);
+-- Create edges (relationships) with workspace_id
+INSERT INTO edge (id, workspace_id, owner_id, a_id, b_id, kind, strength, last_signal_at, meta) VALUES 
+('550e8400-e29b-41d4-a716-446655440080', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440023', 'colleague', 7, NOW(), '{"shared_projects": ["AI Platform"]}'),
+('550e8400-e29b-41d4-a716-446655440081', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440024', 'colleague', 6, NOW(), '{"shared_projects": ["Partnership Initiative"]}'),
+('550e8400-e29b-41d4-a716-446655440082', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440022', 'mentor', 8, NOW(), '{"mentorship_area": "AI Strategy"}');
 
--- Demo tasks
-INSERT INTO task (id, owner_id, title, due_at, data, completed)
-VALUES 
-  ('task-1', 'demo-user-id', 'Follow up on intro: suggestion-1', '2024-01-28 10:00:00', 
-   '{"suggestionId": "suggestion-1", "personAId": "person-1", "personBId": "person-2", "daysSinceAcceptance": 2, "followUpMessage": "Check in on recent introduction"}', false),
-  ('task-2', 'demo-user-id', 'Schedule coffee with Sarah Chen', '2024-01-30 14:00:00', 
-   '{"personId": "person-1", "purpose": "Discuss potential collaboration"}', false);
+-- Create suggestions with workspace_id
+INSERT INTO suggestion (id, workspace_id, owner_id, kind, a_id, b_id, goal_id, score, why, draft, state, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440090', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'introduction', '550e8400-e29b-41d4-a716-446655440020', '550e8400-e29b-41d4-a716-446655440021', '550e8400-e29b-41d4-a716-446655440050', 85, '{"mutual_interests": ["AI/ML", "Product Development"], "complementary_skills": ["Engineering Leadership", "Business Strategy"], "network_overlap": "TechCorp alumni"}', '{"preIntroPing": "Hi Sarah, I think you and Michael would have a great conversation about AI strategy and product development. Would you be open to an intro?", "doubleOptIntro": "Sarah, meet Michael - he\'s building an AI platform and I think your engineering leadership experience would be valuable. Michael, Sarah leads engineering at TechCorp and has deep AI/ML expertise.", "estimatedCost": 0.05, "estimatedTokens": 500}', 'ready', NOW()),
+('550e8400-e29b-41d4-a716-446655440091', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'introduction', '550e8400-e29b-41d4-a716-446655440022', '550e8400-e29b-41d4-a716-446655440024', '550e8400-e29b-41d4-a716-446655440050', 78, '{"mutual_interests": ["Innovation", "Product Management"], "complementary_skills": ["Innovation Strategy", "Product Execution"], "network_overlap": "Startup ecosystem"}', '{"preIntroPing": "Hi Emily, I think you and Lisa would have a great conversation about innovation and product strategy. Would you be open to an intro?", "doubleOptIntro": "Emily, meet Lisa - she\'s leading product at StartupHub and I think your innovation expertise would be valuable. Lisa, Emily heads innovation at Innovation Labs and has deep strategic thinking.", "estimatedCost": 0.05, "estimatedTokens": 500}', 'ready', NOW()),
+('550e8400-e29b-41d4-a716-446655440092', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'introduction', '550e8400-e29b-41d4-a716-446655440023', '550e8400-e29b-41d4-a716-446655440022', '550e8400-e29b-41d4-a716-446655440050', 72, '{"mutual_interests": ["AI/ML", "Innovation"], "complementary_skills": ["Engineering", "Strategy"], "network_overlap": "Tech industry"}', '{"preIntroPing": "Hi David, I think you and Emily would have a great conversation about AI and innovation. Would you be open to an intro?", "doubleOptIntro": "David, meet Emily - she leads innovation at Innovation Labs and I think your engineering expertise would be valuable. Emily, David is a senior engineer at TechCorp with deep AI experience.", "estimatedCost": 0.05, "estimatedTokens": 500}', 'proposed', NOW());
 
--- Demo event logs
-INSERT INTO event_log (id, owner_id, event, entity_type, entity_id, metadata, created_at)
-VALUES 
-  ('event-1', 'demo-user-id', 'goal_created', 'goal', 'goal-1', '{"kind": "raise_seed", "title": "Raise $2M Seed Round"}', NOW()),
-  ('event-2', 'demo-user-id', 'suggestion_generated', 'suggestion', 'suggestion-1', '{"score": 85, "personA": "person-1", "personB": "person-2"}', NOW()),
-  ('event-3', 'demo-user-id', 'intro_drafted', 'suggestion', 'suggestion-1', '{"draftsGenerated": 2, "cost": 25, "tokens": 500}', NOW()),
-  ('event-4', 'demo-user-id', 'suggestion_accepted', 'suggestion', 'suggestion-1', '{"acceptedAt": "2024-01-26T12:00:00Z"}', NOW());
+-- Create tasks with workspace_id
+INSERT INTO task (id, workspace_id, owner_id, title, due_at, data, completed) VALUES 
+('550e8400-e29b-41d4-a716-446655440100', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'Follow up with Sarah about AI platform discussion', '2024-01-20 10:00:00', '{"person_id": "550e8400-e29b-41d4-a716-446655440020", "encounter_id": "550e8400-e29b-41d4-a716-446655440030"}', false),
+('550e8400-e29b-41d4-a716-446655440101', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'Schedule partnership meeting with Michael', '2024-01-22 14:00:00', '{"person_id": "550e8400-e29b-41d4-a716-446655440021", "encounter_id": "550e8400-e29b-41d4-a716-446655440031"}', false);
+
+-- Create workspace activity feed
+INSERT INTO workspace_activity (id, workspace_id, user_id, action, entity_type, entity_id, metadata, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440110', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'created_goal', 'goal', '550e8400-e29b-41d4-a716-446655440050', '{"goal_title": "Raise $2M Seed Round"}', NOW() - INTERVAL '2 days'),
+('550e8400-e29b-41d4-a716-446655440111', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'added_person', 'person', '550e8400-e29b-41d4-a716-446655440020', '{"person_name": "Sarah Chen"}', NOW() - INTERVAL '1 day'),
+('550e8400-e29b-41d4-a716-446655440112', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'added_person', 'person', '550e8400-e29b-41d4-a716-446655440022', '{"person_name": "Emily Johnson"}', NOW() - INTERVAL '12 hours'),
+('550e8400-e29b-41d4-a716-446655440113', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'accepted_intro', 'suggestion', '550e8400-e29b-41d4-a716-446655440090', '{"suggestion_score": 85, "person_a": "Sarah Chen", "person_b": "Michael Rodriguez"}', NOW() - INTERVAL '6 hours');
+
+-- Create notifications
+INSERT INTO notification (id, workspace_id, user_id, type, message, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440120', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'new_suggestion', 'New introduction suggestion: Sarah Chen ↔ Michael Rodriguez (Score: 85)', NOW() - INTERVAL '1 hour'),
+('550e8400-e29b-41d4-a716-446655440121', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'new_suggestion', 'New introduction suggestion: Emily Johnson ↔ Lisa Wang (Score: 78)', NOW() - INTERVAL '30 minutes'),
+('550e8400-e29b-41d4-a716-446655440122', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_accepted', 'Introduction accepted: Sarah Chen ↔ Michael Rodriguez', NOW() - INTERVAL '15 minutes');
+
+-- Create event logs with workspace_id
+INSERT INTO event_log (id, workspace_id, owner_id, event, entity_type, entity_id, metadata, created_at) VALUES 
+('550e8400-e29b-41d4-a716-446655440130', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'person_enriched', 'person', '550e8400-e29b-41d4-a716-446655440020', '{"provider": "linkedin", "claims_added": 3, "cost": 0.05}', NOW() - INTERVAL '1 day'),
+('550e8400-e29b-41d4-a716-446655440131', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_drafted', 'suggestion', '550e8400-e29b-41d4-a716-446655440090', '{"model": "gpt-4", "tokens_used": 500, "cost": 0.05}', NOW() - INTERVAL '2 hours'),
+('550e8400-e29b-41d4-a716-446655440132', '550e8400-e29b-41d4-a716-446655440001', 'bob-user-id', 'voice_transcribed', 'encounter', '550e8400-e29b-41d4-a716-446655440032', '{"model": "whisper", "duration": 120, "cost": 0.02}', NOW() - INTERVAL '12 hours'),
+('550e8400-e29b-41d4-a716-446655440133', '550e8400-e29b-41d4-a716-446655440001', 'alice-user-id', 'intro_accepted', 'suggestion', '550e8400-e29b-41d4-a716-446655440090', '{"accepted_by": "alice-user-id", "accepted_at": "2024-01-17T15:30:00Z"}', NOW() - INTERVAL '15 minutes');

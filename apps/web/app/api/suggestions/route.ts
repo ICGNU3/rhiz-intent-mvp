@@ -4,20 +4,24 @@ import { eq, and, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    // For demo purposes, use the demo user ID
-    const ownerId = 'demo-user-id';
-    
-    // Get goalId from query params
     const { searchParams } = new URL(request.url);
+    const workspaceId = searchParams.get('workspaceId');
     const goalId = searchParams.get('goalId');
     
-    // Build where clause
-    let whereClause = eq(suggestion.ownerId, ownerId);
-    if (goalId) {
-      whereClause = and(eq(suggestion.ownerId, ownerId), eq(suggestion.goalId, goalId));
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: 'Workspace ID is required' },
+        { status: 400 }
+      );
     }
     
-    // Get suggestions for the owner
+    // Build where clause
+    let whereClause = eq(suggestion.workspaceId, workspaceId);
+    if (goalId) {
+      whereClause = and(eq(suggestion.workspaceId, workspaceId), eq(suggestion.goalId, goalId));
+    }
+    
+    // Get suggestions for the workspace
     const suggestions = await db
       .select()
       .from(suggestion)
@@ -28,7 +32,7 @@ export async function GET(request: NextRequest) {
     const people = await db
       .select()
       .from(person)
-      .where(eq(person.ownerId, ownerId));
+      .where(eq(person.workspaceId, workspaceId));
     
     // Get all claims for person context
     const allClaims = await db
@@ -36,7 +40,7 @@ export async function GET(request: NextRequest) {
       .from(claim)
       .where(
         and(
-          eq(claim.ownerId, ownerId),
+          eq(claim.workspaceId, workspaceId),
           eq(claim.subjectType, 'person')
         )
       );
@@ -55,6 +59,7 @@ export async function GET(request: NextRequest) {
         score: s.score,
         state: s.state,
         createdAt: s.createdAt,
+        ownerId: s.ownerId,
         personA: personA ? {
           name: personA.fullName,
           title: claimsA.find(c => c.key === 'title')?.value,

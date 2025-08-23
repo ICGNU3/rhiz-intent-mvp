@@ -21,6 +21,7 @@
     "@rhiz/workers": "workspace:*",
     "@radix-ui/react-dialog": "^1.0.0",
     "@radix-ui/react-dropdown-menu": "^2.0.0",
+    "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toast": "^1.0.0",
