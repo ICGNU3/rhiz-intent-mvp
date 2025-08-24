@@ -25,6 +25,8 @@
     "@radix-ui/react-slot": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toast": "^1.0.0",
+    "@ai-sdk/anthropic": "^2.0.6",
+    "@ai-sdk/openai": "^2.0.19",
     "@supabase/supabase-js": "^2.39.0",
     "ai": "^5.0.22",
     "class-variance-authority": "^0.7.0",
