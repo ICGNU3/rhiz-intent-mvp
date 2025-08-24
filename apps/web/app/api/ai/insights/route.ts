@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, person, goal, encounter, claim, edge } from '@/../../../../packages/db/src';
+import { db, person, goal, encounter, claim, edge } from '@rhiz/db';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getUserId } from '@/lib/auth-mock';
 import { generateGraphInsights, rankSuggestions } from '@/lib/ai';

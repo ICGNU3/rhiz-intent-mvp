@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, encounter, person, claim } from '@/../../../../packages/db/src';
+import { db, encounter, person, claim } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 import { transcribeAudio, extractFromText, extractionSchemas } from '@/lib/ai';
 

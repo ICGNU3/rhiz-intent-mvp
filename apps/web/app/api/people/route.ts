@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, person, claim, setUserContext } from '@/../../packages/db/src';
+import { db, person, claim, setUserContext } from '@rhiz/db';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import { getUserId } from '@/lib/auth-mock';
 

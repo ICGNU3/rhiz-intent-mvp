@@ -1,5 +1,5 @@
-import { db, person, goal, suggestion, claim, edge, setUserContext, eq, and, desc, sql } from '@/../../packages/db/src';
-import type { Person, Goal, Suggestion } from '@/../../packages/db/src';
+import { db, person, goal, suggestion, claim, edge, setUserContext, eq, and, desc, sql } from '@rhiz/db';
+import type { Person, Goal, Suggestion } from '@rhiz/db';
 
 export interface MatchScore {
   score: number;

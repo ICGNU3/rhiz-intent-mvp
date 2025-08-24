@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, goal, suggestion, person, eq, and, desc } from '@/../../packages/db/src';
+import { db, goal, suggestion, person, eq, and, desc } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
