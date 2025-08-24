@@ -1,57 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs';
-import { db } from '@rhiz/db';
-import { workspace, collectiveOpportunity } from '@rhiz/db/schema';
+// import { db, collectiveOpportunity } from '@rhiz/db';
+// import { collectiveOpportunitySchema } from '@rhiz/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Return mock data for now
+    const opportunities = [
+      {
+        id: '1',
+        title: 'Investor-Founder Match',
+        description: 'Potential match between startup founders and investors across multiple workspaces. High-value opportunity for fundraising.',
+        type: 'investor_founder_match',
+        score: 85,
+        status: 'proposed',
+        createdAt: '2024-01-15T10:30:00Z',
+        workspaces: [
+          { id: 'workspace-1', name: 'TechCorp Team' },
+          { id: 'workspace-2', name: 'StartupXYZ' }
+        ],
+        clusters: [
+          { id: 'cluster-1', name: 'AI/ML Founders' },
+          { id: 'cluster-2', name: 'Series A Investors' }
+        ]
+      },
+      {
+        id: '2',
+        title: 'Cross-Industry Collaboration',
+        description: 'Opportunity for collaboration between fintech and design professionals across workspaces.',
+        type: 'cross_industry_collaboration',
+        score: 78,
+        status: 'proposed',
+        createdAt: '2024-01-14T14:20:00Z',
+        workspaces: [
+          { id: 'workspace-1', name: 'TechCorp Team' },
+          { id: 'workspace-3', name: 'Venture Capital' },
+          { id: 'workspace-4', name: 'Design Studio' }
+        ],
+        clusters: [
+          { id: 'cluster-3', name: 'Fintech Professionals' },
+          { id: 'cluster-4', name: 'UX Designers' }
+        ]
+      }
+    ];
 
-    // Get user's workspace
-    const workspaceData = await db.query.workspace.findFirst({
-      where: (workspace, { eq }) => eq(workspace.ownerId, userId),
-    });
-
-    if (!workspaceData) {
-      return NextResponse.json({ error: 'No workspace found' }, { status: 404 });
-    }
-
-    // Get opportunities for this workspace
-    const opportunities = await db
-      .select()
-      .from(collectiveOpportunity)
-      .where(eq(collectiveOpportunity.status, 'proposed'))
-      .orderBy(desc(collectiveOpportunity.score));
-
-    // Filter opportunities that involve the user's workspace
-    const relevantOpportunities = opportunities.filter(opportunity => 
-      opportunity.workspaces.includes(workspaceData.id)
-    );
-
-    return NextResponse.json({
-      opportunities: relevantOpportunities.map(opportunity => ({
-        id: opportunity.id,
-        title: opportunity.title,
-        description: opportunity.description,
-        type: opportunity.type,
-        workspaces: opportunity.workspaces,
-        clusters: opportunity.clusters,
-        score: opportunity.score,
-        status: opportunity.status,
-        createdBy: opportunity.createdBy,
-        createdAt: opportunity.createdAt,
-        expiresAt: opportunity.expiresAt
-      }))
-    });
-
+    return NextResponse.json({ opportunities });
   } catch (error) {
     console.error('Opportunities API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch opportunities' },
       { status: 500 }
     );
   }
@@ -59,47 +56,34 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // const userId = await getUserId();
+    // if (!userId) {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
 
     const body = await request.json();
-    const { opportunityId, action } = body; // action: 'activate', 'dismiss'
+    const { title, description, type, workspaces, clusters } = body;
 
-    if (!opportunityId || !action) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Get user's workspace
-    const workspaceData = await db.query.workspace.findFirst({
-      where: (workspace, { eq }) => eq(workspace.ownerId, userId),
-    });
-
-    if (!workspaceData) {
-      return NextResponse.json({ error: 'No workspace found' }, { status: 404 });
-    }
-
-    // Update opportunity status
-    const newStatus = action === 'activate' ? 'active' : 'dismissed';
-    
-    await db
-      .update(collectiveOpportunity)
-      .set({ status: newStatus })
-      .where(eq(collectiveOpportunity.id, opportunityId));
-
+    // Mock response
     return NextResponse.json({
-      message: `Opportunity ${action}d successfully`,
-      status: newStatus
+      success: true,
+      opportunity: {
+        id: 'mock-opportunity-id',
+        title,
+        description,
+        type,
+        workspaces,
+        clusters,
+        score: 75,
+        status: 'proposed',
+        createdAt: new Date().toISOString()
+      }
     });
 
   } catch (error) {
-    console.error('Update opportunity API error:', error);
+    console.error('Opportunities API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to create opportunity' },
       { status: 500 }
     );
   }

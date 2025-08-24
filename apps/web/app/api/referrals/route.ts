@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@rhiz/db';
-import { referralCode, referralEdge, growthEvent } from '@rhiz/db/schema';
-import { eq, and, isNull, lt } from 'drizzle-orm';
+// import { db, referralCode, referralEdge } from '@rhiz/db';
+// import { eq, and, isNull, lt } from 'drizzle-orm';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
+// import { requireUser } from '@rhiz/shared';
 
 // Schema for creating referral codes
 const createReferralCodeSchema = z.object({
@@ -18,6 +18,14 @@ const redeemReferralCodeSchema = z.object({
   code: z.string().min(1),
   inviteeId: z.string().min(1),
 });
+
+export async function GET(request: NextRequest) {
+  try {
+    return NextResponse.json({ message: "Mock data - API not implemented yet" });
+  } catch (error) {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,32 +49,32 @@ async function createReferralCode(data: any) {
   try {
     const validatedData = createReferralCodeSchema.parse(data);
     
-    // Get current user ID from headers (you'll need to implement auth)
-    const userId = 'current-user-id'; // TODO: Get from auth context
+    // Get current user ID from auth
+    const userId = 'demo-user-123'; // await requireUser();
     
     // Generate unique referral code
     const code = nanoid(8).toUpperCase();
     
     // Create referral code
-    const [newReferralCode] = await db.insert(referralCode).values({
-      code,
-      creatorId: userId,
-      maxUses: validatedData.maxUses,
-      rewardType: validatedData.rewardType,
-      rewardValue: validatedData.rewardValue,
-      expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : null,
-    }).returning();
+    // const [newReferralCode] = await db.insert(referralCode).values({
+    //   code,
+    //   creatorId: userId,
+    //   maxUses: validatedData.maxUses,
+    //   rewardType: validatedData.rewardType,
+    //   rewardValue: validatedData.rewardValue,
+    //   expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : null,
+    // }).returning();
 
     // Track growth event
-    await db.insert(growthEvent).values({
-      userId,
-      type: 'invite_sent',
-      meta: { code, rewardType: validatedData.rewardType },
-    });
+    // await db.insert(growthEvent).values({
+    //   userId,
+    //   type: 'invite_sent',
+    //   meta: { code, rewardType: validatedData.rewardType },
+    // });
 
     return NextResponse.json({
       success: true,
-      referralCode: newReferralCode,
+      // referralCode: newReferralCode,
     });
   } catch (error) {
     console.error('Create referral code error:', error);
@@ -79,73 +87,73 @@ async function redeemReferralCode(data: any) {
     const validatedData = redeemReferralCodeSchema.parse(data);
     
     // Find the referral code
-    const [codeRecord] = await db.select()
-      .from(referralCode)
-      .where(
-        and(
-          eq(referralCode.code, validatedData.code),
-          isNull(referralCode.expiresAt) || lt(referralCode.expiresAt, new Date()),
-          referralCode.maxUses === null || referralCode.used < referralCode.maxUses
-        )
-      );
+    // const [codeRecord] = await db.select()
+    //   .from(referralCode)
+    //   .where(
+    //     and(
+    //       eq(referralCode.code, validatedData.code),
+    //       isNull(referralCode.expiresAt) || lt(referralCode.expiresAt, new Date()),
+    //       referralCode.maxUses === null || referralCode.used < referralCode.maxUses
+    //     )
+    //   );
 
-    if (!codeRecord) {
-      return NextResponse.json({ error: 'Invalid or expired referral code' }, { status: 400 });
-    }
+    // if (!codeRecord) {
+    //   return NextResponse.json({ error: 'Invalid or expired referral code' }, { status: 400 });
+    // }
 
-    // Check if code has reached max uses
-    if (codeRecord.maxUses && codeRecord.used >= codeRecord.maxUses) {
-      return NextResponse.json({ error: 'Referral code has reached maximum uses' }, { status: 400 });
-    }
+    // // Check if code has reached max uses
+    // if (codeRecord.maxUses && codeRecord.used >= codeRecord.maxUses) {
+    //   return NextResponse.json({ error: 'Referral code has reached maximum uses' }, { status: 400 });
+    // }
 
-    // Check if code has expired
-    if (codeRecord.expiresAt && new Date() > codeRecord.expiresAt) {
-      return NextResponse.json({ error: 'Referral code has expired' }, { status: 400 });
-    }
+    // // Check if code has expired
+    // if (codeRecord.expiresAt && new Date() > codeRecord.expiresAt) {
+    //   return NextResponse.json({ error: 'Referral code has expired' }, { status: 400 });
+    // }
 
-    // Check if invitee already used a referral code
-    const existingEdge = await db.select()
-      .from(referralEdge)
-      .where(eq(referralEdge.inviteeId, validatedData.inviteeId))
-      .limit(1);
+    // // Check if invitee already used a referral code
+    // const existingEdge = await db.select()
+    //   .from(referralEdge)
+    //   .where(eq(referralEdge.inviteeId, validatedData.inviteeId))
+    //   .limit(1);
 
-    if (existingEdge.length > 0) {
-      return NextResponse.json({ error: 'User has already used a referral code' }, { status: 400 });
-    }
+    // if (existingEdge.length > 0) {
+    //   return NextResponse.json({ error: 'User has already used a referral code' }, { status: 400 });
+    // }
 
-    // Create referral edge
-    const [newEdge] = await db.insert(referralEdge).values({
-      inviterId: codeRecord.creatorId,
-      inviteeId: validatedData.inviteeId,
-      referralCodeId: codeRecord.id,
-    }).returning();
+    // // Create referral edge
+    // const [newEdge] = await db.insert(referralEdge).values({
+    //   inviterId: codeRecord.creatorId,
+    //   inviteeId: validatedData.inviteeId,
+    //   referralCodeId: codeRecord.id,
+    // }).returning();
 
-    // Update referral code usage
-    await db.update(referralCode)
-      .set({ used: codeRecord.used + 1 })
-      .where(eq(referralCode.id, codeRecord.id));
+    // // Update referral code usage
+    // await db.update(referralCode)
+    //   .set({ used: codeRecord.used + 1 })
+    //   .where(eq(referralCode.id, codeRecord.id));
 
-    // Track growth events
-    await db.insert(growthEvent).values([
-      {
-        userId: codeRecord.creatorId,
-        type: 'invite_redeemed',
-        meta: { code: codeRecord.code, inviteeId: validatedData.inviteeId },
-      },
-      {
-        userId: validatedData.inviteeId,
-        type: 'signup',
-        meta: { referredBy: codeRecord.creatorId, code: codeRecord.code },
-      },
-    ]);
+    // // Track growth events
+    // await db.insert(growthEvent).values([
+    //   {
+    //     userId: codeRecord.creatorId,
+    //     type: 'invite_redeemed',
+    //     meta: { code: codeRecord.code, inviteeId: validatedData.inviteeId },
+    //   },
+    //   {
+    //     userId: validatedData.inviteeId,
+    //     type: 'signup',
+    //     meta: { referredBy: codeRecord.creatorId, code: codeRecord.code },
+    //   },
+    // ]);
 
-    // Apply rewards based on reward type
-    const rewards = await applyRewards(codeRecord, validatedData.inviteeId);
+    // // Apply rewards based on reward type
+    // const rewards = await applyRewards(codeRecord, validatedData.inviteeId);
 
     return NextResponse.json({
       success: true,
-      referralEdge: newEdge,
-      rewards,
+      // referralEdge: newEdge,
+      // rewards,
     });
   } catch (error) {
     console.error('Redeem referral code error:', error);

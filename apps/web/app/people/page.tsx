@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/app/components/navigation';
 import { Search, Calendar, Target, Users } from 'lucide-react';
 
 interface Person {
@@ -37,6 +37,8 @@ export default function PeoplePage() {
   }, []);
 
   useEffect(() => {
+    if (!people) return;
+    
     const filtered = people.filter(person =>
       person.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       person.primaryEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||

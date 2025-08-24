@@ -2,6 +2,9 @@ import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateText, generateObject, streamText } from 'ai';
 import { z } from 'zod';
+import { logger } from './logger';
+import { AIError } from './errors';
+import { AI_CONFIG } from './constants';
 
 // Initialize AI providers
 const openai = createOpenAI({
@@ -77,7 +80,7 @@ export const extractionSchemas = {
 // Voice transcription with Whisper
 export async function transcribeAudio(audioBuffer: ArrayBuffer): Promise<string> {
   if (!process.env.OPENAI_API_KEY) {
-    console.log('No OpenAI API key, returning mock transcription');
+    logger.debug('No OpenAI API key, returning mock transcription', { component: 'ai', operation: 'transcribeAudio' });
     return 'Mock transcription: Discussed project timeline with Sarah Chen and Mike Rodriguez. They can help with frontend and backend respectively.';
   }
   
@@ -103,7 +106,7 @@ export async function transcribeAudio(audioBuffer: ArrayBuffer): Promise<string>
     const data = await response.json();
     return data.text;
   } catch (error) {
-    console.error('Transcription error:', error);
+    logger.error('Transcription error', error as Error, { component: 'ai', operation: 'transcribeAudio' });
     return 'Transcription failed. Please try again.';
   }
 }
@@ -115,7 +118,7 @@ export async function extractFromText<T>(
   systemPrompt: string
 ): Promise<T | null> {
   if (!models.default) {
-    console.log('No AI model available, returning null');
+    logger.debug('No AI model available, returning null', { component: 'ai', operation: 'extractFromText' });
     return null;
   }
   
@@ -129,7 +132,7 @@ export async function extractFromText<T>(
     
     return object as T;
   } catch (error) {
-    console.error('Extraction error:', error);
+    logger.error('Extraction error', error as Error, { component: 'ai', operation: 'extractFromText' });
     return null;
   }
 }
@@ -166,7 +169,7 @@ export async function generateGraphInsights(
     // Parse insights from text response
     return parseInsightsFromText(text);
   } catch (error) {
-    console.error('Insight generation error:', error);
+    logger.error('Insight generation error', error as Error, { component: 'ai', operation: 'generateGraphInsights' });
     return [];
   }
 }
@@ -253,7 +256,7 @@ export async function rankSuggestions(
       };
     }).sort((a, b) => (b.aiScore || b.score) - (a.aiScore || a.score));
   } catch (error) {
-    console.error('Ranking error:', error);
+    logger.error('Ranking error', error as Error, { component: 'ai', operation: 'rankSuggestions' });
     return suggestions;
   }
 }

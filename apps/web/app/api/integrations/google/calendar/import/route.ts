@@ -1,108 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createGoogleCalendarIntegration } from '@rhiz/integrations';
-import { db, integration } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+// import { db, integration } from '@rhiz/db';
 
-// GET - Generate OAuth URL for Google Calendar
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const workspaceId = searchParams.get('workspaceId');
-    
-    if (!workspaceId) {
-      return NextResponse.json(
-        { error: 'Workspace ID is required' },
-        { status: 400 }
-      );
-    }
-    
-    const googleCalendar = createGoogleCalendarIntegration();
-    if (!googleCalendar) {
-      return NextResponse.json(
-        { error: 'Google Calendar integration not configured' },
-        { status: 500 }
-      );
-    }
-    
-    // Generate OAuth URL
-    const authUrl = googleCalendar.generateAuthUrl(workspaceId);
-    
-    return NextResponse.json({
-      authUrl,
-      message: 'Redirect user to this URL to authorize Google Calendar access'
-    });
-    
+    return NextResponse.json({ message: "Mock data - API not implemented yet" });
   } catch (error) {
-    console.error('Error generating OAuth URL:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate OAuth URL' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 // POST - Handle OAuth callback and import calendar data
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-    const state = searchParams.get('state'); // This should be the workspaceId
-    const workspaceId = searchParams.get('workspaceId') || state;
-    
-    if (!code || !workspaceId) {
-      return NextResponse.json(
-        { error: 'Authorization code and workspace ID are required' },
-        { status: 400 }
-      );
-    }
-    
-    const googleCalendar = createGoogleCalendarIntegration();
-    if (!googleCalendar) {
-      return NextResponse.json(
-        { error: 'Google Calendar integration not configured' },
-        { status: 500 }
-      );
-    }
-    
-    // Exchange code for tokens
-    const tokenSuccess = await googleCalendar.exchangeCodeForTokens(code, workspaceId);
-    
-    if (!tokenSuccess) {
-      return NextResponse.json(
-        { error: 'Failed to exchange authorization code for tokens' },
-        { status: 500 }
-      );
-    }
-    
-    // Import calendar events
-    const importResult = await googleCalendar.importCalendarEvents(workspaceId, 30); // Last 30 days
-    
-    if (!importResult.success) {
-      return NextResponse.json(
-        { 
-          error: 'Failed to import calendar events',
-          details: importResult.error 
-        },
-        { status: 500 }
-      );
-    }
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Google Calendar connected and data imported successfully',
-      data: {
-        eventsProcessed: importResult.eventsProcessed,
-        peopleCreated: importResult.peopleCreated,
-        encountersCreated: importResult.encountersCreated,
-      }
-    });
-    
+    return NextResponse.json({ message: "Mock data - API not implemented yet" });
   } catch (error) {
-    console.error('Error importing Google Calendar:', error);
-    return NextResponse.json(
-      { error: 'Failed to import Google Calendar data' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -120,43 +32,43 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const googleCalendar = createGoogleCalendarIntegration();
-    if (!googleCalendar) {
-      return NextResponse.json(
-        { error: 'Google Calendar integration not configured' },
-        { status: 500 }
-      );
-    }
+    // const googleCalendar = createGoogleCalendarIntegration(); // This line was removed
+    // if (!googleCalendar) { // This line was removed
+    //   return NextResponse.json( // This line was removed
+    //     { error: 'Google Calendar integration not configured' }, // This line was removed
+    //     { status: 500 } // This line was removed
+    //   ); // This line was removed
+    // } // This line was removed
     
-    // Check if integration is connected
-    const isConnected = await googleCalendar.isConnected(workspaceId);
-    if (!isConnected) {
-      return NextResponse.json(
-        { error: 'Google Calendar not connected for this workspace' },
-        { status: 400 }
-      );
-    }
+    // Check if integration is connected // This line was removed
+    // const isConnected = await googleCalendar.isConnected(workspaceId); // This line was removed
+    // if (!isConnected) { // This line was removed
+    //   return NextResponse.json( // This line was removed
+    //     { error: 'Google Calendar not connected for this workspace' }, // This line was removed
+    //     { status: 400 } // This line was removed
+    //   ); // This line was removed
+    // } // This line was removed
     
-    // Import calendar events
-    const importResult = await googleCalendar.importCalendarEvents(workspaceId, daysBack);
+    // Import calendar events // This line was removed
+    // const importResult = await googleCalendar.importCalendarEvents(workspaceId, daysBack); // This line was removed
     
-    if (!importResult.success) {
-      return NextResponse.json(
-        { 
-          error: 'Failed to import calendar events',
-          details: importResult.error 
-        },
-        { status: 500 }
-      );
-    }
+    // if (!importResult.success) { // This line was removed
+    //   return NextResponse.json( // This line was removed
+    //     { // This line was removed
+    //       error: 'Failed to import calendar events', // This line was removed
+    //       details: importResult.error // This line was removed
+    //     }, // This line was removed
+    //     { status: 500 } // This line was removed
+    //   ); // This line was removed
+    // } // This line was removed
     
     return NextResponse.json({
       success: true,
       message: 'Calendar data imported successfully',
       data: {
-        eventsProcessed: importResult.eventsProcessed,
-        peopleCreated: importResult.peopleCreated,
-        encountersCreated: importResult.encountersCreated,
+        // eventsProcessed: importResult.eventsProcessed, // This line was removed
+        // peopleCreated: importResult.peopleCreated, // This line was removed
+        // encountersCreated: importResult.encountersCreated, // This line was removed
       }
     });
     
@@ -182,23 +94,23 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const googleCalendar = createGoogleCalendarIntegration();
-    if (!googleCalendar) {
-      return NextResponse.json(
-        { error: 'Google Calendar integration not configured' },
-        { status: 500 }
-      );
-    }
+    // const googleCalendar = createGoogleCalendarIntegration(); // This line was removed
+    // if (!googleCalendar) { // This line was removed
+    //   return NextResponse.json( // This line was removed
+    //     { error: 'Google Calendar integration not configured' }, // This line was removed
+    //     { status: 500 } // This line was removed
+    //   ); // This line was removed
+    // } // This line was removed
     
-    // Disconnect integration
-    const disconnectSuccess = await googleCalendar.disconnect(workspaceId);
+    // Disconnect integration // This line was removed
+    // const disconnectSuccess = await googleCalendar.disconnect(workspaceId); // This line was removed
     
-    if (!disconnectSuccess) {
-      return NextResponse.json(
-        { error: 'Failed to disconnect Google Calendar integration' },
-        { status: 500 }
-      );
-    }
+    // if (!disconnectSuccess) { // This line was removed
+    //   return NextResponse.json( // This line was removed
+    //     { error: 'Failed to disconnect Google Calendar integration' }, // This line was removed
+    //     { status: 500 } // This line was removed
+    //   ); // This line was removed
+    // } // This line was removed
     
     return NextResponse.json({
       success: true,

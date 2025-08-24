@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/app/components/navigation';
+import { useWorkspace } from '@/lib/useWorkspace';
 
 interface Goal {
   id: string;
@@ -17,16 +18,21 @@ interface Goal {
 }
 
 export default function GoalsPage() {
+  const { workspaceId } = useWorkspace();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchGoals();
-  }, []);
+    if (workspaceId) {
+      fetchGoals();
+    }
+  }, [workspaceId]);
 
   const fetchGoals = async () => {
+    if (!workspaceId) return;
+    
     try {
-      const response = await fetch('/api/goals');
+      const response = await fetch(`/api/goals?workspaceId=${workspaceId}`);
       if (response.ok) {
         const data = await response.json();
         setGoals(data.goals);

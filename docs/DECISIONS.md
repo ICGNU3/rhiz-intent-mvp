@@ -17,7 +17,7 @@ This document captures key architectural and implementation decisions made durin
 - Single package (harder to maintain boundaries)
 
 ### 2. Database: PostgreSQL + Drizzle ORM
-**Decision**: PostgreSQL with Drizzle ORM and pgvector
+**Decision**Y: PostgreSQL with Drizzle ORM and pgvector
 **Rationale**:
 - PostgreSQL provides ACID compliance and advanced features
 - Drizzle offers type safety and excellent TypeScript integration

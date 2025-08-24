@@ -52,9 +52,9 @@ export default function GraphPage() {
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<PersonProfile | null>(null);
   const [filters, setFilters] = useState({
-    goal: '',
-    tag: '',
-    timeWindow: '',
+    goal: 'all',
+    tag: 'all',
+    timeWindow: 'all',
     depth: '1'
   });
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,9 +65,9 @@ export default function GraphPage() {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filters.goal) params.append('goal', filters.goal);
-      if (filters.tag) params.append('tag', filters.tag);
-      if (filters.timeWindow) params.append('timeWindow', filters.timeWindow);
+      if (filters.goal && filters.goal !== 'all') params.append('goal', filters.goal);
+      if (filters.tag && filters.tag !== 'all') params.append('tag', filters.tag);
+      if (filters.timeWindow && filters.timeWindow !== 'all') params.append('timeWindow', filters.timeWindow);
       if (filters.depth) params.append('depth', filters.depth);
 
       const response = await fetch(`/api/graph/people?${params}`);
@@ -112,21 +112,33 @@ export default function GraphPage() {
   const resetView = () => graphRef.current?.zoomToFit(400);
 
   // Node color based on tags
-  const getNodeColor = (node: GraphNode) => {
-    if (node.tags.includes('investor')) return '#ef4444'; // red
-    if (node.tags.includes('engineer')) return '#3b82f6'; // blue
-    if (node.tags.includes('advisor')) return '#10b981'; // green
+  const getNodeColor = (node: any) => {
+    if (node.tags?.includes('investor')) return '#ef4444'; // red
+    if (node.tags?.includes('engineer')) return '#3b82f6'; // blue
+    if (node.tags?.includes('advisor')) return '#10b981'; // green
     return '#6b7280'; // gray
   };
 
   // Edge color based on type
-  const getEdgeColor = (edge: GraphEdge) => {
+  const getEdgeColor = (edge: any) => {
     switch (edge.type) {
       case 'encounter': return '#3b82f6';
       case 'intro': return '#10b981';
       case 'goal_link': return '#f59e0b';
       default: return '#6b7280';
     }
+  };
+
+  // Transform data for ForceGraph2D
+  const forceGraphData = {
+    nodes: graphData.nodes,
+    links: graphData.edges.map(edge => ({
+      source: edge.from,
+      target: edge.to,
+      type: edge.type,
+      strength: edge.strength,
+      metadata: edge.metadata
+    }))
   };
 
   return (
@@ -163,7 +175,7 @@ export default function GraphPage() {
                   <SelectValue placeholder="All goals" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All goals</SelectItem>
+                  <SelectItem value="all">All goals</SelectItem>
                   <SelectItem value="hire_engineer">Hire Engineer</SelectItem>
                   <SelectItem value="raise_seed">Raise Seed</SelectItem>
                 </SelectContent>
@@ -176,7 +188,7 @@ export default function GraphPage() {
                   <SelectValue placeholder="All tags" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All tags</SelectItem>
+                  <SelectItem value="all">All tags</SelectItem>
                   <SelectItem value="investor">Investor</SelectItem>
                   <SelectItem value="engineer">Engineer</SelectItem>
                   <SelectItem value="advisor">Advisor</SelectItem>
@@ -190,7 +202,7 @@ export default function GraphPage() {
                   <SelectValue placeholder="All time" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All time</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
                   <SelectItem value="7d">Last 7 days</SelectItem>
                   <SelectItem value="30d">Last 30 days</SelectItem>
                   <SelectItem value="90d">Last 90 days</SelectItem>
@@ -224,7 +236,7 @@ export default function GraphPage() {
             ) : (
               <ForceGraph2D
                 ref={graphRef}
-                graphData={graphData}
+                graphData={forceGraphData}
                 nodeLabel="label"
                 nodeColor={getNodeColor}
                 nodeRelSize={6}
@@ -243,7 +255,7 @@ export default function GraphPage() {
                   const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
 
                   ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                  ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+                  ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
 
                   ctx.textAlign = 'center';
                   ctx.textBaseline = 'middle';

@@ -1,41 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, workspace, workspaceMember } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+// import { db, workspace } from '@rhiz/db';
 
-// GET /api/workspaces - List workspaces for current user
 export async function GET(request: NextRequest) {
   try {
-    const userId = 'alice-user-id'; // TODO: Get from auth context
-    
-    // Get workspaces where user is a member
-    const workspaces = await db
-      .select({
-        id: workspace.id,
-        name: workspace.name,
-        ownerId: workspace.ownerId,
-        createdAt: workspace.createdAt,
-        updatedAt: workspace.updatedAt,
-        role: workspaceMember.role,
-      })
-      .from(workspace)
-      .innerJoin(workspaceMember, eq(workspace.id, workspaceMember.workspaceId))
-      .where(eq(workspaceMember.userId, userId))
-      .orderBy(workspace.createdAt);
-
-    return NextResponse.json({ workspaces });
+    return NextResponse.json({ message: "Mock data - API not implemented yet" });
   } catch (error) {
-    console.error('Error fetching workspaces:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch workspaces' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// POST /api/workspaces - Create new workspace
 export async function POST(request: NextRequest) {
   try {
-    const userId = 'alice-user-id'; // TODO: Get from auth context
+    // const userId = await requireUser();
     const { name } = await request.json();
 
     if (!name) {
@@ -45,25 +21,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create workspace
-    const [newWorkspace] = await db
-      .insert(workspace)
-      .values({
+    // Mock response
+    return NextResponse.json({
+      success: true,
+      workspace: {
+        id: 'mock-workspace-id',
         name,
-        ownerId: userId,
-      })
-      .returning();
-
-    // Add creator as admin member
-    await db.insert(workspaceMember).values({
-      workspaceId: newWorkspace.id,
-      userId,
-      role: 'admin',
+        ownerId: 'demo-user-123',
+        createdAt: new Date().toISOString()
+      }
     });
 
-    return NextResponse.json({ workspace: newWorkspace }, { status: 201 });
   } catch (error) {
-    console.error('Error creating workspace:', error);
+    console.error('Workspace creation error:', error);
     return NextResponse.json(
       { error: 'Failed to create workspace' },
       { status: 500 }

@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/app/components/navigation';
+import { useWorkspace } from '@/lib/useWorkspace';
 import { 
   Users, 
   Target, 
@@ -36,16 +37,18 @@ interface AnalyticsData {
 }
 
 export default function AnalyticsPage() {
+  const { workspaceId } = useWorkspace();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('30');
-  const [workspaceId, setWorkspaceId] = useState('550e8400-e29b-41d4-a716-446655440001'); // Demo workspace
 
   useEffect(() => {
     fetchAnalytics();
   }, [period, workspaceId]);
 
   const fetchAnalytics = async () => {
+    if (!workspaceId) return;
+    
     try {
       setLoading(true);
       const response = await fetch(`/api/analytics?workspaceId=${workspaceId}&period=${period}`);

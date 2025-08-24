@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getUserId } from '@/lib/auth-mock';
 import { Agent } from '@/lib/agent';
+import { broadcastToWorkspace } from '../ws/route';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
       return new Response('Unauthorized', { status: 401 });
     }
 
-    const { messages, stream = true } = await request.json();
+    const { messages, stream = true, workspaceId = '550e8400-e29b-41d4-a716-446655440001' } = await request.json();
     
     // Get the last user message
     const lastUserMessage = messages
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const agent = new Agent();
-    const context = { userId, messages };
+    const context = { userId, workspaceId, messages };
 
     if (stream) {
       // Stream the response
@@ -46,6 +47,33 @@ export async function POST(request: NextRequest) {
                 metadata: response.metadata
               }
             })}\n\n`));
+
+            // Broadcast real-time updates via WebSocket
+            if (response.cards) {
+              if (response.cards.people) {
+                broadcastToWorkspace(workspaceId, {
+                  type: 'people_updated',
+                  people: response.cards.people,
+                  updatedBy: userId
+                }, userId);
+              }
+
+              if (response.cards.suggestions) {
+                broadcastToWorkspace(workspaceId, {
+                  type: 'suggestions_updated',
+                  suggestions: response.cards.suggestions,
+                  updatedBy: userId
+                }, userId);
+              }
+
+              if (response.cards.goals) {
+                broadcastToWorkspace(workspaceId, {
+                  type: 'goals_updated',
+                  goals: response.cards.goals,
+                  updatedBy: userId
+                }, userId);
+              }
+            }
             
             controller.close();
           } catch (error) {
@@ -68,6 +96,15 @@ export async function POST(request: NextRequest) {
     } else {
       // Non-streaming response
       const response = await agent.process(lastUserMessage, context);
+      
+      // Broadcast real-time updates via WebSocket
+      if (response.cards) {
+        broadcastToWorkspace(workspaceId, {
+          type: 'agent_response',
+          response: response.cards,
+          updatedBy: userId
+        }, userId);
+      }
       
       return new Response(JSON.stringify(response), {
         headers: {

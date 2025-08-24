@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/app/components/navigation';
 import { 
   Lightbulb, 
   Share2, 
@@ -282,8 +282,14 @@ export default function InsightsPage() {
                       </CardDescription>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">
-                          <p>Generated from: {insight.provenance.metric}</p>
-                          <p>Reason: {insight.provenance.reason_generated}</p>
+                          {insight.provenance ? (
+                            <>
+                              <p>Generated from: {insight.provenance.metric}</p>
+                              <p>Reason: {insight.provenance.reason_generated}</p>
+                            </>
+                          ) : (
+                            <p>Generated from: AI analysis</p>
+                          )}
                         </div>
                         <Button>
                           Take Action
@@ -314,23 +320,27 @@ export default function InsightsPage() {
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          {getInsightIcon(shared.insight.type)}
+                          {shared.insight && getInsightIcon(shared.insight.type)}
                           <div>
-                            <CardTitle className="text-lg">{shared.insight.title}</CardTitle>
+                            <CardTitle className="text-lg">{shared.insight?.title || 'Shared Insight'}</CardTitle>
                             <div className="flex items-center gap-2">
-                              <Badge className={getInsightColor(shared.insight.type)}>
-                                {shared.insight.type.replace('_', ' ')}
-                              </Badge>
+                              {shared.insight && (
+                                <Badge className={getInsightColor(shared.insight.type)}>
+                                  {shared.insight.type.replace('_', ' ')}
+                                </Badge>
+                              )}
                               <Badge variant="outline">Shared by {shared.sharedBy}</Badge>
                             </div>
                           </div>
                         </div>
-                        <Badge variant="secondary">Score: {shared.insight.score}</Badge>
+                        {shared.insight && (
+                          <Badge variant="secondary">Score: {shared.insight.score}</Badge>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent>
                       <CardDescription className="text-base mb-4">
-                        {shared.insight.detail}
+                        {shared.insight?.detail || 'Insight details not available'}
                       </CardDescription>
                       <div className="flex items-center justify-between">
                         <div className="text-sm text-muted-foreground">
@@ -374,7 +384,7 @@ export default function InsightsPage() {
                         <div>
                           <p className="font-medium">{overlap.person}</p>
                           <p className="text-sm text-muted-foreground">
-                            Appears in {overlap.workspaces.length} workspaces
+                            Appears in {overlap.workspaces?.length || 0} workspaces
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -428,8 +438,8 @@ export default function InsightsPage() {
                       </CardDescription>
                       <div className="space-y-3">
                         <div className="text-sm text-muted-foreground">
-                          <p>Workspaces: {opportunity.workspaces.length}</p>
-                          <p>Clusters: {opportunity.clusters.length}</p>
+                          <p>Workspaces: {opportunity.workspaces?.length || 0}</p>
+                          <p>Clusters: {opportunity.clusters?.length || 0}</p>
                           <p>Created: {new Date(opportunity.createdAt).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center gap-2">

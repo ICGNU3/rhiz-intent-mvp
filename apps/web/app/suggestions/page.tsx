@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Navigation } from '@/components/navigation';
+import { Navigation } from '@/app/components/navigation';
 
 interface Suggestion {
   id: string;
@@ -115,7 +115,7 @@ export default function SuggestionsPage() {
         </div>
 
         <div className="space-y-6">
-          {suggestions.map((suggestion) => (
+          {suggestions?.map((suggestion) => (
             <Card key={suggestion.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-center justify-between">

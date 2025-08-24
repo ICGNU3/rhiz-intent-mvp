@@ -2,6 +2,15 @@ import { generateText, generateObject, streamText } from 'ai';
 import { z } from 'zod';
 import { models, extractionSchemas } from './ai';
 import { Matching } from './matching';
+import { logger } from './logger';
+import { AIError, handleError } from './errors';
+import { 
+  GOAL_TYPES, 
+  ACTION_TYPES, 
+  SENTIMENT_TYPES, 
+  URGENCY_LEVELS,
+  AI_CONFIG 
+} from './constants';
 
 // Enhanced schemas for better structured extraction
 const parseSchema = z.object({
@@ -12,20 +21,29 @@ const parseSchema = z.object({
     context: z.string().optional().describe('Context in which they were mentioned'),
   })).optional(),
   goals: z.array(z.object({
-    kind: z.enum(['raise_seed', 'hire_engineer', 'hire_designer', 'hire_sales', 'find_investor', 'find_customer', 'learn_skill', 'connect']).describe('Type of goal'),
+    kind: z.enum([
+      GOAL_TYPES.RAISE_SEED,
+      GOAL_TYPES.HIRE_ENGINEER,
+      GOAL_TYPES.HIRE_DESIGNER,
+      GOAL_TYPES.HIRE_SALES,
+      GOAL_TYPES.FIND_INVESTOR,
+      GOAL_TYPES.FIND_CUSTOMER,
+      GOAL_TYPES.LEARN_SKILL,
+      GOAL_TYPES.CONNECT
+    ]).describe('Type of goal'),
     title: z.string().describe('Human-readable goal title'),
     confidence: z.number().min(0).max(100).describe('Confidence score 0-100'),
     timeframe: z.string().optional().describe('When they want to achieve this'),
     requirements: z.array(z.string()).optional().describe('Specific requirements or constraints'),
   })).optional(),
   actions: z.array(z.enum([
-    'capture_note',
-    'set_goal', 
-    'find_people',
-    'suggest_intros',
-    'schedule_followup',
-    'add_reminder',
-    'clarify'
+    ACTION_TYPES.CAPTURE_NOTE,
+    ACTION_TYPES.SET_GOAL, 
+    ACTION_TYPES.FIND_PEOPLE,
+    ACTION_TYPES.SUGGEST_INTROS,
+    ACTION_TYPES.SCHEDULE_FOLLOWUP,
+    ACTION_TYPES.ADD_REMINDER,
+    ACTION_TYPES.CLARIFY
   ])).describe('What actions the user wants to take'),
   facts: z.array(z.object({
     subject: z.enum(['person', 'org']).describe('Whether this fact is about a person or organization'),
@@ -33,8 +51,16 @@ const parseSchema = z.object({
     value: z.string().describe('The actual fact value'),
     confidence: z.number().min(0).max(100).optional().describe('Confidence in this fact'),
   })).optional(),
-  sentiment: z.enum(['positive', 'neutral', 'negative']).optional().describe('Overall sentiment of the input'),
-  urgency: z.enum(['low', 'medium', 'high']).optional().describe('How urgent this request is'),
+  sentiment: z.enum([
+    SENTIMENT_TYPES.POSITIVE,
+    SENTIMENT_TYPES.NEUTRAL,
+    SENTIMENT_TYPES.NEGATIVE
+  ]).optional().describe('Overall sentiment of the input'),
+  urgency: z.enum([
+    URGENCY_LEVELS.LOW,
+    URGENCY_LEVELS.MEDIUM,
+    URGENCY_LEVELS.HIGH
+  ]).optional().describe('How urgent this request is'),
 });
 
 const agentResponseSchema = z.object({
@@ -131,8 +157,8 @@ export interface Parse {
     value: string;
     confidence?: number;
   }>;
-  sentiment?: 'positive' | 'neutral' | 'negative';
-  urgency?: 'low' | 'medium' | 'high';
+  sentiment?: string;
+  urgency?: string;
 }
 
 export class Agent {
@@ -164,7 +190,7 @@ export class Agent {
         }
       };
     } catch (error) {
-      console.error('Agent processing error:', error);
+      logger.error('Agent processing error', error as Error, { component: 'agent', action: 'process' });
       return {
         text: "I encountered an issue processing your request. Please try again.",
         metadata: {
@@ -199,7 +225,7 @@ export class Agent {
         }
       };
     } catch (error) {
-      console.error('Agent streaming error:', error);
+      logger.error('Agent streaming error', error as Error, { component: 'agent', action: 'streamProcess' });
       return {
         text: "I encountered an issue processing your request. Please try again.",
         metadata: {
@@ -213,7 +239,7 @@ export class Agent {
 
   private async parseInput(text: string): Promise<Parse> {
     if (!models.default) {
-      console.log('No AI model available, using fallback parsing');
+      logger.debug('No AI model available, using fallback parsing', { component: 'agent', action: 'parseInput' });
       return this.fallbackParse(text);
     }
 
@@ -236,7 +262,7 @@ Be thorough but accurate. If uncertain about something, set lower confidence sco
 
       return object as Parse;
     } catch (error) {
-      console.error('AI parsing failed, using fallback:', error);
+      logger.error('AI parsing failed, using fallback', error as Error, { component: 'agent', action: 'parseInput' });
       return this.fallbackParse(text);
     }
   }
@@ -275,7 +301,7 @@ Generate a natural, helpful response that:
 
       return object as AgentResponse;
     } catch (error) {
-      console.error('AI response generation failed:', error);
+      logger.error('AI response generation failed', error as Error, { component: 'agent', action: 'generateResponse' });
       return actionResponse as AgentResponse;
     }
   }
@@ -314,7 +340,7 @@ Generate a natural, helpful response that acknowledges what the user said and ex
 
       return fullResponse;
     } catch (error) {
-      console.error('Streaming response generation failed:', error);
+      logger.error('Streaming response generation failed', error as Error, { component: 'agent', action: 'streamResponse' });
       return actionResponse.text || "I've processed your request.";
     }
   }

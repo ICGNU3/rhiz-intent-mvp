@@ -45,7 +45,7 @@ export default function ReferralsPage() {
 
   // Mock user data - in real app, get from auth context
   const currentUserId = 'current-user-id';
-  const userTier = 'root_alpha'; // 'free', 'pro', 'root_alpha', 'power'
+  const userTier = 'root_alpha' as 'free' | 'pro' | 'root_alpha' | 'power'; // 'free', 'pro', 'root_alpha', 'power'
 
   useEffect(() => {
     loadReferralData();
