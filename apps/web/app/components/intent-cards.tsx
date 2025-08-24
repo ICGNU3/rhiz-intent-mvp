@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { IntentCard } from '@/components/IntentCard'
 
-interface IntentCard {
+interface IntentCardData {
   id: string
   goalTitle: string
   goalKind: string
@@ -35,7 +35,7 @@ interface IntentCardsProps {
 }
 
 export function IntentCards({ workspaceId }: IntentCardsProps) {
-  const [cards, setCards] = useState<IntentCard[]>([])
+  const [cards, setCards] = useState<IntentCardData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
