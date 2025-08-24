@@ -1,10 +1,8 @@
 {
-  "id": "5c35c107-f4ce-4d7e-b4d7-5b19eb77678e",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "claim": {
+    "public.claim": {
       "name": "claim",
       "schema": "",
       "columns": {
@@ -92,54 +90,94 @@
       },
       "indexes": {
         "claim_workspace_idx": {
-          "name": "claim_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "claim_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "claim_owner_idx": {
-          "name": "claim_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "claim_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "claim_subject_idx": {
-          "name": "claim_subject_idx",
           "columns": [
-            "subject_type",
-            "subject_id"
+            {
+              "expression": "subject_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "claim_subject_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "claim_key_idx": {
-          "name": "claim_key_idx",
           "columns": [
-            "key"
+            {
+              "expression": "key",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "claim_key_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "claim_workspace_id_workspace_id_fk": {
           "name": "claim_workspace_id_workspace_id_fk",
           "tableFrom": "claim",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "collective_opportunity": {
+    "public.collective_opportunity": {
       "name": "collective_opportunity",
       "schema": "",
       "columns": {
@@ -216,32 +254,59 @@
       },
       "indexes": {
         "collective_opportunity_type_idx": {
-          "name": "collective_opportunity_type_idx",
           "columns": [
-            "type"
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "collective_opportunity_type_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "collective_opportunity_status_idx": {
-          "name": "collective_opportunity_status_idx",
           "columns": [
-            "status"
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "collective_opportunity_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "collective_opportunity_created_by_idx": {
-          "name": "collective_opportunity_created_by_idx",
           "columns": [
-            "created_by"
+            {
+              "expression": "created_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "collective_opportunity_created_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "consent": {
+    "public.consent": {
       "name": "consent",
       "schema": "",
       "columns": {
@@ -292,59 +357,86 @@
       },
       "indexes": {
         "consent_workspace_idx": {
-          "name": "consent_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "consent_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "consent_owner_idx": {
-          "name": "consent_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "consent_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "consent_subject_idx": {
-          "name": "consent_subject_idx",
           "columns": [
-            "subject_id"
+            {
+              "expression": "subject_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "consent_subject_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "consent_workspace_id_workspace_id_fk": {
           "name": "consent_workspace_id_workspace_id_fk",
           "tableFrom": "consent",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "consent_subject_id_person_id_fk": {
           "name": "consent_subject_id_person_id_fk",
           "tableFrom": "consent",
-          "tableTo": "person",
           "columnsFrom": [
             "subject_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "crm_contact_sync": {
+    "public.crm_contact_sync": {
       "name": "crm_contact_sync",
       "schema": "",
       "columns": {
@@ -402,66 +494,101 @@
       },
       "indexes": {
         "crm_contact_sync_workspace_idx": {
-          "name": "crm_contact_sync_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "crm_contact_sync_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "crm_contact_sync_crm_id_idx": {
-          "name": "crm_contact_sync_crm_id_idx",
           "columns": [
-            "crm_id"
+            {
+              "expression": "crm_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "crm_contact_sync_crm_id_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "crm_contact_sync_person_idx": {
-          "name": "crm_contact_sync_person_idx",
           "columns": [
-            "rhiz_person_id"
+            {
+              "expression": "rhiz_person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "crm_contact_sync_person_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "crm_contact_sync_provider_idx": {
-          "name": "crm_contact_sync_provider_idx",
           "columns": [
-            "crm_provider"
+            {
+              "expression": "crm_provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "crm_contact_sync_provider_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "crm_contact_sync_workspace_id_workspace_id_fk": {
           "name": "crm_contact_sync_workspace_id_workspace_id_fk",
           "tableFrom": "crm_contact_sync",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "crm_contact_sync_rhiz_person_id_person_id_fk": {
           "name": "crm_contact_sync_rhiz_person_id_person_id_fk",
           "tableFrom": "crm_contact_sync",
-          "tableTo": "person",
           "columnsFrom": [
             "rhiz_person_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "cross_workspace_overlap": {
+    "public.cross_workspace_overlap": {
       "name": "cross_workspace_overlap",
       "schema": "",
       "columns": {
@@ -514,46 +641,73 @@
       },
       "indexes": {
         "cross_workspace_overlap_person_idx": {
-          "name": "cross_workspace_overlap_person_idx",
           "columns": [
-            "person_id"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "cross_workspace_overlap_person_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "cross_workspace_overlap_type_idx": {
-          "name": "cross_workspace_overlap_type_idx",
           "columns": [
-            "overlap_type"
+            {
+              "expression": "overlap_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "cross_workspace_overlap_type_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "cross_workspace_overlap_state_idx": {
-          "name": "cross_workspace_overlap_state_idx",
           "columns": [
-            "state"
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "cross_workspace_overlap_state_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "cross_workspace_overlap_person_id_person_id_fk": {
           "name": "cross_workspace_overlap_person_id_person_id_fk",
           "tableFrom": "cross_workspace_overlap",
-          "tableTo": "person",
           "columnsFrom": [
             "person_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "edge": {
+    "public.edge": {
       "name": "edge",
       "schema": "",
       "columns": {
@@ -617,86 +771,129 @@
       },
       "indexes": {
         "edge_workspace_idx": {
-          "name": "edge_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "edge_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "edge_owner_idx": {
-          "name": "edge_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "edge_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "edge_from_idx": {
-          "name": "edge_from_idx",
           "columns": [
-            "from_id"
+            {
+              "expression": "from_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "edge_from_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "edge_to_idx": {
-          "name": "edge_to_idx",
           "columns": [
-            "to_id"
+            {
+              "expression": "to_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "edge_to_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "edge_type_idx": {
-          "name": "edge_type_idx",
           "columns": [
-            "type"
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "edge_type_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "edge_workspace_id_workspace_id_fk": {
           "name": "edge_workspace_id_workspace_id_fk",
           "tableFrom": "edge",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "edge_from_id_person_id_fk": {
           "name": "edge_from_id_person_id_fk",
           "tableFrom": "edge",
-          "tableTo": "person",
           "columnsFrom": [
             "from_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "edge_to_id_person_id_fk": {
           "name": "edge_to_id_person_id_fk",
           "tableFrom": "edge",
-          "tableTo": "person",
           "columnsFrom": [
             "to_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "encounter": {
+    "public.encounter": {
       "name": "encounter",
       "schema": "",
       "columns": {
@@ -753,46 +950,73 @@
       },
       "indexes": {
         "encounter_workspace_idx": {
-          "name": "encounter_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "encounter_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "encounter_owner_idx": {
-          "name": "encounter_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "encounter_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "encounter_occurred_idx": {
-          "name": "encounter_occurred_idx",
           "columns": [
-            "occurred_at"
+            {
+              "expression": "occurred_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "encounter_occurred_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "encounter_workspace_id_workspace_id_fk": {
           "name": "encounter_workspace_id_workspace_id_fk",
           "tableFrom": "encounter",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "event_log": {
+    "public.event_log": {
       "name": "event_log",
       "schema": "",
       "columns": {
@@ -849,46 +1073,73 @@
       },
       "indexes": {
         "event_log_workspace_idx": {
-          "name": "event_log_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "event_log_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "event_log_owner_idx": {
-          "name": "event_log_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "event_log_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "event_log_event_idx": {
-          "name": "event_log_event_idx",
           "columns": [
-            "event"
+            {
+              "expression": "event",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "event_log_event_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "event_log_workspace_id_workspace_id_fk": {
           "name": "event_log_workspace_id_workspace_id_fk",
           "tableFrom": "event_log",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "goal": {
+    "public.goal": {
       "name": "goal",
       "schema": "",
       "columns": {
@@ -946,46 +1197,73 @@
       },
       "indexes": {
         "goal_workspace_idx": {
-          "name": "goal_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "goal_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "goal_owner_idx": {
-          "name": "goal_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "goal_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "goal_kind_idx": {
-          "name": "goal_kind_idx",
           "columns": [
-            "kind"
+            {
+              "expression": "kind",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "goal_kind_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "goal_workspace_id_workspace_id_fk": {
           "name": "goal_workspace_id_workspace_id_fk",
           "tableFrom": "goal",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "graph_insight": {
+    "public.graph_insight": {
       "name": "graph_insight",
       "schema": "",
       "columns": {
@@ -1074,93 +1352,144 @@
       },
       "indexes": {
         "graph_insight_workspace_idx": {
-          "name": "graph_insight_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_insight_owner_idx": {
-          "name": "graph_insight_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_insight_type_idx": {
-          "name": "graph_insight_type_idx",
           "columns": [
-            "type"
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_type_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_insight_person_idx": {
-          "name": "graph_insight_person_idx",
           "columns": [
-            "person_id"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_person_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_insight_goal_idx": {
-          "name": "graph_insight_goal_idx",
           "columns": [
-            "goal_id"
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_goal_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_insight_state_idx": {
-          "name": "graph_insight_state_idx",
           "columns": [
-            "state"
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_insight_state_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "graph_insight_workspace_id_workspace_id_fk": {
           "name": "graph_insight_workspace_id_workspace_id_fk",
           "tableFrom": "graph_insight",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "graph_insight_person_id_person_id_fk": {
           "name": "graph_insight_person_id_person_id_fk",
           "tableFrom": "graph_insight",
-          "tableTo": "person",
           "columnsFrom": [
             "person_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "graph_insight_goal_id_goal_id_fk": {
           "name": "graph_insight_goal_id_goal_id_fk",
           "tableFrom": "graph_insight",
-          "tableTo": "goal",
           "columnsFrom": [
             "goal_id"
           ],
+          "tableTo": "goal",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "graph_metrics": {
+    "public.graph_metrics": {
       "name": "graph_metrics",
       "schema": "",
       "columns": {
@@ -1211,74 +1540,122 @@
       },
       "indexes": {
         "graph_metrics_workspace_idx": {
-          "name": "graph_metrics_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_metrics_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_metrics_owner_idx": {
-          "name": "graph_metrics_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_metrics_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_metrics_person_idx": {
-          "name": "graph_metrics_person_idx",
           "columns": [
-            "person_id"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_metrics_person_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_metrics_metric_idx": {
-          "name": "graph_metrics_metric_idx",
           "columns": [
-            "metric"
+            {
+              "expression": "metric",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_metrics_metric_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "graph_metrics_unique_idx": {
-          "name": "graph_metrics_unique_idx",
           "columns": [
-            "person_id",
-            "metric"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "metric",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "graph_metrics_unique_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "graph_metrics_workspace_id_workspace_id_fk": {
           "name": "graph_metrics_workspace_id_workspace_id_fk",
           "tableFrom": "graph_metrics",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "graph_metrics_person_id_person_id_fk": {
           "name": "graph_metrics_person_id_person_id_fk",
           "tableFrom": "graph_metrics",
-          "tableTo": "person",
           "columnsFrom": [
             "person_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "growth_event": {
+    "public.growth_event": {
       "name": "growth_event",
       "schema": "",
       "columns": {
@@ -1317,32 +1694,59 @@
       },
       "indexes": {
         "growth_event_user_idx": {
-          "name": "growth_event_user_idx",
           "columns": [
-            "user_id"
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "growth_event_user_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "growth_event_type_idx": {
-          "name": "growth_event_type_idx",
           "columns": [
-            "type"
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "growth_event_type_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "growth_event_created_idx": {
-          "name": "growth_event_created_idx",
           "columns": [
-            "created_at"
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "growth_event_created_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "insight_share": {
+    "public.insight_share": {
       "name": "insight_share",
       "schema": "",
       "columns": {
@@ -1394,73 +1798,116 @@
       },
       "indexes": {
         "insight_share_insight_idx": {
-          "name": "insight_share_insight_idx",
           "columns": [
-            "insight_id"
+            {
+              "expression": "insight_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "insight_share_insight_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "insight_share_shared_by_idx": {
-          "name": "insight_share_shared_by_idx",
           "columns": [
-            "shared_by"
+            {
+              "expression": "shared_by",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "insight_share_shared_by_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "insight_share_shared_with_idx": {
-          "name": "insight_share_shared_with_idx",
           "columns": [
-            "shared_with"
+            {
+              "expression": "shared_with",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "insight_share_shared_with_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "insight_share_workspace_idx": {
-          "name": "insight_share_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "insight_share_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "insight_share_visibility_idx": {
-          "name": "insight_share_visibility_idx",
           "columns": [
-            "visibility"
+            {
+              "expression": "visibility",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "insight_share_visibility_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "insight_share_insight_id_graph_insight_id_fk": {
           "name": "insight_share_insight_id_graph_insight_id_fk",
           "tableFrom": "insight_share",
-          "tableTo": "graph_insight",
           "columnsFrom": [
             "insight_id"
           ],
+          "tableTo": "graph_insight",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "insight_share_workspace_id_workspace_id_fk": {
           "name": "insight_share_workspace_id_workspace_id_fk",
           "tableFrom": "insight_share",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "integration": {
+    "public.integration": {
       "name": "integration",
       "schema": "",
       "columns": {
@@ -1519,46 +1966,73 @@
       },
       "indexes": {
         "integration_workspace_idx": {
-          "name": "integration_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "integration_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "integration_provider_idx": {
-          "name": "integration_provider_idx",
           "columns": [
-            "provider"
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "integration_provider_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "integration_status_idx": {
-          "name": "integration_status_idx",
           "columns": [
-            "status"
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "integration_status_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "integration_workspace_id_workspace_id_fk": {
           "name": "integration_workspace_id_workspace_id_fk",
           "tableFrom": "integration",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "notification": {
+    "public.notification": {
       "name": "notification",
       "schema": "",
       "columns": {
@@ -1609,46 +2083,73 @@
       },
       "indexes": {
         "notification_workspace_idx": {
-          "name": "notification_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "notification_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_user_idx": {
-          "name": "notification_user_idx",
           "columns": [
-            "user_id"
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "notification_user_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "notification_read_idx": {
-          "name": "notification_read_idx",
           "columns": [
-            "read_at"
+            {
+              "expression": "read_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "notification_read_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "notification_workspace_id_workspace_id_fk": {
           "name": "notification_workspace_id_workspace_id_fk",
           "tableFrom": "notification",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "oauth_token": {
+    "public.oauth_token": {
       "name": "oauth_token",
       "schema": "",
       "columns": {
@@ -1712,39 +2213,58 @@
       },
       "indexes": {
         "oauth_token_workspace_idx": {
-          "name": "oauth_token_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "oauth_token_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "oauth_token_provider_idx": {
-          "name": "oauth_token_provider_idx",
           "columns": [
-            "provider"
+            {
+              "expression": "provider",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "oauth_token_provider_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "oauth_token_workspace_id_workspace_id_fk": {
           "name": "oauth_token_workspace_id_workspace_id_fk",
           "tableFrom": "oauth_token",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "org": {
+    "public.org": {
       "name": "org",
       "schema": "",
       "columns": {
@@ -1784,18 +2304,29 @@
       },
       "indexes": {
         "org_domain_idx": {
-          "name": "org_domain_idx",
           "columns": [
-            "domain"
+            {
+              "expression": "domain",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "org_domain_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "person": {
+    "public.person": {
       "name": "person",
       "schema": "",
       "columns": {
@@ -1859,46 +2390,73 @@
       },
       "indexes": {
         "person_workspace_idx": {
-          "name": "person_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "person_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "person_owner_idx": {
-          "name": "person_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "person_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "person_email_idx": {
-          "name": "person_email_idx",
           "columns": [
-            "primary_email"
+            {
+              "expression": "primary_email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "person_email_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "person_workspace_id_workspace_id_fk": {
           "name": "person_workspace_id_workspace_id_fk",
           "tableFrom": "person",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "person_encounter": {
+    "public.person_encounter": {
       "name": "person_encounter",
       "schema": "",
       "columns": {
@@ -1930,52 +2488,71 @@
       },
       "indexes": {
         "person_encounter_person_idx": {
-          "name": "person_encounter_person_idx",
           "columns": [
-            "person_id"
+            {
+              "expression": "person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "person_encounter_person_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "person_encounter_encounter_idx": {
-          "name": "person_encounter_encounter_idx",
           "columns": [
-            "encounter_id"
+            {
+              "expression": "encounter_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "person_encounter_encounter_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "person_encounter_person_id_person_id_fk": {
           "name": "person_encounter_person_id_person_id_fk",
           "tableFrom": "person_encounter",
-          "tableTo": "person",
           "columnsFrom": [
             "person_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "person_encounter_encounter_id_encounter_id_fk": {
           "name": "person_encounter_encounter_id_encounter_id_fk",
           "tableFrom": "person_encounter",
-          "tableTo": "encounter",
           "columnsFrom": [
             "encounter_id"
           ],
+          "tableTo": "encounter",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "referral_code": {
+    "public.referral_code": {
       "name": "referral_code",
       "schema": "",
       "columns": {
@@ -2039,25 +2616,49 @@
       },
       "indexes": {
         "referral_code_code_idx": {
-          "name": "referral_code_code_idx",
           "columns": [
-            "code"
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_code_code_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "referral_code_creator_idx": {
-          "name": "referral_code_creator_idx",
           "columns": [
-            "creator_id"
+            {
+              "expression": "creator_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_code_creator_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "referral_code_used_idx": {
-          "name": "referral_code_used_idx",
           "columns": [
-            "used"
+            {
+              "expression": "used",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_code_used_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
@@ -2065,14 +2666,17 @@
       "uniqueConstraints": {
         "referral_code_code_unique": {
           "name": "referral_code_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "code"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
-      }
+      },
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "referral_edge": {
+    "public.referral_edge": {
       "name": "referral_edge",
       "schema": "",
       "columns": {
@@ -2111,46 +2715,73 @@
       },
       "indexes": {
         "referral_edge_inviter_idx": {
-          "name": "referral_edge_inviter_idx",
           "columns": [
-            "inviter_id"
+            {
+              "expression": "inviter_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_edge_inviter_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "referral_edge_invitee_idx": {
-          "name": "referral_edge_invitee_idx",
           "columns": [
-            "invitee_id"
+            {
+              "expression": "invitee_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_edge_invitee_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "referral_edge_code_idx": {
-          "name": "referral_edge_code_idx",
           "columns": [
-            "referral_code_id"
+            {
+              "expression": "referral_code_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "referral_edge_code_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "referral_edge_referral_code_id_referral_code_id_fk": {
           "name": "referral_edge_referral_code_id_referral_code_id_fk",
           "tableFrom": "referral_edge",
-          "tableTo": "referral_code",
           "columnsFrom": [
             "referral_code_id"
           ],
+          "tableTo": "referral_code",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "suggestion": {
+    "public.suggestion": {
       "name": "suggestion",
       "schema": "",
       "columns": {
@@ -2232,92 +2863,127 @@
       },
       "indexes": {
         "suggestion_workspace_idx": {
-          "name": "suggestion_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "suggestion_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "suggestion_owner_idx": {
-          "name": "suggestion_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "suggestion_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "suggestion_goal_idx": {
-          "name": "suggestion_goal_idx",
           "columns": [
-            "goal_id"
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "suggestion_goal_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "suggestion_state_idx": {
-          "name": "suggestion_state_idx",
           "columns": [
-            "state"
+            {
+              "expression": "state",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "suggestion_state_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "suggestion_workspace_id_workspace_id_fk": {
           "name": "suggestion_workspace_id_workspace_id_fk",
           "tableFrom": "suggestion",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "suggestion_a_id_person_id_fk": {
           "name": "suggestion_a_id_person_id_fk",
           "tableFrom": "suggestion",
-          "tableTo": "person",
           "columnsFrom": [
             "a_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "suggestion_b_id_person_id_fk": {
           "name": "suggestion_b_id_person_id_fk",
           "tableFrom": "suggestion",
-          "tableTo": "person",
           "columnsFrom": [
             "b_id"
           ],
+          "tableTo": "person",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "suggestion_goal_id_goal_id_fk": {
           "name": "suggestion_goal_id_goal_id_fk",
           "tableFrom": "suggestion",
-          "tableTo": "goal",
           "columnsFrom": [
             "goal_id"
           ],
+          "tableTo": "goal",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "task": {
+    "public.task": {
       "name": "task",
       "schema": "",
       "columns": {
@@ -2368,46 +3034,73 @@
       },
       "indexes": {
         "task_workspace_idx": {
-          "name": "task_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "task_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "task_owner_idx": {
-          "name": "task_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "task_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "task_due_idx": {
-          "name": "task_due_idx",
           "columns": [
-            "due_at"
+            {
+              "expression": "due_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "task_due_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "task_workspace_id_workspace_id_fk": {
           "name": "task_workspace_id_workspace_id_fk",
           "tableFrom": "task",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "workspace": {
+    "public.workspace": {
       "name": "workspace",
       "schema": "",
       "columns": {
@@ -2447,18 +3140,29 @@
       },
       "indexes": {
         "workspace_owner_idx": {
-          "name": "workspace_owner_idx",
           "columns": [
-            "owner_id"
+            {
+              "expression": "owner_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_owner_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "workspace_activity": {
+    "public.workspace_activity": {
       "name": "workspace_activity",
       "schema": "",
       "columns": {
@@ -2515,46 +3219,73 @@
       },
       "indexes": {
         "workspace_activity_workspace_idx": {
-          "name": "workspace_activity_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_activity_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "workspace_activity_user_idx": {
-          "name": "workspace_activity_user_idx",
           "columns": [
-            "user_id"
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_activity_user_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "workspace_activity_created_idx": {
-          "name": "workspace_activity_created_idx",
           "columns": [
-            "created_at"
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_activity_created_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "workspace_activity_workspace_id_workspace_id_fk": {
           "name": "workspace_activity_workspace_id_workspace_id_fk",
           "tableFrom": "workspace_activity",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "workspace_member": {
+    "public.workspace_member": {
       "name": "workspace_member",
       "schema": "",
       "columns": {
@@ -2600,59 +3331,105 @@
       },
       "indexes": {
         "workspace_member_workspace_idx": {
-          "name": "workspace_member_workspace_idx",
           "columns": [
-            "workspace_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_member_workspace_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "workspace_member_user_idx": {
-          "name": "workspace_member_user_idx",
           "columns": [
-            "user_id"
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_member_user_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "workspace_member_slack_user_idx": {
-          "name": "workspace_member_slack_user_idx",
           "columns": [
-            "slack_user_id"
+            {
+              "expression": "slack_user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_member_slack_user_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         },
         "workspace_member_unique_idx": {
-          "name": "workspace_member_unique_idx",
           "columns": [
-            "workspace_id",
-            "user_id"
+            {
+              "expression": "workspace_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
           ],
-          "isUnique": false
+          "with": {},
+          "name": "workspace_member_unique_idx",
+          "isUnique": false,
+          "method": "btree",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "workspace_member_workspace_id_workspace_id_fk": {
           "name": "workspace_member_workspace_id_workspace_id_fk",
           "tableFrom": "workspace_member",
-          "tableTo": "workspace",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "workspace",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "5c35c107-f4ce-4d7e-b4d7-5b19eb77678e",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }

@@ -11,30 +11,24 @@ export async function seed() {
     const seedPath = join(__dirname, '../../../infra/sql/seed.sql');
     const seedSQL = readFileSync(seedPath, 'utf8');
     
-    // Split by semicolon and execute each statement
-    const statements = seedSQL
-      .split(';')
-      .map(stmt => stmt.trim())
-      .filter(stmt => stmt.length > 0 && !stmt.startsWith('--'));
-    
-    for (const statement of statements) {
-      if (statement.trim()) {
-        await db.execute(sql.raw(statement));
-      }
-    }
+    // Execute the entire SQL file as one statement
+    // This avoids issues with semicolons inside JSON strings
+    await db.execute(sql.raw(seedSQL));
     
     console.log('✅ Database seeded successfully with demo data!');
     console.log('📊 Created:');
-    console.log('   - 1 demo user');
+    console.log('   - 1 demo workspace');
+    console.log('   - 2 workspace members');
     console.log('   - 3 organizations');
     console.log('   - 5 people');
     console.log('   - 3 encounters');
     console.log('   - 1 goal (raise_seed)');
-    console.log('   - 13 claims');
-    console.log('   - 3 edges');
+    console.log('   - 18 claims');
+    console.log('   - 4 edges');
     console.log('   - 3 suggestions with drafts');
     console.log('   - 2 tasks');
-    console.log('   - 4 event logs');
+    console.log('   - 4 workspace activities');
+    console.log('   - 2 notifications');
   } catch (error) {
     console.error('❌ Failed to seed database:', error);
     throw error;

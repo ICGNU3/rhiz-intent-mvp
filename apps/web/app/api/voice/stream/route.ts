@@ -47,7 +47,7 @@ function initWebSocketServer() {
                 audioBuffer = []; // Reset buffer
                 
                 // Step 1: Real-time transcription
-                const transcript = await transcribeAudio(combinedAudio);
+                const transcript = await transcribeAudio(combinedAudio.buffer.slice(combinedAudio.byteOffset, combinedAudio.byteOffset + combinedAudio.byteLength));
                 conversationContext += ' ' + transcript;
                 
                 // Send transcription back to client
@@ -59,7 +59,7 @@ function initWebSocketServer() {
                 
                 // Step 2: AI processing (only if we have meaningful content)
                 if (transcript.trim().length > 10) {
-                  const aiResponse = await agent.processInput(transcript, {
+                  const aiResponse = await agent.process(transcript, {
                     conversationContext,
                     encounterId
                   });
@@ -94,7 +94,7 @@ function initWebSocketServer() {
                 }
                 
               } catch (error) {
-                logger.error('Error processing audio chunk', error, { component: 'voice-stream' });
+                logger.error('Error processing audio chunk', error as Error, { component: 'voice-stream' });
                 ws.send(JSON.stringify({
                   type: 'error',
                   error: 'Failed to process audio',
@@ -136,7 +136,7 @@ function initWebSocketServer() {
         }
         
       } catch (error) {
-        logger.error('Error processing WebSocket message', error, { component: 'voice-stream' });
+        logger.error('Error processing WebSocket message', error as Error, { component: 'voice-stream' });
         ws.send(JSON.stringify({
           type: 'error',
           error: 'Failed to process message',
@@ -151,13 +151,13 @@ function initWebSocketServer() {
       // Finalize conversation if needed
       if (encounterId) {
         finalizeConversation(encounterId, conversationContext).catch(error => {
-          logger.error('Error finalizing conversation', error, { component: 'voice-stream' });
+          logger.error('Error finalizing conversation', error as Error, { component: 'voice-stream' });
         });
       }
     });
 
     ws.on('error', (error) => {
-      logger.error('WebSocket error', error, { component: 'voice-stream' });
+      logger.error('WebSocket error', error as Error, { component: 'voice-stream' });
     });
   });
 
@@ -175,16 +175,12 @@ async function saveConversationToDatabase(
 
     // Create encounter record
     await db.insert(encounter).values({
-      id: encounterId,
       workspaceId: 'default', // TODO: Get from context
       ownerId: userId,
       kind: 'voice_conversation',
-      title: 'Real-time Voice Conversation',
-      description: transcript.substring(0, 100) + '...',
+      summary: transcript.substring(0, 100) + '...',
       occurredAt: new Date(),
-      transcript,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      raw: { transcript }, // Store full transcript in raw field
     });
 
     // Extract and save people mentioned
@@ -228,7 +224,7 @@ async function saveConversationToDatabase(
     }
 
   } catch (error) {
-    logger.error('Error saving conversation to database', error, { component: 'voice-stream' });
+    logger.error('Error saving conversation to database', error as Error, { component: 'voice-stream' });
   }
 }
 
@@ -247,7 +243,7 @@ async function updateConversationInDatabase(
       transcriptLength: transcript.length 
     });
   } catch (error) {
-    logger.error('Error updating conversation in database', error, { component: 'voice-stream' });
+    logger.error('Error updating conversation in database', error as Error, { component: 'voice-stream' });
   }
 }
 
@@ -266,7 +262,7 @@ async function finalizeConversation(encounterId: string, conversationContext: st
     // 4. Update the encounter with final metadata
     
   } catch (error) {
-    logger.error('Error finalizing conversation', error, { component: 'voice-stream' });
+    logger.error('Error finalizing conversation', error as Error, { component: 'voice-stream' });
   }
 }
 
@@ -284,7 +280,7 @@ export async function GET(request: NextRequest) {
     
     return new Response('WebSocket endpoint', { status: 200 });
   } catch (error) {
-    logger.error('WebSocket handler error', error, { component: 'voice-stream' });
+    logger.error('WebSocket handler error', error as Error, { component: 'voice-stream' });
     return new Response('Internal server error', { status: 500 });
   }
 }
@@ -297,10 +293,10 @@ export async function POST(request: NextRequest) {
     if (type === 'audio_chunk') {
       // Process audio chunk directly
       const audioBuffer = Buffer.from(audioData, 'base64');
-      const transcript = await transcribeAudio(audioBuffer);
+      const transcript = await transcribeAudio(audioBuffer.buffer.slice(audioBuffer.byteOffset, audioBuffer.byteOffset + audioBuffer.byteLength));
       
       const agent = new Agent();
-      const aiResponse = await agent.processInput(transcript);
+      const aiResponse = await agent.process(transcript, {});
       
       const audioResponse = await generateSpeech(aiResponse.text);
       
@@ -314,7 +310,7 @@ export async function POST(request: NextRequest) {
     
     return Response.json({ error: 'Invalid request type' }, { status: 400 });
   } catch (error) {
-    logger.error('Voice stream POST error', error, { component: 'voice-stream' });
+    logger.error('Voice stream POST error', error as Error, { component: 'voice-stream' });
     return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

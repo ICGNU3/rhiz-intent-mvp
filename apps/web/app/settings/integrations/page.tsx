@@ -180,7 +180,7 @@ export default function IntegrationsPage() {
     )
   }
 
-  const integrations = [
+  const availableIntegrations = [
     {
       id: 'slack',
       name: 'Slack',
@@ -230,7 +230,7 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {integrations.map((integration) => (
+        {availableIntegrations.map((integration) => (
           <Card key={integration.id} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-4">
