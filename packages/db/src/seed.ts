@@ -1,4 +1,5 @@
 import { db } from './index';
+import { sql } from 'drizzle-orm';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -18,7 +19,7 @@ export async function seed() {
     
     for (const statement of statements) {
       if (statement.trim()) {
-        await db.execute(statement);
+        await db.execute(sql.raw(statement));
       }
     }
     

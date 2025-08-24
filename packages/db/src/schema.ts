@@ -1,8 +1,7 @@
 import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, index } from 'drizzle-orm/pg-core';
-import { pgVector } from 'pgvector/drizzle-orm';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { z } from 'zod';
-import { createCipherGCM, createDecipherGCM, randomBytes } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
 // Encryption helpers with AES-256-GCM
 const encryptField = (value: string | null, encryptionKey?: string): string | null => {
@@ -10,7 +9,7 @@ const encryptField = (value: string | null, encryptionKey?: string): string | nu
   
   try {
     const iv = randomBytes(16);
-    const cipher = createCipherGCM('aes-256-gcm', encryptionKey);
+    const cipher = createCipheriv('aes-256-gcm', Buffer.from(encryptionKey, 'hex'), iv);
     
     let encrypted = cipher.update(value, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -39,7 +38,7 @@ const decryptField = (value: string | null, encryptionKey?: string): string | nu
     const iv = Buffer.from(ivHex, 'hex');
     const authTag = Buffer.from(authTagHex, 'hex');
     
-    const decipher = createDecipherGCM('aes-256-gcm', encryptionKey);
+    const decipher = createDecipheriv('aes-256-gcm', Buffer.from(encryptionKey, 'hex'), iv);
     decipher.setAuthTag(authTag);
     
     let decrypted = decipher.update(encrypted, 'hex', 'utf8');
@@ -472,6 +471,48 @@ export const collectiveOpportunity = pgTable('collective_opportunity', {
   createdByIdx: index('collective_opportunity_created_by_idx').on(table.createdBy),
 }));
 
+// Conversation table (chat threads)
+export const conversation = pgTable('conversation', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  title: text('title').notNull(),
+  createdBy: text('created_by').notNull(), // User who created the conversation
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('conversation_workspace_idx').on(table.workspaceId),
+  createdByIdx: index('conversation_created_by_idx').on(table.createdBy),
+  updatedIdx: index('conversation_updated_idx').on(table.updatedAt),
+}));
+
+// Message table (individual messages in conversations)
+export const message = pgTable('message', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id').references(() => conversation.id).notNull(),
+  senderType: text('sender_type').notNull(), // 'user', 'contact', 'agent', 'system'
+  senderId: text('sender_id'), // User ID, person ID, or null for agent/system
+  text: text('text').notNull(),
+  data: jsonb('data'), // Structured data for agent responses
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  conversationIdx: index('message_conversation_idx').on(table.conversationId),
+  senderTypeIdx: index('message_sender_type_idx').on(table.senderType),
+  createdIdx: index('message_created_idx').on(table.createdAt),
+  conversationCreatedIdx: index('message_conversation_created_idx').on(table.conversationId, table.createdAt),
+}));
+
+// Message link table (links messages to entities)
+export const messageLink = pgTable('message_link', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  messageId: uuid('message_id').references(() => message.id).notNull(),
+  subjectType: text('subject_type').notNull(), // 'person', 'goal', 'encounter', 'suggestion'
+  subjectId: uuid('subject_id').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  messageIdx: index('message_link_message_idx').on(table.messageId),
+  subjectIdx: index('message_link_subject_idx').on(table.subjectType, table.subjectId),
+}));
+
 // Zod schemas for validation
 export const insertWorkspaceSchema = createInsertSchema(workspace);
 export const selectWorkspaceSchema = createSelectSchema(workspace);
@@ -524,6 +565,15 @@ export const selectCrossWorkspaceOverlapSchema = createSelectSchema(crossWorkspa
 export const insertCollectiveOpportunitySchema = createInsertSchema(collectiveOpportunity);
 export const selectCollectiveOpportunitySchema = createSelectSchema(collectiveOpportunity);
 
+export const insertConversationSchema = createInsertSchema(conversation);
+export const selectConversationSchema = createSelectSchema(conversation);
+
+export const insertMessageSchema = createInsertSchema(message);
+export const selectMessageSchema = createSelectSchema(message);
+
+export const insertMessageLinkSchema = createInsertSchema(messageLink);
+export const selectMessageLinkSchema = createSelectSchema(messageLink);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
@@ -542,6 +592,9 @@ export type GraphInsight = z.infer<typeof selectGraphInsightSchema>;
 export type InsightShare = z.infer<typeof selectInsightShareSchema>;
 export type CrossWorkspaceOverlap = z.infer<typeof selectCrossWorkspaceOverlapSchema>;
 export type CollectiveOpportunity = z.infer<typeof selectCollectiveOpportunitySchema>;
+export type Conversation = z.infer<typeof selectConversationSchema>;
+export type Message = z.infer<typeof selectMessageSchema>;
+export type MessageLink = z.infer<typeof selectMessageLinkSchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {

@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import * as schema from './schema';
 
 // Database connection
@@ -20,6 +21,9 @@ export const getCurrentUser = async () => {
 
 // Export all schema tables
 export * from './schema';
+
+// Export drizzle functions
+export { eq, and, desc, sql };
 
 // Database utilities
 export const closeConnection = async () => {

@@ -173,3 +173,73 @@ export const EnrichmentData = z.object({
 });
 
 export type EnrichmentData = z.infer<typeof EnrichmentData>;
+
+// Agent system types
+export const AgentTask = z.enum([
+  'capture_note',
+  'find_people', 
+  'suggest_intros',
+  'draft_intro',
+  'followup',
+  'clarify',
+  'set_goal'
+]);
+
+export type AgentTask = z.infer<typeof AgentTask>;
+
+export const Parse = z.object({
+  people: z.array(z.object({
+    name: z.string(),
+    role: z.string().optional(),
+    company: z.string().optional()
+  })).optional(),
+  goals: z.array(z.object({
+    kind: z.string(),
+    title: z.string().optional(),
+    confidence: z.number().min(0).max(100)
+  })).optional(),
+  actions: z.array(AgentTask),
+  facts: z.array(z.object({
+    subject: z.enum(['person', 'org']),
+    key: z.string(),
+    value: z.string()
+  })).optional()
+});
+
+export type Parse = z.infer<typeof Parse>;
+
+export const AgentResponse = z.object({
+  text: z.string(),
+  cards: z.object({
+    people: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      role: z.string().optional(),
+      company: z.string().optional(),
+      lastEncounter: z.string().optional(),
+      actions: z.array(z.object({
+        label: z.string(),
+        action: z.string(),
+        data: z.record(z.any())
+      }))
+    })).optional(),
+    suggestions: z.array(z.object({
+      id: z.string(),
+      score: z.number(),
+      why: z.array(z.string()),
+      actions: z.array(z.object({
+        label: z.string(),
+        action: z.string(),
+        data: z.record(z.any())
+      }))
+    })).optional(),
+    goals: z.array(z.object({
+      id: z.string(),
+      kind: z.string(),
+      title: z.string(),
+      status: z.string()
+    })).optional()
+  }).optional()
+});
+
+export type AgentResponse = z.infer<typeof AgentResponse>;
