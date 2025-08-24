@@ -13,15 +13,17 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "drizzle-orm": "^0.29.0",
-    "postgres": "^3.4.0",
+    "crypto": "^1.0.1",
+    "drizzle-orm": "^0.44.4",
+    "drizzle-zod": "^0.4.4",
     "pgvector": "^0.2.0",
-    "crypto": "^1.0.1"
+    "postgres": "^3.4.7",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/pg": "^8.10.0",
     "drizzle-kit": "^0.20.0",
-    "tsx": "^4.0.0",
+    "tsx": "^4.20.4",
     "typescript": "^5.0.0"
   }
 }
