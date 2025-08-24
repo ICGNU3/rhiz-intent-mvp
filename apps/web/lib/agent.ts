@@ -163,23 +163,90 @@ export interface Parse {
 
 export class Agent {
   private matching: Matching;
+  private failureCount: number = 0;
+  private circuitBreakerOpen: boolean = false;
+  private lastFailureTime: number = 0;
 
   constructor() {
     this.matching = new Matching();
+  }
+
+  private isCircuitBreakerOpen(): boolean {
+    if (!this.circuitBreakerOpen) return false;
+    
+    // Check if enough time has passed to retry
+    if (Date.now() - this.lastFailureTime > 60000) { // 60 seconds
+      this.circuitBreakerOpen = false;
+      this.failureCount = 0;
+      return false;
+    }
+    
+    return true;
+  }
+
+  private recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    
+    if (this.failureCount >= 5) { // Circuit breaker threshold
+      this.circuitBreakerOpen = true;
+      logger.warn('Circuit breaker opened due to repeated failures', {
+        component: 'agent',
+        failureCount: this.failureCount
+      });
+    }
+  }
+
+  private recordSuccess(): void {
+    this.failureCount = 0;
+    this.circuitBreakerOpen = false;
+  }
+
+  private validateInput(text: string): string {
+    if (!text || typeof text !== 'string') {
+      throw new Error('Invalid input: text must be a non-empty string');
+    }
+    
+    const trimmed = text.trim();
+    if (trimmed.length === 0) {
+      throw new Error('Invalid input: text cannot be empty');
+    }
+    
+    if (trimmed.length > 50000) {
+      logger.warn('Input text truncated due to length', {
+        originalLength: trimmed.length,
+        maxLength: 50000
+      });
+      return trimmed.substring(0, 50000);
+    }
+    
+    return trimmed;
   }
 
   async process(text: string, context: any): Promise<AgentResponse> {
     const startTime = Date.now();
     
     try {
+      // Check circuit breaker
+      if (this.isCircuitBreakerOpen()) {
+        logger.warn('Request rejected due to circuit breaker', { component: 'agent' });
+        return this.getFallbackResponse('Service temporarily unavailable. Please try again later.', startTime);
+      }
+
+      // Validate and sanitize input
+      const sanitizedText = this.validateInput(text);
+      
       // Step 1: Parse user input with structured extraction
-      const parse = await this.parseInput(text);
+      const parse = await this.parseInput(sanitizedText);
       
       // Step 2: Execute actions based on parse
       const response = await this.executeActions(parse, context);
       
       // Step 3: Generate final response with AI SDK
-      const finalResponse = await this.generateResponse(parse, response, text);
+      const finalResponse = await this.generateResponse(parse, response, sanitizedText);
+      
+      // Record success for circuit breaker
+      this.recordSuccess();
       
       return {
         ...finalResponse,
@@ -190,30 +257,70 @@ export class Agent {
         }
       };
     } catch (error) {
+      this.recordFailure();
       logger.error('Agent processing error', error as Error, { component: 'agent', action: 'process' });
-      return {
-        text: "I encountered an issue processing your request. Please try again.",
-        metadata: {
-          confidence: 0,
-          processingTime: Date.now() - startTime,
-          modelUsed: 'error',
-        }
-      };
+      
+      // Return appropriate error response based on error type
+      return this.getErrorResponse(error as Error, startTime);
     }
+  }
+
+  private getFallbackResponse(message: string, startTime: number): AgentResponse {
+    return {
+      text: message,
+      metadata: {
+        confidence: 0,
+        processingTime: Date.now() - startTime,
+        modelUsed: 'fallback',
+      }
+    };
+  }
+
+  private getErrorResponse(error: Error, startTime: number): AgentResponse {
+    let message = "I encountered an issue processing your request. Please try again.";
+    
+    if (error.message.includes('Invalid input')) {
+      message = "Please provide a valid message for me to process.";
+    } else if (error.message.includes('timeout')) {
+      message = "The request took too long to process. Please try again with a shorter message.";
+    } else if (error.message.includes('rate limit')) {
+      message = "I'm receiving too many requests right now. Please wait a moment and try again.";
+    }
+    
+    return {
+      text: message,
+      metadata: {
+        confidence: 0,
+        processingTime: Date.now() - startTime,
+        modelUsed: 'error',
+      }
+    };
   }
 
   async streamProcess(text: string, context: any, onChunk?: (chunk: string) => void): Promise<AgentResponse> {
     const startTime = Date.now();
     
     try {
+      // Check circuit breaker
+      if (this.isCircuitBreakerOpen()) {
+        logger.warn('Streaming request rejected due to circuit breaker', { component: 'agent' });
+        return this.getFallbackResponse('Service temporarily unavailable. Please try again later.', startTime);
+      }
+
+      // Validate and sanitize input
+      const sanitizedText = this.validateInput(text);
+      
       // Step 1: Parse user input
-      const parse = await this.parseInput(text);
+      const parse = await this.parseInput(sanitizedText);
       
       // Step 2: Execute actions
       const response = await this.executeActions(parse, context);
       
       // Step 3: Stream the response generation
-      const streamedText = await this.streamResponse(parse, response, text, onChunk);
+      const streamedText = await this.streamResponse(parse, response, sanitizedText, onChunk);
+      
+      // Record success
+      this.recordSuccess();
       
       return {
         text: streamedText,
@@ -225,30 +332,29 @@ export class Agent {
         }
       };
     } catch (error) {
+      this.recordFailure();
       logger.error('Agent streaming error', error as Error, { component: 'agent', action: 'streamProcess' });
-      return {
-        text: "I encountered an issue processing your request. Please try again.",
-        metadata: {
-          confidence: 0,
-          processingTime: Date.now() - startTime,
-          modelUsed: 'error',
-        }
-      };
+      return this.getErrorResponse(error as Error, startTime);
     }
   }
 
   private async parseInput(text: string): Promise<Parse> {
-    if (!models.default) {
+    if (!models.default && !models.backup) {
       logger.debug('No AI model available, using fallback parsing', { component: 'agent', action: 'parseInput' });
       return this.fallbackParse(text);
     }
 
-    try {
-      const { object } = await generateObject({
-        model: models.default,
-        schema: parseSchema,
-        prompt: text,
-        system: `You are a natural language parser for a networking assistant. Extract structured data from user input.
+    // Try primary model first, then backup
+    const modelsToTry = [models.default, models.backup].filter(Boolean);
+    let lastError: Error | null = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const { object } = await generateObject({
+          model: model!,
+          schema: parseSchema,
+          prompt: text,
+          system: `You are a natural language parser for a networking assistant. Extract structured data from user input.
 
 Key guidelines:
 - Identify people mentioned (names, roles, companies)
@@ -258,25 +364,72 @@ Key guidelines:
 - Assess sentiment and urgency
 
 Be thorough but accurate. If uncertain about something, set lower confidence scores.`,
-      });
+        });
 
-      return object as Parse;
-    } catch (error) {
-      logger.error('AI parsing failed, using fallback', error as Error, { component: 'agent', action: 'parseInput' });
-      return this.fallbackParse(text);
+        // Validate the parsed object
+        const validatedParse = this.validateParse(object as Parse);
+        return validatedParse;
+        
+      } catch (error) {
+        lastError = error as Error;
+        logger.warn('AI parsing attempt failed, trying next model', {
+          component: 'agent',
+          action: 'parseInput',
+          modelAttempted: model?.toString() || 'unknown',
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
+
+    if (lastError) {
+      logger.error('All AI parsing attempts failed, using fallback', lastError, { component: 'agent', action: 'parseInput' });
+    }
+    return this.fallbackParse(text);
+  }
+
+  private validateParse(parse: Parse): Parse {
+    // Ensure we have at least some actions
+    if (!parse.actions || parse.actions.length === 0) {
+      parse.actions = ['clarify'];
+    }
+
+    // Validate people data
+    if (parse.people) {
+      parse.people = parse.people.filter(p => p.name && p.name.trim().length > 0);
+    }
+
+    // Validate goals data
+    if (parse.goals) {
+      parse.goals = parse.goals.filter(g => g.kind && g.confidence >= 0 && g.confidence <= 100);
+    }
+
+    // Validate facts data
+    if (parse.facts) {
+      parse.facts = parse.facts.filter(f => f.key && f.value && f.subject);
+    }
+
+    return parse;
   }
 
   private async generateResponse(parse: Parse, actionResponse: Partial<AgentResponse>, originalText: string): Promise<AgentResponse> {
-    if (!models.default) {
-      return actionResponse as AgentResponse;
+    // If no AI models available, return action response with default text
+    if (!models.default && !models.backup) {
+      return {
+        text: actionResponse.text || "I've processed your request.",
+        cards: actionResponse.cards,
+        metadata: actionResponse.metadata
+      };
     }
 
-    try {
-      const { object } = await generateObject({
-        model: models.default,
-        schema: agentResponseSchema,
-        prompt: `
+    // Try models with fallback
+    const modelsToTry = [models.default, models.backup].filter(Boolean);
+    
+    for (const model of modelsToTry) {
+      try {
+        const { object } = await generateObject({
+          model: model!,
+          schema: agentResponseSchema,
+          prompt: `
 Original user input: "${originalText}"
 
 Parsed data:
@@ -296,25 +449,72 @@ Generate a natural, helpful response that:
 4. Maintains a professional but friendly tone
 5. Addresses any urgency or sentiment appropriately
 `,
-        system: `You are a helpful networking assistant. Generate natural, actionable responses that help users manage their professional relationships and achieve their goals.`,
-      });
+          system: `You are a helpful networking assistant. Generate natural, actionable responses that help users manage their professional relationships and achieve their goals.`,
+        });
 
-      return object as AgentResponse;
-    } catch (error) {
-      logger.error('AI response generation failed', error as Error, { component: 'agent', action: 'generateResponse' });
-      return actionResponse as AgentResponse;
+        // Validate and merge response
+        const validatedResponse = this.validateAgentResponse(object as AgentResponse, actionResponse);
+        return validatedResponse;
+        
+      } catch (error) {
+        logger.warn('Response generation failed, trying next model', {
+          component: 'agent',
+          action: 'generateResponse',
+          modelAttempted: model?.toString() || 'unknown',
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
+
+    logger.error('All response generation attempts failed, using fallback', undefined, { component: 'agent', action: 'generateResponse' });
+    return {
+      text: actionResponse.text || "I've processed your request and here's what I found.",
+      cards: actionResponse.cards,
+      metadata: actionResponse.metadata
+    };
+  }
+
+  private validateAgentResponse(response: AgentResponse, actionResponse: Partial<AgentResponse>): AgentResponse {
+    // Ensure we have text
+    if (!response.text || response.text.trim().length === 0) {
+      response.text = actionResponse.text || "I've processed your request.";
+    }
+
+    // Merge cards from action response if AI didn't generate them
+    if (!response.cards && actionResponse.cards) {
+      response.cards = actionResponse.cards;
+    }
+
+    // Ensure metadata is present
+    if (!response.metadata) {
+      response.metadata = actionResponse.metadata;
+    }
+
+    return response;
   }
 
   private async streamResponse(parse: Parse, actionResponse: Partial<AgentResponse>, originalText: string, onChunk?: (chunk: string) => void): Promise<string> {
-    if (!models.default) {
-      return actionResponse.text || "I've processed your request.";
+    // If no AI models available, return action response text
+    if (!models.default && !models.backup) {
+      const fallbackText = actionResponse.text || "I've processed your request.";
+      if (onChunk) {
+        // Simulate streaming for consistency
+        for (const char of fallbackText) {
+          onChunk(char);
+          await new Promise(resolve => setTimeout(resolve, 20)); // Small delay for streaming effect
+        }
+      }
+      return fallbackText;
     }
 
-    try {
-      const { textStream } = await streamText({
-        model: models.default,
-        prompt: `
+    // Try models with fallback
+    const modelsToTry = [models.default, models.backup].filter(Boolean);
+    
+    for (const model of modelsToTry) {
+      try {
+        const { textStream } = await streamText({
+          model: model!,
+          prompt: `
 Original user input: "${originalText}"
 
 Parsed data:
@@ -327,22 +527,54 @@ Parsed data:
 Action results: ${JSON.stringify(actionResponse)}
 
 Generate a natural, helpful response that acknowledges what the user said and explains what you've done or will do. Keep it conversational and actionable.`,
-        system: `You are a helpful networking assistant. Generate natural, actionable responses that help users manage their professional relationships and achieve their goals.`,
-      });
+          system: `You are a helpful networking assistant. Generate natural, actionable responses that help users manage their professional relationships and achieve their goals.`,
+        });
 
-      let fullResponse = '';
-      for await (const chunk of textStream) {
-        fullResponse += chunk;
-        if (onChunk) {
-          onChunk(chunk);
+        let fullResponse = '';
+        let chunkCount = 0;
+        
+        for await (const chunk of textStream) {
+          chunkCount++;
+          fullResponse += chunk;
+          
+          // Safety check for infinite streams
+          if (chunkCount > 1000 || fullResponse.length > 100000) {
+            logger.warn('Stream truncated due to size limits', {
+              chunkCount,
+              responseLength: fullResponse.length
+            });
+            break;
+          }
+          
+          if (onChunk) {
+            onChunk(chunk);
+          }
         }
-      }
 
-      return fullResponse;
-    } catch (error) {
-      logger.error('Streaming response generation failed', error as Error, { component: 'agent', action: 'streamResponse' });
-      return actionResponse.text || "I've processed your request.";
+        return fullResponse || actionResponse.text || "I've processed your request.";
+        
+      } catch (error) {
+        logger.warn('Streaming failed, trying next model', {
+          component: 'agent',
+          action: 'streamResponse',
+          modelAttempted: model?.toString() || 'unknown',
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
+
+    logger.error('All streaming attempts failed, using fallback', undefined, { component: 'agent', action: 'streamResponse' });
+    const fallbackText = actionResponse.text || "I've processed your request.";
+    
+    if (onChunk) {
+      // Stream fallback text for consistency
+      for (const char of fallbackText) {
+        onChunk(char);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+    }
+    
+    return fallbackText;
   }
 
   private fallbackParse(text: string): Parse {

@@ -166,15 +166,15 @@ export default function ChatPage() {
           <div className="text-sm space-y-1">
             <div className="flex justify-between">
               <span className="text-gray-500">Model</span>
-              <Badge variant="outline" size="sm">GPT-3.5</Badge>
+              <Badge variant="outline" className="text-xs">GPT-3.5</Badge>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Workspace</span>
-              <Badge variant="outline" size="sm">Active</Badge>
+              <Badge variant="outline" className="text-xs">Active</Badge>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Streaming</span>
-              <Badge variant="outline" size="sm" className="text-green-600">Enabled</Badge>
+              <Badge variant="outline" className="text-xs text-green-600">Enabled</Badge>
             </div>
           </div>
         </div>

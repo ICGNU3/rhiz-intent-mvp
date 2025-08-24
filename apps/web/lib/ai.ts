@@ -3,20 +3,19 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateText, generateObject, streamText } from 'ai';
 import { z } from 'zod';
 import { logger } from './logger';
-import { AIError } from './errors';
+import { AIError, ValidationError } from './errors';
 import { AI_CONFIG } from './constants';
 
 // Initialize AI providers
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY || '',
-  compatibility: 'strict',
 });
 
 const anthropic = createAnthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
 });
 
-// Model configurations
+// Model configurations with fallback hierarchy
 export const models = {
   // OpenAI models
   gpt4: openai('gpt-4-turbo-preview'),
@@ -26,8 +25,19 @@ export const models = {
   // Anthropic models (if API key provided)
   claude3: process.env.ANTHROPIC_API_KEY ? anthropic('claude-3-sonnet-20240229') : null,
   
-  // Default model based on available API keys
-  default: process.env.OPENAI_API_KEY ? openai('gpt-3.5-turbo') : null,
+  // Default model with fallback hierarchy
+  get default() {
+    if (process.env.OPENAI_API_KEY) return openai('gpt-3.5-turbo');
+    if (process.env.ANTHROPIC_API_KEY) return anthropic('claude-3-sonnet-20240229');
+    return null;
+  },
+  
+  // Backup model for reliability
+  get backup() {
+    if (process.env.ANTHROPIC_API_KEY) return anthropic('claude-3-sonnet-20240229');
+    if (process.env.OPENAI_API_KEY) return openai('gpt-3.5-turbo');
+    return null;
+  },
 };
 
 // Structured extraction schemas
@@ -111,30 +121,69 @@ export async function transcribeAudio(audioBuffer: ArrayBuffer): Promise<string>
   }
 }
 
-// Extract structured data from text
+// Extract structured data from text with retry logic
 export async function extractFromText<T>(
   text: string,
   schema: z.ZodSchema<T>,
-  systemPrompt: string
+  systemPrompt: string,
+  maxRetries: number = 3
 ): Promise<T | null> {
-  if (!models.default) {
-    logger.debug('No AI model available, returning null', { component: 'ai', operation: 'extractFromText' });
+  if (!text?.trim()) {
+    logger.warn('Empty text provided for extraction', { component: 'ai', operation: 'extractFromText' });
     return null;
+  }
+
+  // Input validation and sanitization
+  const sanitizedText = text.substring(0, 50000);
+  
+  let lastError: Error | null = null;
+  
+  // Try primary model first
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const modelToUse = attempt === 0 ? models.default : models.backup;
+    
+    if (!modelToUse) {
+      logger.debug('No AI model available', { component: 'ai', operation: 'extractFromText', attempt });
+      continue;
+    }
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      
+      const { object } = await generateObject({
+        model: modelToUse,
+        schema,
+        prompt: sanitizedText,
+        system: systemPrompt,
+        abortSignal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Validate the response
+      const validatedObject = schema.parse(object);
+      return validatedObject as T;
+      
+    } catch (error) {
+      lastError = error as Error;
+      logger.warn(`AI extraction attempt ${attempt + 1} failed`, {
+        component: 'ai',
+        operation: 'extractFromText',
+        attempt: attempt + 1,
+        maxRetries,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      // Exponential backoff for retries
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+      }
+    }
   }
   
-  try {
-    const { object } = await generateObject({
-      model: models.default,
-      schema,
-      prompt: text,
-      system: systemPrompt,
-    });
-    
-    return object as T;
-  } catch (error) {
-    logger.error('Extraction error', error as Error, { component: 'ai', operation: 'extractFromText' });
-    return null;
-  }
+  logger.error('All extraction attempts failed', lastError || undefined, { component: 'ai', operation: 'extractFromText' });
+  return null;
 }
 
 // Generate insights from graph data
@@ -174,29 +223,85 @@ export async function generateGraphInsights(
   }
 }
 
-// Stream chat responses
+// Stream chat responses with enhanced reliability
 export async function streamChatResponse(
   messages: { role: 'user' | 'assistant' | 'system'; content: string }[],
-  onChunk?: (chunk: string) => void
+  onChunk?: (chunk: string) => void,
+  maxRetries: number = 3
 ) {
-  if (!models.default) {
-    throw new Error('No AI model configured');
+  if (!models.default && !models.backup) {
+    throw new AIError('No AI model configured');
   }
   
-  const { textStream } = await streamText({
-    model: models.default,
-    messages,
-  });
+  // Validate and sanitize messages
+  const sanitizedMessages = messages
+    .filter(msg => msg?.content?.trim())
+    .map(msg => ({
+      ...msg,
+      content: msg.content.substring(0, 50000)
+    }))
+    .slice(-20);
   
-  let fullResponse = '';
-  for await (const chunk of textStream) {
-    fullResponse += chunk;
-    if (onChunk) {
-      onChunk(chunk);
+  if (sanitizedMessages.length === 0) {
+    throw new ValidationError('No valid messages provided');
+  }
+  
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const modelToUse = attempt === 0 ? models.default : models.backup;
+    
+    if (!modelToUse) continue;
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      
+      const { textStream } = await streamText({
+        model: modelToUse,
+        messages: sanitizedMessages,
+        abortSignal: controller.signal,
+
+        temperature: AI_CONFIG.TEMPERATURE,
+      });
+      
+      let fullResponse = '';
+      let chunkCount = 0;
+      
+      for await (const chunk of textStream) {
+        chunkCount++;
+        fullResponse += chunk;
+        
+        // Prevent infinite streams
+        if (chunkCount > 1000 || fullResponse.length > 100000) {
+          // Stop streaming when limit is reached
+          break;
+        }
+        
+        if (onChunk) {
+          onChunk(chunk);
+        }
+      }
+      
+      clearTimeout(timeoutId);
+      return fullResponse;
+      
+    } catch (error) {
+      lastError = error as Error;
+      logger.warn(`Streaming attempt ${attempt + 1} failed`, {
+        component: 'ai',
+        operation: 'streamChatResponse',
+        attempt: attempt + 1,
+        error: error instanceof Error ? error.message : String(error)
+      });
+      
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt)));
+      }
     }
   }
   
-  return fullResponse;
+  throw new AIError(`All streaming attempts failed: ${lastError?.message}`);
 }
 
 // Helper function to parse insights from text

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, person, goal, encounter, claim, edge } from '@rhiz/db';
-import { eq, and, desc, sql } from 'drizzle-orm';
+import { db, person, goal, encounter, claim, edge, eq, and, desc, sql } from '@rhiz/db';
+
 import { getUserId } from '@/lib/auth-mock';
 import { generateGraphInsights, rankSuggestions } from '@/lib/ai';
 
@@ -68,27 +68,23 @@ export async function POST(request: NextRequest) {
           // Find relationships that haven't been active recently
           const recentEncounters = await db
             .select({
-              personId: sql`pe.person_id`,
-              lastContact: sql`MAX(e.occurred_at)`,
+              id: encounter.id,
+              occurredAt: encounter.occurredAt,
             })
             .from(encounter)
-            .innerJoin(
-              sql`person_encounter pe ON pe.encounter_id = encounter.id`
-            )
             .where(eq(encounter.workspaceId, workspaceId))
-            .groupBy(sql`pe.person_id`)
-            .having(sql`MAX(e.occurred_at) < NOW() - INTERVAL '30 days'`)
+            .orderBy(desc(encounter.occurredAt))
             .limit(20);
 
           insights = recentEncounters.map(r => ({
             type: 'dormant_tie',
             title: 'Reconnection Opportunity',
             description: `Haven't connected recently - consider reaching out`,
-            personId: r.personId,
+            encounterId: r.id,
             score: 75,
             metadata: {
-              lastContact: r.lastContact,
-              daysSince: Math.floor((Date.now() - new Date(r.lastContact).getTime()) / (1000 * 60 * 60 * 24)),
+              lastContact: r.occurredAt,
+              daysSince: Math.floor((Date.now() - new Date(r.occurredAt || Date.now()).getTime()) / (1000 * 60 * 60 * 24)),
             },
           }));
           break;
@@ -110,7 +106,7 @@ export async function POST(request: NextRequest) {
           ]);
 
           // Group claims by person
-          const personClaims = {};
+          const personClaims: Record<string, any[]> = {};
           claims.forEach(c => {
             if (!personClaims[c.subjectId]) {
               personClaims[c.subjectId] = [];
@@ -179,7 +175,7 @@ export async function POST(request: NextRequest) {
             ...recentEncounters.slice(0, 3).map(e => ({
               type: 'follow_up',
               title: 'Follow-up Opportunity',
-              description: e.description || 'Consider following up on recent conversation',
+              description: e.summary || 'Consider following up on recent conversation',
               encounterId: e.id,
               score: 70,
             })),

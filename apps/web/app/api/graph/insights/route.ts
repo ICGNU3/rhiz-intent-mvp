@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@rhiz/db';
-import { eq, and, desc, sql } from 'drizzle-orm';
+
 import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {

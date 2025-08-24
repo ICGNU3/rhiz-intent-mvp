@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { db, collectiveOpportunity } from '@rhiz/db';
 // import { collectiveOpportunitySchema } from '@rhiz/db/schema';
-import { eq, desc } from 'drizzle-orm';
+
 
 export async function GET(request: NextRequest) {
   try {

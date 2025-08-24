@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { db, referralEdge, referralCode } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+
 
 export async function GET(request: NextRequest) {
   try {

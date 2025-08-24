@@ -14,6 +14,15 @@ export const AI_CONFIG = {
   TOP_P: 0.9,
   FREQUENCY_PENALTY: 0.0,
   PRESENCE_PENALTY: 0.0,
+  TIMEOUT: 45000, // 45 seconds for AI operations
+  RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000, // Base delay for exponential backoff
+  MAX_INPUT_LENGTH: 50000, // Maximum input text length
+  MAX_RESPONSE_LENGTH: 100000, // Maximum response length
+  MAX_CHUNKS: 1000, // Maximum streaming chunks
+  MAX_MESSAGES_HISTORY: 20, // Maximum messages to keep in context
+  CIRCUIT_BREAKER_THRESHOLD: 5, // Failures before circuit opens
+  CIRCUIT_BREAKER_TIMEOUT: 60000, // Time before trying again
 } as const;
 
 // Database Configuration

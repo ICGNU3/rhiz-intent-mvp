@@ -31,7 +31,7 @@ export function ChatMessage({ message, onAction }: ChatMessageProps) {
           </div>
         )}
         {message.metadata.modelUsed && message.metadata.modelUsed !== 'unknown' && (
-          <Badge variant="outline" size="sm">
+          <Badge variant="outline" className="text-xs">
             {message.metadata.modelUsed}
           </Badge>
         )}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { db, workspaceMember } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+
 
 // POST /api/workspaces/remove - Remove user from workspace
 export async function DELETE(request: NextRequest) {

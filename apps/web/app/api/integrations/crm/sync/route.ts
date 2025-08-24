@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import { db, integration } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+
 
 // POST - Sync Rhiz people to CRM
 export async function POST(request: NextRequest) {

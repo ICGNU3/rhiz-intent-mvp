@@ -5,7 +5,6 @@ export async function GET() {
   const modelInfo = getModelInfo();
   
   return NextResponse.json({
-    configured: isAIConfigured(),
     ...modelInfo,
     features: {
       transcription: !!process.env.OPENAI_API_KEY,

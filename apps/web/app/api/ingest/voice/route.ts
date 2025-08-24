@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, encounter, person, claim } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
-import { eq } from 'drizzle-orm';
+
 
 export async function POST(request: NextRequest) {
   try {
