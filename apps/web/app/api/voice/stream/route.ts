@@ -51,7 +51,6 @@ function initWebSocketServer() {
                 
                 // Step 1: Real-time transcription
                 const transcript = await transcribeAudio(combinedAudio.buffer.slice(combinedAudio.byteOffset, combinedAudio.byteOffset + combinedAudio.byteLength));
-                conversationContext += ' ' + transcript;
                 
                 // Send transcription back to client
                 ws.send(JSON.stringify({
@@ -62,10 +61,20 @@ function initWebSocketServer() {
                 
                 // Step 2: AI processing (only if we have meaningful content)
                 if (transcript.trim().length > 10) {
-                  const aiResponse = await agent.process(transcript, {
-                    conversationContext,
-                    encounterId
-                  });
+                  // Process with interview agent
+                  const interviewResponse = await interviewAgent.processUserInput(transcript);
+                  
+                  // Combine response with next question if available
+                  let fullResponse = interviewResponse.response;
+                  if (interviewResponse.nextQuestion && !interviewResponse.shouldEndInterview) {
+                    fullResponse += ' ' + interviewResponse.nextQuestion;
+                  }
+                  
+                  const aiResponse = {
+                    text: fullResponse,
+                    cards: null,
+                    entities: interviewResponse.entities
+                  };
                   
                   // Send AI response back to client
                   ws.send(JSON.stringify({
@@ -92,7 +101,7 @@ function initWebSocketServer() {
                     encounterId = crypto.randomUUID();
                     await saveConversationToDatabase(encounterId, transcript, aiResponse);
                   } else {
-                    await updateConversationInDatabase(encounterId, transcript, aiResponse);
+                    await updateEntitiesToDatabase(encounterId, aiResponse.entities);
                   }
                 }
                 
@@ -112,7 +121,7 @@ function initWebSocketServer() {
           case 'start_conversation':
             // Initialize conversation
             encounterId = crypto.randomUUID();
-            conversationContext = '';
+            interviewAgent.reset();
             audioBuffer = [];
             
             ws.send(JSON.stringify({
@@ -125,7 +134,8 @@ function initWebSocketServer() {
           case 'end_conversation':
             // Finalize conversation
             if (encounterId) {
-              await finalizeConversation(encounterId, conversationContext);
+              const summary = await interviewAgent.getSummary();
+              await finalizeConversation(encounterId, summary);
             }
             
             ws.send(JSON.stringify({
@@ -153,7 +163,10 @@ function initWebSocketServer() {
       
       // Finalize conversation if needed
       if (encounterId) {
-        finalizeConversation(encounterId, conversationContext).catch(error => {
+        (async () => {
+          const summary = await interviewAgent.getSummary();
+          await finalizeConversation(encounterId, summary);
+        })().catch(error => {
           logger.error('Error finalizing conversation', error as Error, { component: 'voice-stream' });
         });
       }
@@ -240,7 +253,7 @@ async function updateEntitiesToDatabase(
     logger.info('Updating entities in database', { 
       component: 'voice-stream',
       encounterId,
-      transcriptLength: transcript.length 
+      entitiesCount: Object.keys(entities).length 
     });
   } catch (error) {
     logger.error('Error updating conversation in database', error as Error, { component: 'voice-stream' });

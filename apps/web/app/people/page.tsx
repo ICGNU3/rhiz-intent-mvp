@@ -37,7 +37,12 @@ export default function PeoplePage() {
   }, []);
 
   useEffect(() => {
-    if (!people) return;
+    console.log('🔍 Filtering people - people count:', people?.length, 'search term:', searchTerm);
+    
+    if (!people || people.length === 0) {
+      setFilteredPeople([]);
+      return;
+    }
     
     const filtered = people.filter(person =>
       person.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -46,19 +51,27 @@ export default function PeoplePage() {
         claim.value.toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
+    console.log('✅ Filtered people count:', filtered.length);
     setFilteredPeople(filtered);
   }, [people, searchTerm]);
 
   const fetchPeople = async () => {
+    console.log('🔍 Fetching people...');
     try {
       const response = await fetch('/api/people');
+      console.log('📡 Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('📊 People data:', data);
         setPeople(data.people);
+        console.log('✅ People state set:', data.people?.length, 'people');
+      } else {
+        console.error('❌ Response not ok:', response.status);
       }
     } catch (error) {
-      console.error('Failed to fetch people:', error);
+      console.error('❌ Failed to fetch people:', error);
     } finally {
+      console.log('🏁 Setting loading to false');
       setLoading(false);
     }
   };
@@ -84,7 +97,12 @@ export default function PeoplePage() {
     setIsDrawerOpen(true);
   };
 
-  if (loading) {
+  console.log('🔄 Component render - loading:', loading, 'people count:', people?.length);
+  
+  // Temporary: Force loading to false for debugging
+  const debugLoading = false;
+  
+  if (debugLoading && loading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navigation />
@@ -120,6 +138,7 @@ export default function PeoplePage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {console.log('🎨 Rendering people - filtered count:', filteredPeople?.length)}
           {filteredPeople.map((person) => (
             <Card key={person.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handlePersonClick(person)}>
               <CardHeader>
