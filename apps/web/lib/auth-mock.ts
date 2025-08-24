@@ -1,7 +1,7 @@
 // Mock auth functions to replace @clerk/nextjs dependencies
 export async function getUserId(): Promise<string | null> {
-  // Return a mock user ID for development
-  return 'demo-user-123';
+  // Return a mock user ID for development - matches seeded data
+  return 'alice-user-id';
 }
 
 export async function requireUser(): Promise<string> {

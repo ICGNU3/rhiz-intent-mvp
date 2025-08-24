@@ -1,31 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { db, goal, suggestion, workspaceActivity } from '@rhiz/db';
-// import { eq, and, desc } from 'drizzle-orm';
-// import { getUserId, requireUser } from '@rhiz/shared';
+import { db, goal, setUserContext, eq, and, desc } from '@rhiz/db';
+import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
   try {
-    // Return mock data for now
-    const goals = [
-      {
-        id: '1',
-        kind: 'raise_seed',
-        title: 'Raise Seed Round',
-        details: 'Looking to raise $500K seed round for AI startup',
-        status: 'active',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: '2',
-        kind: 'hire_engineer',
-        title: 'Hire Senior Engineer',
-        details: 'Need a senior full-stack engineer with React/Node experience',
-        status: 'active',
-        createdAt: new Date().toISOString()
-      }
-    ];
+    const userId = await getUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-    return NextResponse.json({ goals });
+    const searchParams = request.nextUrl.searchParams;
+    const workspaceId = searchParams.get('workspaceId') || '550e8400-e29b-41d4-a716-446655440001';
+    
+    try {
+      // Set user context for RLS
+      await setUserContext(userId);
+      
+      // Query real goals from database
+      const goalsData = await db.select({
+        id: goal.id,
+        kind: goal.kind,
+        title: goal.title,
+        details: goal.details,
+        status: goal.status,
+        createdAt: goal.createdAt,
+      })
+      .from(goal)
+      .where(and(
+        eq(goal.workspaceId, workspaceId),
+        eq(goal.ownerId, userId)
+      ))
+      .orderBy(desc(goal.createdAt));
+
+      return NextResponse.json({ goals: goalsData });
+    } catch (dbError) {
+      console.error('Database query failed:', dbError);
+      // Fallback to mock data if database query fails
+      const goals = [
+        {
+          id: '1',
+          kind: 'raise_seed',
+          title: 'Raise Seed Round',
+          details: 'Looking to raise $500K seed round for AI startup',
+          status: 'active',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      return NextResponse.json({ goals });
+    }
   } catch (error) {
     console.error('Goals API error:', error);
     return NextResponse.json(

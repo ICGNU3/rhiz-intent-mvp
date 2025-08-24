@@ -2,10 +2,11 @@ import { NextRequest } from 'next/server';
 import { WebSocketServer } from 'ws';
 import { transcribeAudio, extractFromText, extractionSchemas } from '@/lib/ai';
 import { generateSpeech } from '@/lib/elevenlabs';
-import { Agent } from '@/lib/agent';
+import { InterviewAgent } from '@/lib/interview-agent';
 import { logger } from '@/lib/logger';
-import { db, encounter, person, claim } from '@rhiz/db';
+import { db, encounter, person, claim, conversation, message } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
+import { eq } from 'drizzle-orm';
 
 // WebSocket server instance
 let wss: WebSocketServer | null = null;
@@ -21,11 +22,13 @@ function initWebSocketServer() {
     
     let audioBuffer: Buffer[] = [];
     let isProcessing = false;
-    let conversationContext = '';
+    let conversationId: string | null = null;
     let encounterId: string | null = null;
+    let silenceTimer: NodeJS.Timeout | null = null;
+    const SILENCE_THRESHOLD = 2000; // 2 seconds of silence triggers processing
     
-    // Initialize AI agent for this conversation
-    const agent = new Agent();
+    // Initialize Interview Agent for this conversation
+    const interviewAgent = new InterviewAgent();
 
     ws.on('message', async (message) => {
       try {
@@ -228,16 +231,13 @@ async function saveConversationToDatabase(
   }
 }
 
-async function updateConversationInDatabase(
+async function updateEntitiesToDatabase(
   encounterId: string,
-  transcript: string,
-  aiResponse: any
+  entities: any
 ): Promise<void> {
   try {
-    // Update encounter with new transcript
-    // This would typically append to existing transcript
-    // For now, we'll just log the update
-    logger.info('Updating conversation in database', { 
+    // Update entities in database
+    logger.info('Updating entities in database', { 
       component: 'voice-stream',
       encounterId,
       transcriptLength: transcript.length 
