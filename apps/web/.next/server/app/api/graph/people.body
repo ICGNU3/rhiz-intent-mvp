@@ -1,1 +1,0 @@
-{"nodes":[{"id":"1","label":"John Doe","tags":["investor","tech"],"location":"San Francisco, CA","email":"john@example.com"},{"id":"2","label":"Jane Smith","tags":["founder","ai"],"location":"New York, NY","email":"jane@example.com"}],"edges":[{"from":"1","to":"2","type":"introduction","strength":0.8,"metadata":{"source":"mutual_interest"}}]}

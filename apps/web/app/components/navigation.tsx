@@ -50,6 +50,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
+    { href: '/voice-chat', label: 'Voice Chat', icon: Users },
     { href: '/people', label: 'People', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
     { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },

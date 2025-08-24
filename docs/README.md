@@ -16,7 +16,7 @@ Rhiz is an AI-powered platform that captures high-signal relationship data from 
 ### Prerequisites
 
 - Node.js 18+ and pnpm 8+
-- PostgreSQL with pgvector extension
+- PostgreSQL with pgvector extension (via Docker or local)
 - Redis for BullMQ queues
 - OpenAI API key
 
@@ -39,7 +39,7 @@ cp docs/env.example .env
 Required environment variables:
 
 ```bash
-# Database
+# Database (PostgreSQL)
 DATABASE_URL=postgresql://user:password@localhost:5432/rhiz
 DIRECT_URL=postgresql://user:password@localhost:5432/rhiz
 

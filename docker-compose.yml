@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rhiz-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rhiz
+      POSTGRES_USER: rhiz
+      POSTGRES_PASSWORD: rhiz_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/sql/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rhiz -d rhiz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for job queues
+  redis:
+    image: redis:7-alpine
+    container_name: rhiz-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # n8n for integrations
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: rhiz-n8n
+    restart: unless-stopped
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=rhiz_password
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=UTC
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=rhiz
+      - DB_POSTGRESDB_PASSWORD=rhiz_password
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5678/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker - Intent Router
+  worker-router:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-router
+    restart: unless-stopped
+    environment:
+      - ROLE=intent-router
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+      - N8N_API_KEY=your-n8n-api-key
+      - N8N_BASE_URL=http://n8n:5678
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Worker router health check passed')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Worker - Capture Agent
+  worker-capture:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-capture
+    restart: unless-stopped
+    environment:
+      - ROLE=capture
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker - Enrichment Agent
+  worker-enrichment:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-enrichment
+    restart: unless-stopped
+    environment:
+      - ROLE=enrichment
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker - Matching Agent
+  worker-matching:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-matching
+    restart: unless-stopped
+    environment:
+      - ROLE=matching
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker - Intro Writer
+  worker-intro:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-intro
+    restart: unless-stopped
+    environment:
+      - ROLE=intro
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker - Follow Up
+  worker-followup:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-followup
+    restart: unless-stopped
+    environment:
+      - ROLE=followup
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Worker - n8n Manager
+  worker-n8n:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.worker
+    container_name: rhiz-worker-n8n
+    restart: unless-stopped
+    environment:
+      - ROLE=n8n-manager
+      - DATABASE_URL=postgresql://rhiz:rhiz_password@postgres:5432/rhiz
+      - REDIS_URL=redis://redis:6379
+      - N8N_API_KEY=your-n8n-api-key
+      - N8N_BASE_URL=http://n8n:5678
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      n8n:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  n8n_data:

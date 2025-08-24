@@ -15,6 +15,8 @@ export const QUEUE_NAMES = {
   FOLLOWUP: 'followup',
   GOALS_UPDATED: 'goals.updated',
   SUGGESTIONS_PROPOSED: 'suggestions.proposed',
+  N8N_CLEANUP: 'n8n.cleanup',
+  EVENTS: 'events',
 } as const;
 
 // Create queues
@@ -28,6 +30,8 @@ export const queues = {
   followup: new Queue(QUEUE_NAMES.FOLLOWUP, { connection: redis }),
   goalsUpdated: new Queue(QUEUE_NAMES.GOALS_UPDATED, { connection: redis }),
   suggestionsProposed: new Queue(QUEUE_NAMES.SUGGESTIONS_PROPOSED, { connection: redis }),
+  n8nCleanup: new Queue(QUEUE_NAMES.N8N_CLEANUP, { connection: redis }),
+  events: new Queue(QUEUE_NAMES.EVENTS, { connection: redis }),
 };
 
 // Create schedulers for delayed jobs
@@ -41,6 +45,8 @@ export const schedulers = {
   followup: new QueueScheduler(QUEUE_NAMES.FOLLOWUP, { connection: redis }),
   goalsUpdated: new QueueScheduler(QUEUE_NAMES.GOALS_UPDATED, { connection: redis }),
   suggestionsProposed: new QueueScheduler(QUEUE_NAMES.SUGGESTIONS_PROPOSED, { connection: redis }),
+  n8nCleanup: new QueueScheduler(QUEUE_NAMES.N8N_CLEANUP, { connection: redis }),
+  events: new QueueScheduler(QUEUE_NAMES.EVENTS, { connection: redis }),
 };
 
 // Helper function to start an agent

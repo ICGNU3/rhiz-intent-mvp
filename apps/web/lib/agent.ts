@@ -466,7 +466,7 @@ Generate a natural, helpful response that:
       }
     }
 
-    logger.error('All response generation attempts failed, using fallback', undefined, { component: 'agent', action: 'generateResponse' });
+    logger.warn('All response generation attempts failed, using fallback', { component: 'agent', action: 'generateResponse' });
     return {
       text: actionResponse.text || "I've processed your request and here's what I found.",
       cards: actionResponse.cards,
@@ -563,7 +563,7 @@ Generate a natural, helpful response that acknowledges what the user said and ex
       }
     }
 
-    logger.error('All streaming attempts failed, using fallback', undefined, { component: 'agent', action: 'streamResponse' });
+    logger.warn('All streaming attempts failed, using fallback', { component: 'agent', action: 'streamResponse' });
     const fallbackText = actionResponse.text || "I've processed your request.";
     
     if (onChunk) {

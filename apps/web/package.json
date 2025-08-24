@@ -13,6 +13,8 @@
     "playwright:install": "playwright install"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.6",
+    "@ai-sdk/openai": "^2.0.19",
     "@hookform/resolvers": "^3.3.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -25,20 +27,19 @@
     "@radix-ui/react-slot": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.0",
     "@radix-ui/react-toast": "^1.0.0",
-    "@ai-sdk/anthropic": "^2.0.6",
-    "@ai-sdk/openai": "^2.0.19",
-    "@supabase/supabase-js": "^2.39.0",
+
     "ai": "^5.0.22",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-
+    "dotenv": "^17.2.1",
     "elevenlabs": "^1.59.0",
     "ics": "^3.1.0",
     "lucide-react": "^0.294.0",
     "nanoid": "^5.0.0",
     "next": "14.0.0",
     "openai": "^5.15.0",
+    "postgres": "^3.4.7",
     "posthog-js": "^1.100.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

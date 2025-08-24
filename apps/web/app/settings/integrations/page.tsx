@@ -86,6 +86,10 @@ export default function IntegrationsPage() {
           // Connect HubSpot (would open OAuth flow)
           alert('HubSpot integration coming soon!')
           break
+        case 'n8n':
+          // Open n8n integration guide
+          window.open('/docs/N8N_INTEGRATION.md', '_blank')
+          break
       }
     } catch (error) {
       console.error('Error connecting integration:', error)
@@ -176,6 +180,46 @@ export default function IntegrationsPage() {
     )
   }
 
+  const integrations = [
+    {
+      id: 'slack',
+      name: 'Slack',
+      description: 'Get notifications and use slash commands',
+      icon: '💬',
+      status: getIntegrationStatus('slack'),
+      connected: false,
+      features: ['Notifications', 'Slash Commands', 'Real-time Updates']
+    },
+    {
+      id: 'google',
+      name: 'Google Calendar',
+      description: 'Import calendar events and attendees',
+      icon: '📅',
+      status: getIntegrationStatus('google'),
+      connected: false,
+      features: ['Event Import', 'Attendee Sync', 'Meeting Data']
+    },
+    {
+      id: 'hubspot',
+      name: 'HubSpot',
+      description: 'Sync contacts and deals',
+      icon: '🎯',
+      status: getIntegrationStatus('hubspot'),
+      connected: false,
+      features: ['Contact Sync', 'Deal Tracking', 'Custom Fields']
+    },
+    {
+      id: 'n8n',
+      name: 'n8n (Open Source)',
+      description: 'Connect any CRM or tool via n8n workflows',
+      icon: '🔗',
+      status: 'available',
+      connected: false,
+      features: ['Any CRM', 'Custom Workflows', 'Free Forever'],
+      isOpenSource: true
+    }
+  ];
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -186,218 +230,64 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Slack Integration */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Slack className="h-5 w-5 text-blue-500" />
-                <CardTitle>Slack</CardTitle>
-              </div>
-              <Badge variant={getIntegrationStatus('slack') === 'connected' ? 'default' : 'secondary'}>
-                {getIntegrationStatus('slack') === 'connected' ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                ) : (
-                  <XCircle className="h-3 w-3 mr-1" />
-                )}
-                {getIntegrationStatus('slack') === 'connected' ? 'Connected' : 'Disconnected'}
-              </Badge>
-            </div>
-            <CardDescription>
-              Get notifications and manage introductions directly in Slack
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {getIntegrationStatus('slack') === 'connected' ? (
-              <>
-                <div className="text-sm text-muted-foreground">
-                  <div>Last sync: {getLastSyncTime('slack')}</div>
-                  <div>Connected users: {getSyncCount('slack').users}</div>
-                  <div>Active channels: {getSyncCount('slack').channels}</div>
-                </div>
-                <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => window.open('/slack', '_blank')}>
-                    <ExternalLink className="h-4 w-4 mr-1" />
-                    Open Slack
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => disconnectIntegration('slack')}
-                  >
-                    Disconnect
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <Button 
-                onClick={() => connectIntegration('slack')}
-                disabled={connecting === 'slack'}
-                className="w-full"
-              >
-                {connecting === 'slack' ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Slack className="h-4 w-4 mr-2" />
-                )}
-                Connect Slack
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Google Calendar Integration */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-green-500" />
-                <CardTitle>Google Calendar</CardTitle>
-              </div>
-              <Badge variant={getIntegrationStatus('google') === 'connected' ? 'default' : 'secondary'}>
-                {getIntegrationStatus('google') === 'connected' ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                ) : (
-                  <XCircle className="h-3 w-3 mr-1" />
-                )}
-                {getIntegrationStatus('google') === 'connected' ? 'Connected' : 'Disconnected'}
-              </Badge>
-            </div>
-            <CardDescription>
-              Import calendar events and attendees automatically
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {getIntegrationStatus('google') === 'connected' ? (
-              <>
-                <div className="text-sm text-muted-foreground">
-                  <div>Last sync: {getLastSyncTime('google')}</div>
-                  <div>Events imported: {getSyncCount('google').events}</div>
-                  <div>People found: {getSyncCount('google').people}</div>
-                </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => syncIntegration('google')}
-                    disabled={connecting === 'google'}
-                  >
-                    {connecting === 'google' ? (
-                      <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-1" />
+        {integrations.map((integration) => (
+          <Card key={integration.id} className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="text-2xl">{integration.icon}</div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="font-semibold">{integration.name}</h3>
+                    {integration.isOpenSource && (
+                      <Badge variant="secondary" className="text-xs">
+                        Open Source
+                      </Badge>
                     )}
-                    Sync Now
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => disconnectIntegration('google')}
-                  >
-                    Disconnect
-                  </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {integration.description}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {integration.features.map((feature) => (
+                      <Badge key={feature} variant="outline" className="text-xs">
+                        {feature}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </>
-            ) : (
-              <Button 
-                onClick={() => connectIntegration('google')}
-                disabled={connecting === 'google'}
-                className="w-full"
-              >
-                {connecting === 'google' ? (
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Calendar className="h-4 w-4 mr-2" />
-                )}
-                Connect Calendar
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* CRM Integration */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
+              </div>
+              
               <div className="flex items-center space-x-2">
-                <Database className="h-5 w-5 text-purple-500" />
-                <CardTitle>CRM Sync</CardTitle>
-              </div>
-              <Badge variant={getIntegrationStatus('hubspot') === 'connected' ? 'default' : 'secondary'}>
-                {getIntegrationStatus('hubspot') === 'connected' ? (
-                  <CheckCircle className="h-3 w-3 mr-1" />
+                <Badge 
+                  variant={integration.status === 'connected' ? 'default' : 'secondary'}
+                  className="text-xs"
+                >
+                  {integration.status === 'connected' ? 'Connected' : 'Available'}
+                </Badge>
+                
+                {integration.id === 'n8n' ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => connectIntegration(integration.id)}
+                    disabled={connecting === integration.id}
+                  >
+                    {connecting === integration.id ? 'Opening...' : 'Setup Guide'}
+                  </Button>
                 ) : (
-                  <XCircle className="h-3 w-3 mr-1" />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => connectIntegration(integration.id)}
+                    disabled={connecting === integration.id}
+                  >
+                    {connecting === integration.id ? 'Connecting...' : 'Connect'}
+                  </Button>
                 )}
-                {getIntegrationStatus('hubspot') === 'connected' ? 'Connected' : 'Disconnected'}
-              </Badge>
-            </div>
-            <CardDescription>
-              Sync contacts with HubSpot or Salesforce
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {getIntegrationStatus('hubspot') === 'connected' ? (
-              <>
-                <div className="text-sm text-muted-foreground">
-                  <div>Last sync: {getLastSyncTime('hubspot')}</div>
-                  <div>Contacts synced: {getSyncCount('hubspot').contacts}</div>
-                  <div>Companies synced: {getSyncCount('hubspot').companies}</div>
-                </div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => syncIntegration('hubspot')}
-                    disabled={connecting === 'hubspot'}
-                  >
-                    {connecting === 'hubspot' ? (
-                      <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                    )}
-                    Sync Now
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => disconnectIntegration('hubspot')}
-                  >
-                    Disconnect
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-2">
-                <Button 
-                  onClick={() => connectIntegration('hubspot')}
-                  disabled={connecting === 'hubspot'}
-                  className="w-full"
-                >
-                  {connecting === 'hubspot' ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Database className="h-4 w-4 mr-2" />
-                  )}
-                  Connect HubSpot
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => connectIntegration('salesforce')}
-                  disabled={connecting === 'salesforce'}
-                  className="w-full"
-                >
-                  {connecting === 'salesforce' ? (
-                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Database className="h-4 w-4 mr-2" />
-                  )}
-                  Connect Salesforce
-                </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          </Card>
+        ))}
       </div>
 
       <Separator className="my-8" />

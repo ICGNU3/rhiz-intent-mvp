@@ -1,27 +1,21 @@
 {
   "name": "@rhiz/integrations",
-  "version": "0.1.0",
-  "description": "Integration providers for Rhiz",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
     "build": "tsc",
-    "test": "vitest",
-    "lint": "eslint src/**/*.ts"
+    "dev": "tsc --watch",
+    "test": "vitest"
   },
   "dependencies": {
-    "@slack/bolt": "^3.17.1",
     "googleapis": "^128.0.0",
-    "ics": "^2.44.0",
-    "zod": "^3.22.4"
+    "@slack/web-api": "^6.10.0",
+    "zod": "^3.22.0",
+    "dotenv": "^16.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
     "vitest": "^1.0.0"
-  },
-  "peerDependencies": {
-    "@rhiz/core": "workspace:*",
-    "@rhiz/db": "workspace:*"
   }
 }

@@ -2,22 +2,22 @@
   "name": "@rhiz/workers",
   "version": "1.0.0",
   "private": true,
-  "main": "./dist/index.js",
   "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsc",
-    "dev": "tsc --watch",
-    "start": "node dist/index.js",
     "test": "vitest"
   },
   "dependencies": {
-    "bullmq": "^5.0.0",
-    "ioredis": "^5.3.0",
-    "@rhiz/db": "workspace:*",
-    "@rhiz/core": "workspace:*",
+    "bullmq": "^4.0.0",
+    "dotenv": "^16.0.0",
+    "openai": "^4.0.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "vitest": "^1.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
   }
 }

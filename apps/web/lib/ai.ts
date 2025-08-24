@@ -182,7 +182,9 @@ export async function extractFromText<T>(
     }
   }
   
-  logger.error('All extraction attempts failed', lastError || undefined, { component: 'ai', operation: 'extractFromText' });
+  if (lastError) {
+    logger.error('All extraction attempts failed', lastError, { component: 'ai', operation: 'extractFromText' });
+  }
   return null;
 }
 
