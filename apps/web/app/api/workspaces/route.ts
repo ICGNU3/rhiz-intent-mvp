@@ -1,37 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { db, workspace } from '@rhiz/db';
 
 export async function GET(request: NextRequest) {
-  try {
-    return NextResponse.json({ message: "Mock data - API not implemented yet" });
-  } catch (error) {
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get('userId');
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: 'User ID is required' },
+      { status: 400 }
+    );
   }
+
+  // Return the demo workspace for now
+  const workspaces = [
+    {
+      id: '550e8400-e29b-41d4-a716-446655440001',
+      name: 'Rhiz Demo Workspace',
+      ownerId: userId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+  ];
+
+  return NextResponse.json({ workspaces });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // const userId = await requireUser();
-    const { name } = await request.json();
+    const body = await request.json();
+    const { name, ownerId } = body;
 
-    if (!name) {
+    if (!name || !ownerId) {
       return NextResponse.json(
-        { error: 'Workspace name is required' },
+        { error: 'Name and ownerId are required' },
         { status: 400 }
       );
     }
 
-    // Mock response
-    return NextResponse.json({
-      success: true,
-      workspace: {
-        id: 'mock-workspace-id',
-        name,
-        ownerId: 'demo-user-123',
-        createdAt: new Date().toISOString()
-      }
-    });
+    // Create a new workspace (mock implementation)
+    const workspace = {
+      id: `workspace-${Date.now()}`,
+      name,
+      ownerId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
+    return NextResponse.json({ workspace });
   } catch (error) {
     console.error('Workspace creation error:', error);
     return NextResponse.json(

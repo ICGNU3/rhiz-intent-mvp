@@ -295,15 +295,22 @@ export async function POST(request: NextRequest) {
       const audioBuffer = Buffer.from(audioData, 'base64');
       const transcript = await transcribeAudio(audioBuffer.buffer.slice(audioBuffer.byteOffset, audioBuffer.byteOffset + audioBuffer.byteLength));
       
-      const agent = new Agent();
-      const aiResponse = await agent.process(transcript, {});
+      // For POST, we'll create a temporary interview agent
+      const tempAgent = new InterviewAgent();
+      const interviewResponse = await tempAgent.processUserInput(transcript);
       
-      const audioResponse = await generateSpeech(aiResponse.text);
+      let fullResponse = interviewResponse.response;
+      if (interviewResponse.nextQuestion && !interviewResponse.shouldEndInterview) {
+        fullResponse += ' ' + interviewResponse.nextQuestion;
+      }
+      
+      const audioResponse = await generateSpeech(fullResponse);
       
       return Response.json({
         type: 'response',
         transcript,
-        aiResponse: aiResponse.text,
+        aiResponse: fullResponse,
+        entities: interviewResponse.entities,
         audioResponse: audioResponse.toString('base64')
       });
     }

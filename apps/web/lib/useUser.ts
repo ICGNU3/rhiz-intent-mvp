@@ -3,11 +3,11 @@ export function useUser() {
   // Always use mock user since Clerk dependency was removed
   return { 
     isSignedIn: true,
-    userId: "demo-user",
+    userId: "alice-user-id",
     user: { 
-      id: "demo-user", 
-      fullName: "Demo User", 
-      primaryEmailAddress: { emailAddress: "demo@rhiz.local" } 
+      id: "alice-user-id", 
+      fullName: "Alice User", 
+      primaryEmailAddress: { emailAddress: "alice@rhiz.local" } 
     } 
   };
 }
@@ -16,12 +16,12 @@ export function useUser() {
 export async function requireUser() {
   // Mock authentication - in real implementation, verify JWT or session
   return {
-    id: "demo-user",
-    fullName: "Demo User",
-    email: "demo@rhiz.local"
+    id: "alice-user-id",
+    fullName: "Alice User",
+    email: "alice@rhiz.local"
   };
 }
 
 export function getUserId(): string {
-  return "demo-user";
+  return "alice-user-id";
 }
