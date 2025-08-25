@@ -52,7 +52,6 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
   const pathname = usePathname();
 
   const navItems = [
-    { href: '/', label: 'Home', icon: Home },
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/connections', label: 'Connections', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
@@ -67,7 +66,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex h-screen w-64 flex-col fixed left-0 top-0 bg-background border-r">
         <div className="p-6">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/dashboard" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">R</span>
             </div>
@@ -173,7 +172,7 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
                   </nav>
                 </SheetContent>
               </Sheet>
-              <Link href="/" className="text-xl font-bold">
+              <Link href="/dashboard" className="text-xl font-bold">
                 Rhiz
               </Link>
             </div>

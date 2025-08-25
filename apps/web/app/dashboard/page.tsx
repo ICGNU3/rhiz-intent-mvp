@@ -195,6 +195,31 @@ export default function DashboardPage() {
     { id: 'school', label: 'Alumni', icon: GraduationCap, color: 'text-indigo-500' },
   ];
 
+  // Handle user interactions
+  const handleMessageContact = (node: any) => {
+    console.log('🔥 MESSAGE FUNCTION CALLED for:', node.name);
+    alert(`MESSAGE CLICKED: ${node.name}`); // Immediate visible feedback
+    setAiResponse('');
+    setCommand(`Message ${node.name}`);
+    typeMessage(`🎯 Ready to message ${node.name} at ${node.company}! I'll help you draft a personalized message. What would you like to discuss? Consider mentioning your shared interest in ${node.type === 'investor' ? 'AI investments' : 'tech innovation'} or mutual connections.`);
+    setActiveNode(null);
+    // Ensure the AI panel is visible
+    setShowAIPanel(true);
+  };
+
+  const handleViewProfile = (node: any) => {
+    console.log('🔥 VIEW PROFILE FUNCTION CALLED for:', node.name);
+    alert(`VIEW PROFILE CLICKED: ${node.name}`); // Immediate visible feedback
+    // Show immediate feedback in AI panel first
+    setAiResponse('');
+    typeMessage(`📋 Loading ${node.name}'s profile... Redirecting to connections page with detailed view.`);
+    
+    // Navigate to connections page with this person selected
+    setTimeout(() => {
+      window.location.href = `/connections?selected=${node.id}`;
+    }, 2000); // Increased delay to see the alert first
+  };
+
   return (
     <div className="h-screen bg-black text-white overflow-hidden">
       {/* Premium gradient background */}
@@ -441,9 +466,14 @@ export default function DashboardPage() {
                     }}
                   >
                     <motion.button
+                      type="button"
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => setActiveNode(node.id)}
+                      onClick={() => {
+                        console.log('🔥 NODE CLICKED:', node.name);
+                        alert(`Node clicked: ${node.name} - Card should appear!`);
+                        setActiveNode(activeNode === node.id ? null : node.id);
+                      }}
                       className={cn(
                         "relative group",
                         activeNode === node.id && "z-50"
@@ -484,7 +514,7 @@ export default function DashboardPage() {
                         )}
                       </div>
 
-                      {/* Hover Card */}
+                      {/* Action Card - Now shows immediately when node is active */}
                       <AnimatePresence>
                         {activeNode === node.id && node.id !== 'you' && (
                           <motion.div
@@ -493,11 +523,12 @@ export default function DashboardPage() {
                             exit={{ opacity: 0, y: 10 }}
                             className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50"
                           >
-                            <div className="bg-gray-900/95 backdrop-blur-xl rounded-lg p-4 shadow-2xl border border-white/10 w-64">
+                            <div className="bg-gray-900/95 backdrop-blur-xl rounded-lg p-4 shadow-2xl border border-blue-500/20 w-64">
                               <div className="flex items-start justify-between mb-3">
                                 <div>
                                   <h3 className="font-semibold text-white">{node.name}</h3>
                                   <p className="text-sm text-gray-400">{node.company}</p>
+                                  <div className="text-xs text-blue-400 mt-1">● Active Connection</div>
                                 </div>
                                 <div className="text-xs text-gray-500">{node.lastSeen}</div>
                               </div>
@@ -523,10 +554,26 @@ export default function DashboardPage() {
                               </div>
 
                               <div className="flex space-x-2">
-                                <button className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition-colors">
+                                <button 
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleMessageContact(node);
+                                  }}
+                                  className="flex-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-sm font-medium transition-colors"
+                                >
                                   Message
                                 </button>
-                                <button className="flex-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-sm font-medium transition-colors">
+                                <button 
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleViewProfile(node);
+                                  }}
+                                  className="flex-1 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded text-sm font-medium transition-colors"
+                                >
                                   View Profile
                                 </button>
                               </div>

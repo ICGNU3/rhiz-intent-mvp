@@ -199,6 +199,8 @@ export default function OpportunitiesPage() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState('confidence');
   const [showAICoach, setShowAICoach] = useState(false);
+  const [showExecutionModal, setShowExecutionModal] = useState(false);
+  const [executingOpportunity, setExecutingOpportunity] = useState<any>(null);
 
   const getEffortColor = (effort: string) => {
     switch (effort) {
@@ -216,6 +218,11 @@ export default function OpportunitiesPage() {
       case 'low': return 'text-gray-500';
       default: return 'text-gray-500';
     }
+  };
+
+  const handleExecuteOpportunity = (opportunity: any) => {
+    setExecutingOpportunity(opportunity);
+    setShowExecutionModal(true);
   };
 
   return (
@@ -448,7 +455,10 @@ export default function OpportunitiesPage() {
                     
                     {/* Actions */}
                     <div className="flex flex-col space-y-2 ml-4">
-                      <button className="px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium flex items-center space-x-2">
+                      <button 
+                        onClick={() => handleExecuteOpportunity(opportunity)}
+                        className="px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg hover:opacity-90 transition-all text-sm font-medium flex items-center space-x-2"
+                      >
                         <Zap className="w-4 h-4" />
                         <span>Execute</span>
                       </button>
@@ -484,6 +494,79 @@ export default function OpportunitiesPage() {
           </div>
         </div>
       </div>
+
+      {/* Execution Modal */}
+      <AnimatePresence>
+        {showExecutionModal && executingOpportunity && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowExecutionModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 rounded-xl p-6 w-full max-w-lg border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">Execute Opportunity</h3>
+                  <p className="text-sm text-gray-400">{executingOpportunity.title}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-3 bg-green-600/10 rounded-lg border border-green-600/20">
+                  <p className="text-sm text-green-400 font-medium mb-1">✓ Ready to Execute</p>
+                  <p className="text-sm text-gray-300">
+                    {executingOpportunity.confidence}% confidence • {executingOpportunity.timeline} timeline • {executingOpportunity.effort} effort
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-300">Next Actions:</p>
+                  {executingOpportunity.nextActions.slice(0, 3).map((action: string, i: number) => (
+                    <div key={i} className="flex items-center space-x-2 text-sm text-gray-400">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                      <span>{action}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="p-3 bg-blue-600/10 rounded-lg border border-blue-600/20">
+                  <p className="text-sm text-blue-400 font-medium mb-1">Estimated Value</p>
+                  <p className="text-sm text-gray-300">{executingOpportunity.estimatedValue}</p>
+                </div>
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowExecutionModal(false)}
+                    className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      alert(`Executing "${executingOpportunity.title}"! (Demo mode)`);
+                      setShowExecutionModal(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-orange-600 to-red-600 hover:opacity-90 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Execute Now
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

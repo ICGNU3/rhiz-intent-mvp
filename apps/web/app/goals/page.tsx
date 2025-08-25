@@ -171,6 +171,8 @@ export default function GoalsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedGoal, setSelectedGoal] = useState<string | null>(null);
   const [showAICoach, setShowAICoach] = useState(false);
+  const [showCreateGoal, setShowCreateGoal] = useState(false);
+  const [showGoalDetails, setShowGoalDetails] = useState(false);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -220,7 +222,10 @@ export default function GoalsPage() {
                 </button>
 
                 {/* Create Goal */}
-                <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:opacity-90 transition-all flex items-center space-x-2">
+                <button 
+                  onClick={() => setShowCreateGoal(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:opacity-90 transition-all flex items-center space-x-2"
+                >
                   <Plus className="w-4 h-4" />
                   <span className="text-sm">Create Goal</span>
                 </button>
@@ -418,7 +423,13 @@ export default function GoalsPage() {
                           <span>{goal.suggestions} suggestions</span>
                         </div>
                       </div>
-                      <button className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-all text-xs font-medium">
+                      <button 
+                        onClick={() => {
+                          setSelectedGoal(goal.id);
+                          setShowGoalDetails(true);
+                        }}
+                        className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-all text-xs font-medium"
+                      >
                         View Details
                       </button>
                     </div>

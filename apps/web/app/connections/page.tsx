@@ -136,6 +136,8 @@ export default function ConnectionsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
   const [showAIInsights, setShowAIInsights] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageTarget, setMessageTarget] = useState<any>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -151,6 +153,16 @@ export default function ConnectionsPage() {
     if (strength >= 8) return 'bg-green-500';
     if (strength >= 5) return 'bg-yellow-500';
     return 'bg-gray-500';
+  };
+
+  const handleMessageContact = (connection: any) => {
+    setMessageTarget(connection);
+    setShowMessageModal(true);
+  };
+
+  const handleViewProfile = (connection: any) => {
+    setSelectedConnection(connection.id);
+    // Scroll to show more details or expand the connection card
   };
 
   return (
@@ -380,7 +392,10 @@ export default function ConnectionsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center space-x-2">
-                    <button className="flex-1 px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-all text-sm">
+                    <button 
+                      onClick={() => handleMessageContact(connection)}
+                      className="flex-1 px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-all text-sm"
+                    >
                       Message
                     </button>
                     <button className="p-1.5 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
@@ -454,6 +469,71 @@ export default function ConnectionsPage() {
           )}
         </div>
       </div>
+
+      {/* Message Modal */}
+      <AnimatePresence>
+        {showMessageModal && messageTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowMessageModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-gray-900 rounded-xl p-6 w-full max-w-md border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                  {messageTarget.name.split(' ').map((n: string) => n[0]).join('')}
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">{messageTarget.name}</h3>
+                  <p className="text-sm text-gray-400">{messageTarget.company}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-3 bg-blue-600/10 rounded-lg border border-blue-600/20">
+                  <p className="text-sm text-blue-400 font-medium mb-1">AI Suggestion</p>
+                  <p className="text-sm text-gray-300">
+                    "Hi {messageTarget.name.split(' ')[0]}, I noticed we're both passionate about {messageTarget.tags[0]}. 
+                    Would love to connect and explore potential synergies between our work!"
+                  </p>
+                </div>
+                
+                <textarea
+                  placeholder="Write your message..."
+                  className="w-full h-24 p-3 bg-white/5 border border-white/10 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500/50 resize-none"
+                />
+                
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowMessageModal(false)}
+                    className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // TODO: Implement actual message sending
+                      alert('Message sent! (Demo mode)');
+                      setShowMessageModal(false);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Send Message
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
