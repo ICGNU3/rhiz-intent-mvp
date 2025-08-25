@@ -574,6 +574,67 @@ export const selectMessageSchema = createSelectSchema(message);
 export const insertMessageLinkSchema = createInsertSchema(messageLink);
 export const selectMessageLinkSchema = createSelectSchema(messageLink);
 
+// Signals table for agent system
+export const signals = pgTable('signals', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  contactId: uuid('contact_id').references(() => person.id).notNull(),
+  lastInteractionAt: timestamp('last_interaction_at'),
+  interactions90d: integer('interactions_90d').notNull().default(0),
+  reciprocityRatio: integer('reciprocity_ratio').notNull().default(0), // Scaled 0-100
+  sentimentAvg: integer('sentiment_avg').notNull().default(0), // Scaled 0-100
+  decayDays: integer('decay_days').notNull().default(0),
+  roleTags: jsonb('role_tags').notNull().default('[]'), // Array of strings
+  sharedContextTags: jsonb('shared_context_tags').notNull().default('[]'), // Array of strings
+  goalAlignmentScore: integer('goal_alignment_score').notNull().default(0), // Scaled 0-100
+  capacityCost: integer('capacity_cost').notNull().default(100), // Scaled 0-100, 100 = normal cost
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index('signals_user_idx').on(table.userId),
+  contactIdx: index('signals_contact_idx').on(table.contactId),
+  uniqueUserContact: index('signals_user_contact_unique_idx').on(table.userId, table.contactId),
+  updatedIdx: index('signals_updated_idx').on(table.updatedAt),
+}));
+
+// Agent events table for audit trail
+export const agentEvents = pgTable('agent_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull(),
+  goalId: uuid('goal_id').references(() => goal.id),
+  agent: text('agent').notNull(), // 'mapper', 'sensemaker', 'strategist', 'storyweaver'
+  action: text('action').notNull(), // Action type from schema
+  payload: jsonb('payload').notNull(), // Full action payload
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index('agent_events_user_idx').on(table.userId),
+  goalIdx: index('agent_events_goal_idx').on(table.goalId),
+  agentIdx: index('agent_events_agent_idx').on(table.agent),
+  actionIdx: index('agent_events_action_idx').on(table.action),
+  createdIdx: index('agent_events_created_idx').on(table.createdAt),
+}));
+
+// People embeddings table for semantic similarity (optional)
+export const peopleEmbedding = pgTable('people_embedding', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  contactId: uuid('contact_id').references(() => person.id).notNull().unique(),
+  embedding: jsonb('embedding').notNull(), // Vector embedding as JSON array
+  model: text('model').notNull().default('text-embedding-3-small'), // Embedding model used
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  contactIdx: index('people_embedding_contact_idx').on(table.contactId),
+  modelIdx: index('people_embedding_model_idx').on(table.model),
+}));
+
+export const insertSignalsSchema = createInsertSchema(signals);
+export const selectSignalsSchema = createSelectSchema(signals);
+
+export const insertAgentEventsSchema = createInsertSchema(agentEvents);
+export const selectAgentEventsSchema = createSelectSchema(agentEvents);
+
+export const insertPeopleEmbeddingSchema = createInsertSchema(peopleEmbedding);
+export const selectPeopleEmbeddingSchema = createSelectSchema(peopleEmbedding);
+
 // Types
 export type Workspace = z.infer<typeof selectWorkspaceSchema>;
 export type WorkspaceMember = z.infer<typeof selectWorkspaceMemberSchema>;
@@ -595,6 +656,9 @@ export type CollectiveOpportunity = z.infer<typeof selectCollectiveOpportunitySc
 export type Conversation = z.infer<typeof selectConversationSchema>;
 export type Message = z.infer<typeof selectMessageSchema>;
 export type MessageLink = z.infer<typeof selectMessageLinkSchema>;
+export type Signals = z.infer<typeof selectSignalsSchema>;
+export type AgentEvents = z.infer<typeof selectAgentEventsSchema>;
+export type PeopleEmbedding = z.infer<typeof selectPeopleEmbeddingSchema>;
 
 // Encryption helpers
 export const encryptPhone = (phone: string | null): string | null => {
