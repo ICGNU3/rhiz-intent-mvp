@@ -3,9 +3,21 @@ import postgres from 'postgres';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import * as schema from './schema';
 
-// Database connection
-const connectionString = process.env.DATABASE_URL!;
-const client = postgres(connectionString);
+// Database connection with production pooling
+const connectionString = process.env.DATABASE_POOL_URL || process.env.DATABASE_URL!;
+
+const client = postgres(connectionString, {
+  max: process.env.NODE_ENV === 'production' 
+    ? parseInt(process.env.DB_POOL_MAX || '25') 
+    : 10,
+  idle_timeout: parseInt(process.env.DB_IDLE_TIMEOUT || '20'),
+  max_lifetime: parseInt(process.env.DB_MAX_LIFETIME || '1800'),
+  connect_timeout: 10,
+  ssl: process.env.NODE_ENV === 'production' 
+    ? { rejectUnauthorized: false }
+    : false,
+});
+
 export const db = drizzle(client, { schema });
 
 // RLS helper for setting user context

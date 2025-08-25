@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Navigation } from '@/app/components/navigation';
 
 interface ClientLayoutProps {
@@ -9,11 +10,19 @@ interface ClientLayoutProps {
 
 export function ClientLayout({ children }: ClientLayoutProps) {
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState("550e8400-e29b-41d4-a716-446655440001");
+  const pathname = usePathname();
+  
+  // Don't show navigation for dashboard page
+  const showNavigation = pathname !== '/dashboard';
 
   const handleWorkspaceChange = (workspaceId: string) => {
     setCurrentWorkspaceId(workspaceId);
     console.log('Workspace changed to:', workspaceId);
   };
+
+  if (!showNavigation) {
+    return <>{children}</>;
+  }
 
   return (
     <>

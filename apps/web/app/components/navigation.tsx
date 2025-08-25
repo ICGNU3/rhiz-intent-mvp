@@ -33,7 +33,10 @@ import {
   Sun,
   BarChart3,
   Share2,
-  Network
+  Network,
+  Sparkles,
+  Zap,
+  LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkspaceSwitcher } from '@/components/WorkspaceSwitcher';
@@ -50,13 +53,12 @@ export function Navigation({ currentWorkspaceId, onWorkspaceChange }: Navigation
 
   const navItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/voice-chat', label: 'Voice Chat', icon: Users },
-    { href: '/people', label: 'People', icon: Users },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/connections', label: 'Connections', icon: Users },
     { href: '/goals', label: 'Goals', icon: Target },
-    { href: '/suggestions', label: 'Suggestions', icon: Lightbulb },
+    { href: '/opportunities', label: 'Opportunities', icon: Zap },
     { href: '/graph', label: 'Graph', icon: Network },
-    { href: '/insights', label: 'Insights', icon: Lightbulb },
-    { href: '/referrals', label: 'Referrals', icon: Share2 },
+    { href: '/insights', label: 'Insights', icon: Sparkles },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   ];
 
