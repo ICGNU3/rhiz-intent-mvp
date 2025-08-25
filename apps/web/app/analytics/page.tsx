@@ -27,17 +27,21 @@ export default function AnalyticsPage() {
   const [showInsights, setShowInsights] = useState(true);
 
   useEffect(() => {
-    // Mock analytics data
-    setAnalyticsData({
-      networkGrowth: 23,
-      connectionRate: 87,
-      goalCompletion: 65,
-      opportunityConversion: 34,
-      activeConversations: 12,
-      weeklyMeetings: 8,
-      timeSpentNetworking: 4.2,
-      topPerformingGoals: ['Reach 50 investors', 'Connect with designers', 'Find co-founder']
-    });
+    const fetchData = async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 300));
+      setAnalyticsData({
+        networkGrowth: 23,
+        connectionRate: 87,
+        goalCompletion: 65,
+        opportunityConversion: 34,
+        activeConversations: 12,
+        weeklyMeetings: 8,
+        timeSpentNetworking: 4.2,
+        topPerformingGoals: ['50 investors', 'Designers', 'Co-founder']
+      });
+    };
+    fetchData();
   }, [timeFrame]);
 
   if (!analyticsData) {
@@ -45,7 +49,7 @@ export default function AnalyticsPage() {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg animate-pulse" />
-          <span className="text-white font-medium">Loading analytics...</span>
+          <span className="text-white font-medium">Loading...</span>
         </div>
       </div>
     );

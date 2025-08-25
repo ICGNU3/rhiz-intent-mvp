@@ -7,7 +7,7 @@ import {
   CheckCircle, Circle, Star, Archive, Trash2, Filter, Search,
   Send, Reply, Forward, MoreHorizontal, Sparkles, Brain,
   AlertCircle, Users, Target, Zap, ArrowRight, Plus,
-  Mail, Phone, Video, Coffee, Heart, Briefcase
+  Mail, Phone, Video, Coffee, Heart, Briefcase, ChevronLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -172,6 +172,14 @@ export default function InboxPage() {
         >
           {/* Header */}
           <div className="p-6 border-b border-white/10">
+            {/* Back to Dashboard */}
+            <Link href="/dashboard" className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6 group">
+              <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-all">
+                <ChevronLeft className="w-4 h-4" />
+              </div>
+              <span className="text-sm">Back to Dashboard</span>
+            </Link>
+
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                 <InboxIcon className="w-5 h-5 text-white" />

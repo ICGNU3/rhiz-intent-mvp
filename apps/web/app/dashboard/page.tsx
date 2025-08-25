@@ -1,73 +1,40 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Sparkles,
-  MessageCircle,
-  Search,
-  Command,
-  ChevronRight,
-  ChevronLeft,
-  ChevronUp,
-  ChevronDown,
-  Zap,
-  Users,
-  Target,
-  Brain,
-  Building2,
-  Mic,
-  Send,
-  Plus,
-  BarChart3,
-  Minus,
-  Filter,
-  Settings,
-  MapPin,
-  Building,
-  GraduationCap,
-  Hash,
-  Eye,
-  EyeOff,
-  Maximize2,
-  Minimize2,
-  Grid3X3,
-  Loader2,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
-  Expand,
-  Shrink
+  Sparkles, MessageCircle, Command, ChevronUp, ChevronDown,
+  Zap, Users, Target, Brain, Building2, Mic, Send, Plus, BarChart3, Minus,
+  Filter, Settings, MapPin, Building, GraduationCap, Grid3X3, Loader2,
+  PanelRightClose, PanelRightOpen, Expand, Shrink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { PageNavigation } from '@/app/components/PageNavigation';
 
-// Mock data for network visualization
+// Mock data - optimized structure
 const mockNetworkData = {
   nodes: [
     { id: 'you', name: 'You', x: 400, y: 300, type: 'self', strength: 10, color: '#3b82f6' },
-    { id: '1', name: 'Sarah Chen', x: 250, y: 200, type: 'investor', strength: 8, color: '#10b981', lastSeen: '2h ago', company: 'Sequoia Capital', match: 95 },
-    { id: '2', name: 'Mike Ross', x: 550, y: 180, type: 'founder', strength: 7, color: '#8b5cf6', lastSeen: '1d ago', company: 'TechCo', match: 78 },
-    { id: '3', name: 'David Kim', x: 300, y: 400, type: 'advisor', strength: 5, color: '#f59e0b', lastSeen: '1w ago', company: 'Stripe', match: 62 },
-    { id: '4', name: 'Emily Zhang', x: 500, y: 420, type: 'dormant', strength: 3, color: '#6b7280', lastSeen: '3m ago', company: 'Meta', match: 45 },
-    { id: '5', name: 'Alex Park', x: 180, y: 350, type: 'potential', strength: 6, color: '#06b6d4', lastSeen: 'Never', company: 'OpenAI', match: 88 },
+    { id: '1', name: 'Sarah Chen', x: 250, y: 200, type: 'investor', strength: 8, color: '#10b981', lastSeen: '2h', company: 'Sequoia', match: 95 },
+    { id: '2', name: 'Mike Ross', x: 550, y: 180, type: 'founder', strength: 7, color: '#8b5cf6', lastSeen: '1d', company: 'TechCo', match: 78 },
+    { id: '3', name: 'David Kim', x: 300, y: 400, type: 'advisor', strength: 5, color: '#f59e0b', lastSeen: '1w', company: 'Stripe', match: 62 },
+    { id: '4', name: 'Emily Zhang', x: 500, y: 420, type: 'dormant', strength: 3, color: '#6b7280', lastSeen: '3m', company: 'Meta', match: 45 },
+    { id: '5', name: 'Alex Park', x: 180, y: 350, type: 'potential', strength: 6, color: '#06b6d4', lastSeen: 'New', company: 'OpenAI', match: 88 },
   ],
   edges: [
-    { source: 'you', target: '1', strength: 8, type: 'strong' },
-    { source: 'you', target: '2', strength: 7, type: 'strong' },
-    { source: 'you', target: '3', strength: 5, type: 'moderate' },
-    { source: 'you', target: '4', strength: 3, type: 'weak' },
-    { source: '1', target: '2', strength: 6, type: 'potential', dashed: true },
-    { source: '2', target: '5', strength: 8, type: 'potential', dashed: true },
+    { source: 'you', target: '1', strength: 8 },
+    { source: 'you', target: '2', strength: 7 },
+    { source: 'you', target: '3', strength: 5 },
+    { source: 'you', target: '4', strength: 3 },
+    { source: '1', target: '2', strength: 6, dashed: true },
+    { source: '2', target: '5', strength: 8, dashed: true },
   ]
 };
 
 const aiSuggestions = [
-  { icon: Zap, text: "Sarah and Mike both mentioned Series B funding - perfect intro opportunity", action: "Draft intro" },
-  { icon: Users, text: "You haven't talked to David in 3 weeks. He just became VP at Stripe", action: "Reconnect" },
-  { icon: Target, text: "Alex from OpenAI matches 88% with your AI startup goal", action: "Request intro" },
+  { icon: Zap, text: "Sarah and Mike: Series B funding intro opportunity", action: "Draft intro" },
+  { icon: Users, text: "David Kim promoted to VP at Stripe", action: "Reconnect" },
+  { icon: Target, text: "Alex from OpenAI: 88% goal match", action: "Connect" },
 ];
 
 export default function DashboardPage() {
@@ -106,20 +73,27 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Handle mouse movement for parallax effect
+  // Optimized mouse movement with throttling
   useEffect(() => {
+    let animationId: number;
     const handleMouseMove = (e: MouseEvent) => {
-      if (canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        setMousePosition({
-          x: ((e.clientX - rect.left) / rect.width - 0.5) * 20,
-          y: ((e.clientY - rect.top) / rect.height - 0.5) * 20,
-        });
-      }
+      if (animationId) cancelAnimationFrame(animationId);
+      animationId = requestAnimationFrame(() => {
+        if (canvasRef.current) {
+          const rect = canvasRef.current.getBoundingClientRect();
+          setMousePosition({
+            x: ((e.clientX - rect.left) / rect.width - 0.5) * 10,
+            y: ((e.clientY - rect.top) / rect.height - 0.5) * 10,
+          });
+        }
+      });
     };
     if (typeof window !== 'undefined') {
-      window.addEventListener('mousemove', handleMouseMove);
-      return () => window.removeEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        if (animationId) cancelAnimationFrame(animationId);
+      };
     }
   }, []);
 
@@ -169,41 +143,44 @@ export default function DashboardPage() {
     }
   }, [showAIPanel, isFullscreen, showTopBar, showInsights]);
 
-  // Simulate AI typing effect
+  // Optimized AI typing effect
   const typeMessage = useCallback((message: string) => {
     setIsTyping(true);
     setAiResponse('');
     let i = 0;
     const interval = setInterval(() => {
       if (i < message.length) {
-        setAiResponse(prev => prev + message[i]);
-        i++;
+        const chunk = Math.min(3, message.length - i);
+        setAiResponse(prev => prev + message.substr(i, chunk));
+        i += chunk;
       } else {
         clearInterval(interval);
         setIsTyping(false);
       }
-    }, 20);
+    }, 30);
+    return () => clearInterval(interval);
   }, []);
 
   const handleCommand = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && command.trim()) {
       setIsProcessing(true);
       
-      // Simulate AI processing
+      // Optimized AI processing
       setTimeout(() => {
-        if (command.toLowerCase().includes('investor')) {
-          typeMessage("I found 3 investors in your network interested in AI. Sarah Chen from Sequoia is your strongest connection with 95% goal alignment. She just led a $10M round in an AI startup. Would you like me to draft an introduction?");
+        const cmd = command.toLowerCase();
+        if (cmd.includes('investor')) {
+          typeMessage("Found 3 AI-focused investors. Sarah Chen (Sequoia, 95% match) just led a $10M AI round. Draft intro?");
           setSelectedFilter('investor');
-        } else if (command.toLowerCase().includes('reconnect')) {
-          typeMessage("David Kim at Stripe is your best reconnection opportunity. You had strong rapport 3 weeks ago discussing API infrastructure. He just became VP of Product - a congratulations message could rekindle this valuable connection.");
+        } else if (cmd.includes('reconnect')) {
+          typeMessage("David Kim at Stripe: promoted to VP, strong past rapport. Perfect reconnection opportunity.");
           setActiveNode('3');
-        } else if (command.toLowerCase().includes('introduce')) {
-          typeMessage("Sarah and Mike would be a perfect match! Both are Stanford GSB alumni passionate about sustainable tech. Sarah needs technical expertise for due diligence, Mike is looking for Series B funding. Shall I draft a mutual benefit introduction?");
+        } else if (cmd.includes('introduce')) {
+          typeMessage("Sarah + Mike = perfect match! Both Stanford GSB, she needs tech expertise, he needs Series B.");
         } else {
-          typeMessage("I can help you navigate your network. Try commands like 'Show me investors', 'Who should I reconnect with?', or 'Find introduction opportunities'.");
+          typeMessage("Try: 'Show investors', 'Who to reconnect', 'Find intros'");
         }
         setIsProcessing(false);
-      }, 800);
+      }, 600);
       
       setCommand('');
     }
@@ -222,23 +199,20 @@ export default function DashboardPage() {
   const handleMessageContact = (node: any) => {
     setAiResponse('');
     setCommand(`Message ${node.name}`);
-    typeMessage(`🎯 Ready to message ${node.name} at ${node.company}! I'll help you draft a personalized message. What would you like to discuss? Consider mentioning your shared interest in ${node.type === 'investor' ? 'AI investments' : 'tech innovation'} or mutual connections.`);
+    const topic = node.type === 'investor' ? 'AI investments' : 'tech innovation';
+    typeMessage(`🎯 Messaging ${node.name} at ${node.company}! Suggest discussing ${topic} or mutual connections.`);
     setActiveNode(null);
-    // Ensure the AI panel is visible
     setShowAIPanel(true);
   };
 
   const handleViewProfile = (node: any) => {
-    // Show immediate feedback in AI panel first
     setAiResponse('');
-    typeMessage(`📋 Loading ${node.name}'s profile... Redirecting to connections page with detailed view.`);
-    
-    // Navigate to connections page with this person selected
+    typeMessage(`📋 Loading ${node.name}'s profile...`);
     setTimeout(() => {
-              if (typeof window !== 'undefined') {
-          window.location.href = `/connections?selected=${node.id}`;
-        }
-    }, 2000); // Increased delay to see the alert first
+      if (typeof window !== 'undefined') {
+        window.location.href = `/connections?selected=${node.id}`;
+      }
+    }, 1000);
   };
 
   return (
@@ -249,9 +223,6 @@ export default function DashboardPage() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
       </div>
-
-      {/* Page Navigation */}
-      <PageNavigation />
 
       {/* Main Content - Full Width */}
       <div className="relative z-10 h-screen flex flex-col">

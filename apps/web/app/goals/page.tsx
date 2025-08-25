@@ -1,30 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Target,
-  Plus,
-  ChevronRight,
-  Calendar,
-  TrendingUp,
-  Users,
-  Zap,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Share2,
-  BarChart3,
-  Sparkles,
-  Brain,
-  Flag,
-  Rocket,
-  Trophy,
-  ArrowUp,
-  ArrowDown
+  Target, Plus, ChevronRight, Calendar, TrendingUp, Users, Zap, Clock,
+  CheckCircle, AlertCircle, MoreVertical, Edit, Trash2, Share2, BarChart3,
+  Sparkles, Brain, Flag, Rocket, Trophy, ArrowUp, ArrowDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageNavigation } from '@/app/components/PageNavigation';
@@ -49,14 +30,14 @@ const mockGoals = [
     },
     suggestions: 12,
     insights: [
-      'Sarah Chen from Sequoia is highly aligned with your vision',
-      '3 warm intros available through your network',
-      'Your pitch deck engagement rate is 85% above average'
+      'Sarah Chen (Sequoia) highly aligned with vision',
+      '3 warm intros available in network',
+      'Pitch deck: 85% above avg engagement'
     ],
     nextActions: [
-      'Follow up with Mike Ross about intro to a16z',
-      'Schedule demo with potential lead investor',
-      'Update financial projections for Q2'
+      'Follow up Mike Ross → a16z intro',
+      'Schedule lead investor demo',
+      'Update Q2 financial projections'
     ]
   },
   {

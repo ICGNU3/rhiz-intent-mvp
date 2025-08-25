@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'Rhiz - Intent-First Relationship Intelligence',
   description: 'Capture high-signal relationship data and generate smart introductions with AI-powered insights.',
   keywords: ['networking', 'relationships', 'introductions', 'AI', 'productivity'],
@@ -16,6 +17,13 @@ export const metadata: Metadata = {
     title: 'Rhiz - Intent-First Relationship Intelligence',
     description: 'Capture high-signal relationship data and generate smart introductions with AI-powered insights.',
     type: 'website',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    siteName: 'Rhiz',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Rhiz - Intent-First Relationship Intelligence',
+    description: 'Capture high-signal relationship data and generate smart introductions with AI-powered insights.',
   },
 }
 

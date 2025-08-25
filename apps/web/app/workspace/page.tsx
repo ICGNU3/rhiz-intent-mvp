@@ -8,7 +8,7 @@ import {
   Globe, Lock, Mail, Bell, Star, Archive, Trash2,
   UserPlus, UserMinus, Edit, Copy, ExternalLink,
   Sparkles, Target, Zap, MessageSquare, Activity,
-  CheckCircle, AlertCircle, Clock, ArrowRight
+  CheckCircle, AlertCircle, Clock, ArrowRight, ChevronLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -199,6 +199,14 @@ export default function WorkspacePage() {
           className="w-80 bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col"
         >
           <div className="p-6 border-b border-white/10">
+            {/* Back to Dashboard */}
+            <Link href="/dashboard" className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors mb-6 group">
+              <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-all">
+                <ChevronLeft className="w-4 h-4" />
+              </div>
+              <span className="text-sm">Back to Dashboard</span>
+            </Link>
+
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-green-500 rounded-lg flex items-center justify-center">

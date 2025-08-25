@@ -7,7 +7,7 @@ import {
   AlertTriangle, Brain, MessageSquare, Calendar, Mail, 
   Users, Target, BarChart3, Filter, Search, MoreHorizontal,
   ArrowRight, Sparkles, RefreshCw, Power, Edit, Copy, Trash2,
-  Timer, Bell, Send, UserPlus, FileText, Database, Star
+  Timer, Bell, Send, UserPlus, FileText, Database, Star, ChevronLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -178,6 +178,14 @@ export default function AutomationsPage() {
         >
           <div className="px-4 md:px-6 h-16 flex items-center justify-between">
             <div className="flex items-center space-x-3 md:space-x-6">
+              {/* Back to Dashboard */}
+              <Link href="/dashboard" className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors group">
+                <div className="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-all">
+                  <ChevronLeft className="w-4 h-4" />
+                </div>
+                <span className="text-sm hidden md:inline">Dashboard</span>
+              </Link>
+
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                   <Zap className="w-5 h-5 text-white" />
