@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, person, edge, claim, setUserContext } from '@rhiz/db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc } from '@rhiz/db';
 
 // Webhook endpoint to send insights back to CRM via Zapier
 export async function POST(request: NextRequest) {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 async function getPersonInsights(workspaceId: string, userId: string, personId: string) {
   try {
     // Get person details
-    const personData = await db
+    const personResult = await db
       .select()
       .from(person)
       .where(
@@ -61,14 +61,14 @@ async function getPersonInsights(workspaceId: string, userId: string, personId: 
       )
       .limit(1);
 
-    if (personData.length === 0) {
+    if (personResult.length === 0) {
       return NextResponse.json(
         { error: 'Person not found' },
         { status: 404 }
       );
     }
 
-    const person = personData[0];
+    const personData = personResult[0];
 
     // Get claims (facts about the person)
     const claims = await db
@@ -124,10 +124,10 @@ async function getPersonInsights(workspaceId: string, userId: string, personId: 
       success: true,
       insights: {
         person: {
-          id: person.id,
-          fullName: person.fullName,
-          email: person.primaryEmail,
-          location: person.location,
+          id: personData.id,
+          fullName: personData.fullName,
+          email: personData.primaryEmail,
+          location: personData.location,
         },
         claims: claims.map(c => ({
           key: c.key,
@@ -140,7 +140,7 @@ async function getPersonInsights(workspaceId: string, userId: string, personId: 
           averageStrength: avgStrength,
           topConnections: topConnections,
         },
-        lastUpdated: person.updatedAt,
+        lastUpdated: personData.updatedAt,
       },
     });
 

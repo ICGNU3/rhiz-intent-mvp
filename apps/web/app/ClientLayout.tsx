@@ -12,8 +12,8 @@ export function ClientLayout({ children }: ClientLayoutProps) {
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState("550e8400-e29b-41d4-a716-446655440001");
   const pathname = usePathname();
   
-  // Don't show navigation for dashboard, connections, goals, opportunities pages (they have their own full-screen layouts)
-  const fullScreenPages = ['/dashboard', '/connections', '/goals', '/opportunities'];
+  // Don't show navigation for premium pages (they have their own full-screen layouts)
+  const fullScreenPages = ['/dashboard', '/connections', '/goals', '/opportunities', '/analytics', '/inbox', '/automations', '/settings', '/insights', '/workspace'];
   const showNavigation = !fullScreenPages.includes(pathname);
 
   const handleWorkspaceChange = (workspaceId: string) => {

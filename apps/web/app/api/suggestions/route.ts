@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, suggestion, person, goal } from '@rhiz/db';
-import { eq, and, desc } from 'drizzle-orm';
+import { and } from 'drizzle-orm';
+import { eq, desc } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
@@ -59,14 +60,14 @@ export async function GET(request: NextRequest) {
               .limit(1);
             
             // Get goal data
-            const [goalData] = await db
+            const [goalData] = s.goalId ? await db
               .select({
                 title: goal.title,
                 kind: goal.kind,
               })
               .from(goal)
               .where(eq(goal.id, s.goalId))
-              .limit(1);
+              .limit(1) : [null];
             
             return {
               id: s.id,

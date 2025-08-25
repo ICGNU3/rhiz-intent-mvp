@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, X, Check, AlertCircle, Users, Target, Mic, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +37,7 @@ export function Notifications({ workspaceId }: NotificationsProps) {
   const { toast } = useToast();
 
   // Fetch notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/notifications?workspaceId=${workspaceId}`);
@@ -56,7 +56,7 @@ export function Notifications({ workspaceId }: NotificationsProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [workspaceId, toast]);
 
   // Mark notifications as read
   const markAsRead = async (notificationIds: string[]) => {
@@ -114,7 +114,7 @@ export function Notifications({ workspaceId }: NotificationsProps) {
     // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, [workspaceId]);
+  }, [workspaceId, fetchNotifications]);
 
   return (
     <div className="relative">

@@ -176,7 +176,7 @@ export function IntentCard({ id, goalTitle, goalKind, goalStatus, suggestions, i
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Add Note for "{goalTitle}"</DialogTitle>
+                <DialogTitle>Add Note for &ldquo;{goalTitle}&rdquo;</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>

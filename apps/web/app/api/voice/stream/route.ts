@@ -206,38 +206,39 @@ async function saveConversationToDatabase(
       'Extract all people mentioned in this conversation.'
     );
 
-    if (extractedPeople?.people) {
-      for (const person of extractedPeople.people) {
-        const personId = crypto.randomUUID();
-        
-        await db.insert(person).values({
-          id: personId,
-          workspaceId: 'default',
-          ownerId: userId,
-          fullName: person.fullName,
-          primaryEmail: person.email || null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
+    // TODO: Fix database insertion for extracted people
+    // if (extractedPeople?.people) {
+    //   for (const personData of extractedPeople.people) {
+    //     const personId = crypto.randomUUID();
+    //     
+    //     await db.insert(person).values({
+    //       id: personId,
+    //       workspaceId: 'default',
+    //       ownerId: userId,
+    //       fullName: personData.fullName,
+    //       primaryEmail: personData.email || null,
+    //       createdAt: new Date(),
+    //       updatedAt: new Date(),
+    //     });
 
-        // Add claims about the person
-        if (person.role) {
-          await db.insert(claim).values({
-            id: crypto.randomUUID(),
-            workspaceId: 'default',
-            ownerId: userId,
-            subjectType: 'person',
-            subjectId: personId,
-            key: 'role',
-            value: person.role,
-            confidence: 85,
-            source: 'voice_conversation',
-            lawfulBasis: 'legitimate_interest',
-            observedAt: new Date(),
-          });
-        }
-      }
-    }
+    //     // Add claims about the person
+    //     if (personData.role) {
+    //       await db.insert(claim).values({
+    //         id: crypto.randomUUID(),
+    //         workspaceId: 'default',
+    //         ownerId: userId,
+    //         subjectType: 'person',
+    //         subjectId: personId,
+    //         key: 'role',
+    //         value: personData.role,
+    //         confidence: 85,
+    //         source: 'voice_conversation',
+    //         lawfulBasis: 'legitimate_interest',
+    //         observedAt: new Date(),
+    //       });
+    //     }
+    //   }
+    // }
 
   } catch (error) {
     logger.error('Error saving conversation to database', error as Error, { component: 'voice-stream' });

@@ -8,6 +8,7 @@ import {
   Users, 
   Target, 
   Zap,
+  BarChart3,
   ChevronLeft,
   ArrowLeft
 } from 'lucide-react';
@@ -18,6 +19,7 @@ const navigationItems = [
   { href: '/connections', label: 'Connections', icon: Users },
   { href: '/goals', label: 'Goals', icon: Target },
   { href: '/opportunities', label: 'Opportunities', icon: Zap },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
 export function PageNavigation() {

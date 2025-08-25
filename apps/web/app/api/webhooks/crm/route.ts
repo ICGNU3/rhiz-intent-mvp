@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, person, claim, setUserContext } from '@rhiz/db';
-import { eq, and } from 'drizzle-orm';
+import { and, eq } from '@rhiz/db';
 
 // Webhook endpoint for CRM integrations via Zapier
 export async function POST(request: NextRequest) {

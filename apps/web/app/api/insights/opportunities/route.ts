@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, collectiveOpportunity, workspace } from '@rhiz/db';
 import { eq, and, desc } from 'drizzle-orm';
+import { sql } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
@@ -14,22 +15,21 @@ export async function GET(request: NextRequest) {
     const workspaceId = searchParams.get('workspaceId') || '550e8400-e29b-41d4-a716-446655440001';
     
     try {
-      // Query real opportunities from database
-      const opportunitiesData = await db
-        .select({
-          id: collectiveOpportunity.id,
-          title: collectiveOpportunity.title,
-          description: collectiveOpportunity.description,
-          type: collectiveOpportunity.type,
-          score: collectiveOpportunity.score,
-          status: collectiveOpportunity.status,
-          createdAt: collectiveOpportunity.createdAt,
-          metadata: collectiveOpportunity.metadata,
-        })
-        .from(collectiveOpportunity)
-        .where(eq(collectiveOpportunity.workspaceId, workspaceId))
-        .orderBy(desc(collectiveOpportunity.score))
-        .limit(10);
+              // Query real opportunities from database
+        const opportunitiesData = await db
+          .select({
+            id: collectiveOpportunity.id,
+            title: collectiveOpportunity.title,
+            description: collectiveOpportunity.description,
+            type: collectiveOpportunity.type,
+            score: collectiveOpportunity.score,
+            status: collectiveOpportunity.status,
+            createdAt: collectiveOpportunity.createdAt,
+            workspaces: collectiveOpportunity.workspaces,
+            clusters: collectiveOpportunity.clusters,
+          })
+          .from(collectiveOpportunity)
+          .limit(10);
 
       return NextResponse.json({ opportunities: opportunitiesData });
     } catch (dbError) {

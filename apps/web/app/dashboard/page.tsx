@@ -18,8 +18,10 @@ import {
   Mic,
   Send,
   Plus,
+  BarChart3,
   Minus,
   Filter,
+  Settings,
   MapPin,
   Building,
   GraduationCap,
@@ -290,6 +292,22 @@ export default function DashboardPage() {
                 <Link href="/opportunities" className="flex items-center space-x-2 hover:text-orange-400 transition-colors cursor-pointer">
                   <Zap className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-300 hover:text-orange-400">12 opportunities</span>
+                </Link>
+                <Link href="/analytics" className="flex items-center space-x-2 hover:text-purple-400 transition-colors cursor-pointer">
+                  <BarChart3 className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-purple-400 hidden xl:inline">Analytics</span>
+                </Link>
+                <Link href="/inbox" className="flex items-center space-x-2 hover:text-blue-400 transition-colors cursor-pointer">
+                  <MessageCircle className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-blue-400 hidden xl:inline">Inbox</span>
+                </Link>
+                <Link href="/automations" className="flex items-center space-x-2 hover:text-orange-400 transition-colors cursor-pointer">
+                  <Zap className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-orange-400 hidden xl:inline">Automations</span>
+                </Link>
+                <Link href="/settings" className="flex items-center space-x-2 hover:text-gray-400 transition-colors cursor-pointer">
+                  <Settings className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-gray-400 hidden xl:inline">Settings</span>
                 </Link>
               </div>
 

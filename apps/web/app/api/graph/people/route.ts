@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, person, edge, claim, goal } from '@rhiz/db';
-import { eq, and, inArray, desc, sql } from 'drizzle-orm';
+import { inArray } from 'drizzle-orm';
+import { and, eq, sql, desc } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
             location: person.location,
           })
           .from(person)
-          .where(eq(person.workspaceId, workspaceId))
+          .where(sql`${person.workspaceId} = ${workspaceId}`)
           .limit(20);
         
         // Fetch edges (relationships) between people
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
             metadata: edge.metadata,
           })
           .from(edge)
-          .where(eq(edge.workspaceId, workspaceId))
+          .where(sql`${edge.workspaceId} = ${workspaceId}`)
           .limit(50);
         
         // Transform to graph format

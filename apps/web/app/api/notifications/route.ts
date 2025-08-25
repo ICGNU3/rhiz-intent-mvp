@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, notification } from '@rhiz/db';
-import { eq, and, desc } from 'drizzle-orm';
+import { and, eq, desc } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
 // GET /api/notifications - Get notifications for current user
@@ -17,27 +17,25 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     
     try {
-      // Query real notifications from database
-      const notificationsData = await db
-        .select({
-          id: notification.id,
-          action: notification.action,
-          entityType: notification.entityType,
-          entityId: notification.entityId,
-          metadata: notification.metadata,
-          createdAt: notification.createdAt,
-          readAt: notification.readAt,
-        })
-        .from(notification)
-        .where(
-          and(
-            eq(notification.workspaceId, workspaceId),
-            eq(notification.userId, userId)
+              // Query real notifications from database
+        const notificationsData = await db
+          .select({
+            id: notification.id,
+            type: notification.type,
+            message: notification.message,
+            createdAt: notification.createdAt,
+            readAt: notification.readAt,
+          })
+          .from(notification)
+          .where(
+            and(
+              eq(notification.workspaceId, workspaceId),
+              eq(notification.userId, userId)
+            )
           )
-        )
-        .orderBy(desc(notification.createdAt))
-        .limit(limit)
-        .offset(offset);
+          .orderBy(desc(notification.createdAt))
+          .limit(limit)
+          .offset(offset);
 
       return NextResponse.json({ notifications: notificationsData });
     } catch (dbError) {
