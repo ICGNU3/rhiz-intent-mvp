@@ -1,11 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { db, collectiveOpportunity } from '@rhiz/db';
-// import { collectiveOpportunitySchema } from '@rhiz/db/schema';
-
+import { db, collectiveOpportunity, workspace } from '@rhiz/db';
+import { eq, and, desc } from 'drizzle-orm';
+import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
   try {
-    // Return mock data for now
+    const userId = await getUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+    const workspaceId = searchParams.get('workspaceId') || '550e8400-e29b-41d4-a716-446655440001';
+    
+    try {
+      // Query real opportunities from database
+      const opportunitiesData = await db
+        .select({
+          id: collectiveOpportunity.id,
+          title: collectiveOpportunity.title,
+          description: collectiveOpportunity.description,
+          type: collectiveOpportunity.type,
+          score: collectiveOpportunity.score,
+          status: collectiveOpportunity.status,
+          createdAt: collectiveOpportunity.createdAt,
+          metadata: collectiveOpportunity.metadata,
+        })
+        .from(collectiveOpportunity)
+        .where(eq(collectiveOpportunity.workspaceId, workspaceId))
+        .orderBy(desc(collectiveOpportunity.score))
+        .limit(10);
+
+      return NextResponse.json({ opportunities: opportunitiesData });
+    } catch (dbError) {
+      console.log('Database query failed, falling back to mock data:', dbError);
+      
+      // Fallback to mock data
     const opportunities = [
       {
         id: '1',
@@ -45,6 +75,7 @@ export async function GET(request: NextRequest) {
     ];
 
     return NextResponse.json({ opportunities });
+    }
   } catch (error) {
     console.error('Opportunities API error:', error);
     return NextResponse.json(

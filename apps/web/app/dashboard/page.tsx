@@ -86,6 +86,20 @@ export default function DashboardPage() {
   const [showInsights, setShowInsights] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [panelWidth, setPanelWidth] = useState(420);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setPanelWidth(Math.min(320, window.innerWidth - 32));
+      } else {
+        setPanelWidth(420);
+      }
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Handle mouse movement for parallax effect
   useEffect(() => {
@@ -326,12 +340,12 @@ export default function DashboardPage() {
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="absolute top-4 left-4 z-20"
+              className="absolute top-2 left-2 md:top-4 md:left-4 z-20"
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 md:space-x-2">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="px-4 py-2 bg-white/10 backdrop-blur-xl rounded-lg text-sm font-medium hover:bg-white/20 transition-all flex items-center space-x-2"
+                  className="px-2 md:px-4 py-1.5 md:py-2 bg-white/10 backdrop-blur-xl rounded-lg text-xs md:text-sm font-medium hover:bg-white/20 transition-all flex items-center space-x-1 md:space-x-2"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
@@ -591,7 +605,7 @@ export default function DashboardPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute bottom-4 left-4 z-10"
                   style={{ 
-                    right: showAIPanel ? `${panelWidth + 16}px` : '16px',
+                    right: showAIPanel ? `${Math.min(panelWidth, window.innerWidth - 32) + 16}px` : '16px',
                     transition: 'right 0.3s ease-in-out'
                   }}
                 >
@@ -666,7 +680,7 @@ export default function DashboardPage() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 420, opacity: 0 }}
                 className="border-l border-white/10 bg-black/50 backdrop-blur-xl flex flex-col"
-                style={{ width: `${panelWidth}px` }}
+                style={{ width: `${Math.min(panelWidth, window.innerWidth - 32)}px` }}
               >
             {/* Command Input */}
             <div className="p-6 border-b border-white/10">

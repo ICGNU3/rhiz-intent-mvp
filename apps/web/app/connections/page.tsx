@@ -501,8 +501,7 @@ export default function ConnectionsPage() {
                 <div className="p-3 bg-blue-600/10 rounded-lg border border-blue-600/20">
                   <p className="text-sm text-blue-400 font-medium mb-1">AI Suggestion</p>
                   <p className="text-sm text-gray-300">
-                    "Hi {messageTarget.name.split(' ')[0]}, I noticed we're both passionate about {messageTarget.tags[0]}. 
-                    Would love to connect and explore potential synergies between our work!"
+                    {`"Hi ${messageTarget.name.split(' ')[0]}, I noticed we're both passionate about ${messageTarget.tags[0]}. Would love to connect and explore potential synergies between our work!"`}
                   </p>
                 </div>
                 
