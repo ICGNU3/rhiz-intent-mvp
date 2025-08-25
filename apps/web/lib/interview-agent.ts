@@ -1,4 +1,4 @@
-import { generateText, streamText } from 'ai';
+import { generateText, streamText, generateObject } from 'ai';
 import { z } from 'zod';
 import { models } from './ai';
 import { logger } from './logger';
@@ -114,7 +114,7 @@ const FOLLOW_UP_TEMPLATES = {
 
 export class InterviewAgent {
   private context: InterviewContext;
-  private model = models.smart;
+  private model = models.gpt4;
 
   constructor() {
     this.context = this.initializeContext();
@@ -166,7 +166,7 @@ export class InterviewAgent {
         shouldEndInterview
       };
     } catch (error) {
-      logger.error('Interview processing error:', error);
+      logger.error('Interview processing error:', error as Error);
       throw error;
     }
   }

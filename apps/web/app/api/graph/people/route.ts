@@ -4,6 +4,9 @@ import { inArray } from 'drizzle-orm';
 import { and, eq, sql, desc } from '@rhiz/db';
 import { getUserId } from '@/lib/auth-mock';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const userId = await getUserId();

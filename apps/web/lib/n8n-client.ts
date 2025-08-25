@@ -53,6 +53,7 @@ interface N8NWebhookPayload {
     encounterId?: string;
     priority?: 'low' | 'medium' | 'high';
     callback?: string; // URL to send results back to
+    [key: string]: any; // Allow additional properties
   };
 }
 
@@ -91,7 +92,7 @@ export class N8NClient {
         metadata: {
           ...metadata,
           timestamp: new Date().toISOString()
-        }
+        } as any
       };
 
       logger.info('Triggering n8n workflow', {

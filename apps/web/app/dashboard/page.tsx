@@ -15,6 +15,7 @@ import {
   Users,
   Target,
   Brain,
+  Building2,
   Mic,
   Send,
   Plus,
@@ -91,7 +92,7 @@ export default function DashboardPage() {
   
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
         setPanelWidth(Math.min(320, window.innerWidth - 32));
       } else {
         setPanelWidth(420);
@@ -99,8 +100,10 @@ export default function DashboardPage() {
     };
     
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   // Handle mouse movement for parallax effect
@@ -114,8 +117,10 @@ export default function DashboardPage() {
         });
       }
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
   }, []);
 
   // Handle fullscreen mode
@@ -158,8 +163,10 @@ export default function DashboardPage() {
         }
       }
     };
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyPress);
+      return () => window.removeEventListener('keydown', handleKeyPress);
+    }
   }, [showAIPanel, isFullscreen, showTopBar, showInsights]);
 
   // Simulate AI typing effect
@@ -228,7 +235,9 @@ export default function DashboardPage() {
     
     // Navigate to connections page with this person selected
     setTimeout(() => {
-      window.location.href = `/connections?selected=${node.id}`;
+              if (typeof window !== 'undefined') {
+          window.location.href = `/connections?selected=${node.id}`;
+        }
     }, 2000); // Increased delay to see the alert first
   };
 
@@ -304,6 +313,14 @@ export default function DashboardPage() {
                 <Link href="/automations" className="flex items-center space-x-2 hover:text-orange-400 transition-colors cursor-pointer">
                   <Zap className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-300 hover:text-orange-400 hidden xl:inline">Automations</span>
+                </Link>
+                <Link href="/insights" className="flex items-center space-x-2 hover:text-indigo-400 transition-colors cursor-pointer">
+                  <Brain className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-indigo-400 hidden xl:inline">Insights</span>
+                </Link>
+                <Link href="/workspace" className="flex items-center space-x-2 hover:text-emerald-400 transition-colors cursor-pointer">
+                  <Building2 className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 hover:text-emerald-400 hidden xl:inline">Workspace</span>
                 </Link>
                 <Link href="/settings" className="flex items-center space-x-2 hover:text-gray-400 transition-colors cursor-pointer">
                   <Settings className="w-4 h-4 text-gray-400" />
@@ -623,7 +640,7 @@ export default function DashboardPage() {
                   transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   className="absolute bottom-4 left-4 z-10"
                   style={{ 
-                    right: showAIPanel ? `${Math.min(panelWidth, window.innerWidth - 32) + 16}px` : '16px',
+                    right: showAIPanel ? `${Math.min(panelWidth, typeof window !== 'undefined' ? window.innerWidth - 32 : 400) + 16}px` : '16px',
                     transition: 'right 0.3s ease-in-out'
                   }}
                 >
@@ -698,7 +715,7 @@ export default function DashboardPage() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 420, opacity: 0 }}
                 className="border-l border-white/10 bg-black/50 backdrop-blur-xl flex flex-col"
-                style={{ width: `${Math.min(panelWidth, window.innerWidth - 32)}px` }}
+                style={{ width: `${Math.min(panelWidth, typeof window !== 'undefined' ? window.innerWidth - 32 : 400)}px` }}
               >
             {/* Command Input */}
             <div className="p-6 border-b border-white/10">

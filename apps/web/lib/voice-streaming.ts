@@ -66,7 +66,7 @@ export class VoiceStreamManager {
 
       logger.info('Voice streaming started successfully', { component: 'voice-streaming' });
     } catch (error) {
-      logger.error('Failed to start voice streaming', error, { component: 'voice-streaming' });
+      logger.error('Failed to start voice streaming', error as Error, { component: 'voice-streaming' });
       throw error;
     }
   }
@@ -83,12 +83,12 @@ export class VoiceStreamManager {
         const data = JSON.parse(event.data);
         this.handleServerMessage(data);
       } catch (error) {
-        logger.error('Failed to parse WebSocket message', error, { component: 'voice-streaming' });
+        logger.error('Failed to parse WebSocket message', error as Error, { component: 'voice-streaming' });
       }
     };
 
     this.ws.onerror = (error) => {
-      logger.error('WebSocket error', error, { component: 'voice-streaming' });
+      logger.error('WebSocket error', error as unknown as Error, { component: 'voice-streaming' });
     };
 
     this.ws.onclose = () => {
@@ -111,7 +111,7 @@ export class VoiceStreamManager {
     };
 
     this.mediaRecorder.onerror = (error) => {
-      logger.error('MediaRecorder error', error, { component: 'voice-streaming' });
+      logger.error('MediaRecorder error', error as unknown as Error, { component: 'voice-streaming' });
     };
   }
 
@@ -130,7 +130,7 @@ export class VoiceStreamManager {
         format: 'webm'
       }));
     } catch (error) {
-      logger.error('Failed to send audio chunk', error, { component: 'voice-streaming' });
+      logger.error('Failed to send audio chunk', error as Error, { component: 'voice-streaming' });
     }
   }
 
@@ -146,7 +146,7 @@ export class VoiceStreamManager {
         this.playAudioResponse(data.audio);
         break;
       case 'error':
-        logger.error('Server error', data.error, { component: 'voice-streaming' });
+        logger.error('Server error', data.error as Error, { component: 'voice-streaming' });
         break;
       default:
         logger.warn('Unknown message type', { component: 'voice-streaming', type: data.type });
@@ -171,7 +171,7 @@ export class VoiceStreamManager {
       // Clean up
       URL.revokeObjectURL(url);
     } catch (error) {
-      logger.error('Failed to play audio response', error, { component: 'voice-streaming' });
+      logger.error('Failed to play audio response', error as Error, { component: 'voice-streaming' });
     }
   }
 

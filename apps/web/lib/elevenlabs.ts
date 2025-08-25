@@ -80,7 +80,7 @@ class ElevenLabsClient {
     }
 
     // Handle binary responses (audio data)
-    if (options.headers?.['Accept'] === 'audio/*') {
+    if (options.headers && typeof options.headers === 'object' && 'Accept' in options.headers && (options.headers as any).Accept === 'audio/*') {
       return response.arrayBuffer() as T;
     }
 
@@ -124,7 +124,7 @@ class ElevenLabsClient {
 
       return Buffer.from(response);
     } catch (error) {
-      logger.error('Failed to generate speech', error, { component: 'elevenlabs' });
+      logger.error('Failed to generate speech', error as Error, { component: 'elevenlabs' });
       throw error;
     }
   }
@@ -136,7 +136,7 @@ class ElevenLabsClient {
       const response = await this.request<{ voices: Voice[] }>('/voices');
       return response.voices;
     } catch (error) {
-      logger.error('Failed to fetch voices', error, { component: 'elevenlabs' });
+      logger.error('Failed to fetch voices', error as Error, { component: 'elevenlabs' });
       throw error;
     }
   }
@@ -147,7 +147,7 @@ class ElevenLabsClient {
       
       return await this.request<Voice>(`/voices/${voiceId}`);
     } catch (error) {
-      logger.error('Failed to fetch voice', error, { component: 'elevenlabs', voiceId });
+      logger.error('Failed to fetch voice', error as Error, { component: 'elevenlabs', voiceId });
       throw error;
     }
   }
@@ -159,7 +159,7 @@ class ElevenLabsClient {
       const response = await this.request<{ models: any[] }>('/models');
       return response.models;
     } catch (error) {
-      logger.error('Failed to fetch models', error, { component: 'elevenlabs' });
+      logger.error('Failed to fetch models', error as Error, { component: 'elevenlabs' });
       throw error;
     }
   }
@@ -171,7 +171,7 @@ class ElevenLabsClient {
       const response = await this.request<{ history: any[] }>('/history');
       return response.history;
     } catch (error) {
-      logger.error('Failed to fetch history', error, { component: 'elevenlabs' });
+      logger.error('Failed to fetch history', error as Error, { component: 'elevenlabs' });
       throw error;
     }
   }

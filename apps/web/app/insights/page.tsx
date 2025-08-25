@@ -7,7 +7,7 @@ import {
   Clock, Calendar, MapPin, Building, Star, ArrowUpRight, 
   ArrowDownRight, Eye, Filter, Download, Share2, Sparkles,
   CircuitBoard, GitBranch, Layers, Activity, Globe, UserCheck,
-  MessageSquare, Coffee, Handshake, Briefcase, GraduationCap,
+  MessageSquare, Coffee, Heart, Briefcase, GraduationCap,
   Award, Lightbulb, AlertCircle, CheckCircle, Info, Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
