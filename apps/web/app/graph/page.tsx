@@ -12,10 +12,52 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Filter, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 // Dynamically import react-force-graph to avoid SSR issues
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), {
+const ForceGraph2D = dynamic(() => {
+  return new Promise((resolve) => {
+    import('react-force-graph-2d')
+      .then((module) => {
+        resolve({ default: module.default || module });
+      })
+      .catch(() => {
+        // If the library fails to load, resolve with null
+        resolve({ default: null });
+      });
+  });
+}, {
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-96">Loading graph...</div>
 });
+
+// Fallback component if the library fails to load
+const FallbackGraph = () => (
+  <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="text-center">
+      <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">Network Graph</h3>
+      <p className="text-gray-600 max-w-md mb-4">
+        Visualize your network relationships and connections. The interactive graph is loading...
+      </p>
+      <div className="flex justify-center space-x-4">
+        <div className="text-center">
+          <div className="w-4 h-4 bg-red-500 rounded-full mx-auto mb-1"></div>
+          <span className="text-xs text-gray-600">Investors</span>
+        </div>
+        <div className="text-center">
+          <div className="w-4 h-4 bg-blue-500 rounded-full mx-auto mb-1"></div>
+          <span className="text-xs text-gray-600">Engineers</span>
+        </div>
+        <div className="text-center">
+          <div className="w-4 h-4 bg-green-500 rounded-full mx-auto mb-1"></div>
+          <span className="text-xs text-gray-600">Advisors</span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 interface GraphNode {
   id: string;
@@ -234,37 +276,43 @@ export default function GraphPage() {
                 <div className="text-lg">Loading network graph...</div>
               </div>
             ) : (
-              <ForceGraph2D
-                ref={graphRef}
-                graphData={forceGraphData}
-                nodeLabel="label"
-                nodeColor={getNodeColor}
-                nodeRelSize={6}
-                linkColor={getEdgeColor}
-                linkWidth={2}
-                linkDirectionalParticles={2}
-                linkDirectionalParticleSpeed={0.005}
-                onNodeClick={handleNodeClick}
-                onLinkClick={handleEdgeClick}
-                cooldownTicks={100}
-                nodeCanvasObject={(node: any, ctx, globalScale) => {
-                  const label = node.label;
-                  const fontSize = 12/globalScale;
-                  ctx.font = `${fontSize}px Sans-Serif`;
-                  const textWidth = ctx.measureText(label).width;
-                  const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
+              <div className="h-full">
+                {typeof window !== 'undefined' && ForceGraph2D && ForceGraph2D.default ? (
+                  <ForceGraph2D.default
+                    ref={graphRef}
+                    graphData={forceGraphData}
+                    nodeLabel="label"
+                    nodeColor={getNodeColor}
+                    nodeRelSize={6}
+                    linkColor={getEdgeColor}
+                    linkWidth={2}
+                    linkDirectionalParticles={2}
+                    linkDirectionalParticleSpeed={0.005}
+                    onNodeClick={handleNodeClick}
+                    onLinkClick={handleEdgeClick}
+                    cooldownTicks={100}
+                    nodeCanvasObject={(node: any, ctx, globalScale) => {
+                      const label = node.label;
+                      const fontSize = 12/globalScale;
+                      ctx.font = `${fontSize}px Sans-Serif`;
+                      const textWidth = ctx.measureText(label).width;
+                      const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2);
 
-                  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                  ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
+                      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                      ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, bckgDimensions[0], bckgDimensions[1]);
 
-                  ctx.textAlign = 'center';
-                  ctx.textBaseline = 'middle';
-                  ctx.fillStyle = node.color;
-                  ctx.fillText(label, node.x, node.y);
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.fillStyle = node.color;
+                      ctx.fillText(label, node.x, node.y);
 
-                  node.bckgDimensions = bckgDimensions;
-                }}
-              />
+                      node.bckgDimensions = bckgDimensions;
+                    }}
+                  />
+                ) : (
+                  <FallbackGraph />
+                )}
+              </div>
             )}
           </div>
         </CardContent>
