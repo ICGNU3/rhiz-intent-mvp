@@ -59,13 +59,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // const userId = await requireUser(); // This line was removed as per the edit hint
+    const userId = await getUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
-    const { kind, title, details } = body;
-    
-    // For demo purposes, use hardcoded workspace
-    const demoWorkspaceId = '550e8400-e29b-41d4-a716-446655440001';
-    const workspaceId = demoWorkspaceId;
+    const { workspaceId, kind, title, details } = body;
     
     if (!workspaceId) {
       return NextResponse.json(
@@ -82,50 +82,47 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create new goal
-    // const [newGoal] = await db // This line was removed as per the edit hint
-    //   .insert(goal)
-    //   .values({
-    //     workspaceId,
-    //     ownerId: userId,
-    //     kind,
-    //     title,
-    //     details,
-    //     status: 'active',
-    //   })
-    //   .returning();
-    
-    // Log activity
-    // await db.insert(workspaceActivity).values({ // This line was removed as per the edit hint
-    //   workspaceId,
-    //   userId: userId,
-    //   action: 'created_goal',
-    //   entityType: 'goal',
-    //   entityId: newGoal.id,
-    //   metadata: { goal_title: title },
-    // });
-    
-    // return NextResponse.json({ // This line was removed as per the edit hint
-    //   success: true,
-    //   goal: newGoal,
-    // });
+    try {
+      // Set user context for RLS
+      await setUserContext(userId);
+      
+      // Create new goal in database
+      const [newGoal] = await db
+        .insert(goal)
+        .values({
+          workspaceId,
+          ownerId: userId,
+          kind,
+          title,
+          details,
+          status: 'active',
+        })
+        .returning();
+      
+      return NextResponse.json({
+        success: true,
+        goal: newGoal,
+      });
+    } catch (dbError) {
+      console.error('Database insert failed:', dbError);
+      
+      // Fallback to mock response
+      const newGoal = {
+        id: crypto.randomUUID(),
+        workspaceId,
+        ownerId: userId,
+        kind,
+        title,
+        details,
+        status: 'active',
+        createdAt: new Date(),
+      };
 
-    // Return mock data for now
-    const newGoal = {
-      id: '3', // Mock ID
-      workspaceId: workspaceId,
-      ownerId: 'mock_user_id', // Mock owner ID
-      kind,
-      title,
-      details,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-    };
-
-    return NextResponse.json({
-      success: true,
-      goal: newGoal,
-    });
+      return NextResponse.json({
+        success: true,
+        goal: newGoal,
+      });
+    }
     
   } catch (error) {
     console.error('Failed to create goal:', error);

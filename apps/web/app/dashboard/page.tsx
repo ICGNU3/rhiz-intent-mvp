@@ -197,8 +197,6 @@ export default function DashboardPage() {
 
   // Handle user interactions
   const handleMessageContact = (node: any) => {
-    console.log('🔥 MESSAGE FUNCTION CALLED for:', node.name);
-    alert(`MESSAGE CLICKED: ${node.name}`); // Immediate visible feedback
     setAiResponse('');
     setCommand(`Message ${node.name}`);
     typeMessage(`🎯 Ready to message ${node.name} at ${node.company}! I'll help you draft a personalized message. What would you like to discuss? Consider mentioning your shared interest in ${node.type === 'investor' ? 'AI investments' : 'tech innovation'} or mutual connections.`);
@@ -208,8 +206,6 @@ export default function DashboardPage() {
   };
 
   const handleViewProfile = (node: any) => {
-    console.log('🔥 VIEW PROFILE FUNCTION CALLED for:', node.name);
-    alert(`VIEW PROFILE CLICKED: ${node.name}`); // Immediate visible feedback
     // Show immediate feedback in AI panel first
     setAiResponse('');
     typeMessage(`📋 Loading ${node.name}'s profile... Redirecting to connections page with detailed view.`);
@@ -243,8 +239,8 @@ export default function DashboardPage() {
               exit={{ y: -60, opacity: 0 }}
               className="border-b border-white/10 backdrop-blur-xl bg-black/50"
             >
-              <div className="px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+              <div className="px-4 md:px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center space-x-3 md:space-x-6">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
@@ -252,7 +248,7 @@ export default function DashboardPage() {
                 <span className="font-semibold text-lg">Rhiz</span>
               </div>
               
-              <div className="flex items-center space-x-2 text-sm">
+              <div className="hidden md:flex items-center space-x-2 text-sm">
                 <span className="text-gray-400">Network Health</span>
                 <div className="flex space-x-1">
                   {[1,2,3,4,5].map((i) => (
@@ -266,9 +262,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               {/* Quick Stats */}
-              <div className="flex items-center space-x-6 text-sm">
+              <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 text-sm">
                 <Link href="/connections" className="flex items-center space-x-2 hover:text-blue-400 transition-colors cursor-pointer">
                   <Users className="w-4 h-4 text-gray-400" />
                   <span className="text-gray-300 hover:text-blue-400">127 connections</span>
@@ -470,8 +466,6 @@ export default function DashboardPage() {
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
-                        console.log('🔥 NODE CLICKED:', node.name);
-                        alert(`Node clicked: ${node.name} - Card should appear!`);
                         setActiveNode(activeNode === node.id ? null : node.id);
                       }}
                       className={cn(

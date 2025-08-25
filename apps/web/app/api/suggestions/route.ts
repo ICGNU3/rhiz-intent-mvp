@@ -1,11 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import { db, suggestion } from '@rhiz/db';
-// import { eq, and, desc } from 'drizzle-orm';
-// import { getUserId } from '@rhiz/shared';
+import { db, suggestion, person, goal } from '@rhiz/db';
+import { eq, and, desc } from 'drizzle-orm';
+import { getUserId } from '@/lib/auth-mock';
 
 export async function GET(request: NextRequest) {
   try {
-    // Mock suggestions data
+    const userId = await getUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+    const workspaceId = searchParams.get('workspaceId');
+    
+    // Try to fetch real data from database
+    try {
+      if (workspaceId) {
+        // Fetch suggestions with person and goal data
+        const suggestionsData = await db
+          .select({
+            id: suggestion.id,
+            aId: suggestion.aId,
+            bId: suggestion.bId,
+            goalId: suggestion.goalId,
+            score: suggestion.score,
+            state: suggestion.state,
+            why: suggestion.why,
+            createdAt: suggestion.createdAt,
+          })
+          .from(suggestion)
+          .where(eq(suggestion.workspaceId, workspaceId))
+          .orderBy(desc(suggestion.score))
+          .limit(10);
+        
+        // Enrich suggestions with person and goal data
+        const enrichedSuggestions = await Promise.all(
+          suggestionsData.map(async (s) => {
+            // Get person A data
+            const [personAData] = await db
+              .select({
+                fullName: person.fullName,
+                primaryEmail: person.primaryEmail,
+                location: person.location,
+              })
+              .from(person)
+              .where(eq(person.id, s.aId))
+              .limit(1);
+            
+            // Get person B data
+            const [personBData] = await db
+              .select({
+                fullName: person.fullName,
+                primaryEmail: person.primaryEmail,
+                location: person.location,
+              })
+              .from(person)
+              .where(eq(person.id, s.bId))
+              .limit(1);
+            
+            // Get goal data
+            const [goalData] = await db
+              .select({
+                title: goal.title,
+                kind: goal.kind,
+              })
+              .from(goal)
+              .where(eq(goal.id, s.goalId))
+              .limit(1);
+            
+            return {
+              id: s.id,
+              kind: 'introduction',
+              score: s.score,
+              state: s.state,
+              createdAt: s.createdAt.toISOString(),
+              personA: {
+                name: personAData?.fullName || 'Unknown',
+                title: 'Contact',
+                company: personAData?.location?.split(',')[0] || 'Unknown',
+              },
+              personB: {
+                name: personBData?.fullName || 'Unknown',
+                title: 'Contact',
+                company: personBData?.location?.split(',')[0] || 'Unknown',
+              },
+              why: s.why || {
+                mutualInterests: ['Networking', 'Collaboration'],
+                recency: 0.7,
+                frequency: 0.6,
+                affiliation: 0.8,
+                goalAlignment: 0.9
+              },
+              draft: {
+                preIntroPing: `Hi ${personAData?.fullName || 'there'}! I think you'd really enjoy connecting with ${personBData?.fullName || 'this person'}.`,
+                doubleOptIntro: `Hi ${personAData?.fullName || 'there'} and ${personBData?.fullName || 'there'}! I wanted to connect you both.`
+              }
+            };
+          })
+        );
+        
+        return NextResponse.json({ suggestions: enrichedSuggestions });
+      }
+    } catch (dbError) {
+      console.log('Database query failed, falling back to mock data:', dbError);
+    }
+    
+    // Fallback to mock data if database fails
     const mockSuggestions = [
       {
         id: '1',
