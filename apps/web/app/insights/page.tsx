@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { PageNavigation } from '@/app/components/PageNavigation';
 import { ConnectionFlowVisualization } from '@/app/components/ConnectionFlowVisualization';
 
 interface NetworkCluster {
@@ -176,6 +177,7 @@ export default function InsightsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <PageNavigation />
       {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />

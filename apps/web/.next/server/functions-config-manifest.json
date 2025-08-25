@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/agents/prioritize":{},"/api/agents/outreach":{},"/api/agents/sense":{},"/api/analytics/growth":{},"/api/analytics":{},"/api/graph/people":{},"/api/insights/connection-flow":{},"/api/search":{}}}
+{"version":1,"functions":{"/api/agents/outreach":{},"/api/agents/sense":{},"/api/analytics/growth":{},"/api/agents/prioritize":{},"/api/analytics":{},"/api/graph/people":{},"/api/insights/connection-flow":{},"/api/people/enhanced":{},"/api/search":{}}}
