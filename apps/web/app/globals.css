@@ -1,51 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    /* Rhiz Brand Color System - Professional Networking Palette */
+    
+    /* Primary Colors - Optimized for contrast and human vision */
+    --rhiz-forest: 162 52% 18%;          /* #15402E - Darker for better contrast on light backgrounds */
+    --rhiz-forest-light: 162 52% 28%;    /* #1F5B3F - Lighter forest for hover states */
+    --rhiz-forest-dark: 162 52% 12%;     /* #0F2A1E - Darker forest for active states */
+    
+    /* Secondary Colors - Enhanced for better readability */
+    --rhiz-stone: 27 25% 35%;            /* #625447 - Darker stone for better text contrast */
+    --rhiz-stone-light: 27 25% 55%;      /* #8B7B68 - Mid-tone for UI elements */
+    --rhiz-stone-dark: 27 25% 25%;       /* #453D33 - Dark stone for strong contrast */
+    
+    /* Accent Colors - Adjusted for accessibility */
+    --rhiz-coral: 11 75% 58%;            /* #E06B47 - Slightly more saturated and darker */
+    --rhiz-sage: 162 28% 35%;            /* #476B5C - Darker sage for better contrast */
+    
+    /* Neutral Colors - Optimized contrast ratios */
+    --rhiz-cream: 45 35% 97%;            /* #FAF8F4 - Brighter cream for better contrast */
+    --rhiz-cream-dark: 45 35% 92%;       /* #F2EDE6 - Darker cream variant */
+    --rhiz-charcoal: 225 18% 15%;        /* #252938 - Deeper charcoal for maximum contrast */
+    --rhiz-charcoal-light: 225 18% 25%;  /* #3A3F52 - Lighter charcoal maintaining readability */
+    
+    /* Status Colors (matching our palette) */
+    --rhiz-success: 162 46% 30%;         /* Forest green variant */
+    --rhiz-warning: 35 84% 62%;          /* Warm amber */
+    --rhiz-error: 0 65% 58%;             /* Muted red that works with palette */
+    
+    /* Semantic mappings for shadcn compatibility */
+    --background: var(--rhiz-cream);
+    --foreground: var(--rhiz-charcoal);
+    --card: var(--rhiz-cream);
+    --card-foreground: var(--rhiz-charcoal);
+    --popover: var(--rhiz-cream);
+    --popover-foreground: var(--rhiz-charcoal);
+    --primary: var(--rhiz-forest);
+    --primary-foreground: var(--rhiz-cream);
+    --secondary: var(--rhiz-stone);
+    --secondary-foreground: var(--rhiz-cream);
+    --muted: var(--rhiz-cream-dark);
+    --muted-foreground: var(--rhiz-charcoal-light);
+    --accent: var(--rhiz-coral);
+    --accent-foreground: var(--rhiz-cream);
+    --destructive: var(--rhiz-error);
+    --destructive-foreground: var(--rhiz-cream);
+    --border: var(--rhiz-stone);
+    --input: var(--rhiz-cream-dark);
+    --ring: var(--rhiz-forest);
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* Dark mode using our palette - Optimized for human vision */
+    --background: var(--rhiz-charcoal);
+    --foreground: 45 35% 95%;                    /* Brighter cream for dark backgrounds */
+    --card: var(--rhiz-charcoal-light);
+    --card-foreground: 45 35% 95%;               /* Consistent bright text */
+    --popover: var(--rhiz-charcoal);
+    --popover-foreground: 45 35% 95%;
+    --primary: var(--rhiz-forest-light);
+    --primary-foreground: var(--rhiz-charcoal);
+    --secondary: var(--rhiz-stone-light);        /* Lighter stone for dark mode visibility */
+    --secondary-foreground: var(--rhiz-charcoal);
+    --muted: var(--rhiz-charcoal-light);
+    --muted-foreground: 27 25% 65%;              /* Lighter muted text for dark backgrounds */
+    --accent: var(--rhiz-coral);
+    --accent-foreground: var(--rhiz-charcoal);
+    --destructive: var(--rhiz-error);
+    --destructive-foreground: 45 35% 95%;
+    --border: var(--rhiz-stone-dark);
+    --input: var(--rhiz-charcoal-light);
+    --ring: var(--rhiz-forest-light);
   }
 }
 
@@ -53,7 +83,66 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+}
+
+@layer components {
+  /* Professional button styles */
+  .btn-rhiz-primary {
+    @apply bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg;
+  }
+  
+  .btn-rhiz-secondary {
+    @apply bg-gray-600 hover:bg-gray-700 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105;
+  }
+  
+  .btn-rhiz-accent {
+    @apply bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 hover:scale-105;
+  }
+  
+  /* Card styles */
+  .card-rhiz {
+    @apply bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .card-rhiz-dark {
+    @apply bg-gray-900 border border-gray-700 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+  
+  /* Gradient utilities using standard colors */
+  .bg-gradient-rhiz-primary {
+    @apply bg-gradient-to-br from-green-600 to-blue-600;
+  }
+  
+  .bg-gradient-rhiz-warm {
+    @apply bg-gradient-to-br from-orange-500 to-gray-600;
+  }
+  
+  .bg-gradient-rhiz-neutral {
+    @apply bg-gradient-to-br from-gray-100 to-gray-300;
+  }
+}
+
+@layer utilities {
+  /* Text gradients using standard colors */
+  .text-gradient-rhiz {
+    @apply bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-rhiz-warm {
+    @apply bg-gradient-to-r from-orange-500 to-gray-600 bg-clip-text text-transparent;
   }
 }

@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@rhiz/db": ["../../packages/db/src"]
+      "@rhiz/db": ["../../packages/db/src"],
+      "@rhiz/agents": ["../../packages/agents/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
