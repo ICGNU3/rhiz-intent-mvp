@@ -38,6 +38,8 @@ import {
   Shrink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { PageNavigation } from '@/app/components/PageNavigation';
 
 // Mock data for network visualization
 const mockNetworkData = {
@@ -202,6 +204,9 @@ export default function DashboardPage() {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
       </div>
 
+      {/* Page Navigation */}
+      <PageNavigation />
+
       {/* Main Content - Full Width */}
       <div className="relative z-10 h-screen flex flex-col">
         {/* Top Navigation Bar - Collapsible */}
@@ -239,18 +244,18 @@ export default function DashboardPage() {
             <div className="flex items-center space-x-4">
               {/* Quick Stats */}
               <div className="flex items-center space-x-6 text-sm">
-                <div className="flex items-center space-x-2">
+                <Link href="/connections" className="flex items-center space-x-2 hover:text-blue-400 transition-colors cursor-pointer">
                   <Users className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-300">127 connections</span>
-                </div>
-                <div className="flex items-center space-x-2">
+                  <span className="text-gray-300 hover:text-blue-400">127 connections</span>
+                </Link>
+                <Link href="/goals" className="flex items-center space-x-2 hover:text-green-400 transition-colors cursor-pointer">
                   <Target className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-300">3 active goals</span>
-                </div>
-                <div className="flex items-center space-x-2">
+                  <span className="text-gray-300 hover:text-green-400">3 active goals</span>
+                </Link>
+                <Link href="/opportunities" className="flex items-center space-x-2 hover:text-orange-400 transition-colors cursor-pointer">
                   <Zap className="w-4 h-4 text-gray-400" />
-                  <span className="text-gray-300">12 opportunities</span>
-                </div>
+                  <span className="text-gray-300 hover:text-orange-400">12 opportunities</span>
+                </Link>
               </div>
 
               {/* View Toggle */}
@@ -703,11 +708,11 @@ export default function DashboardPage() {
                   <div className="space-y-3 text-left max-w-sm mx-auto">
                     <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                       <p className="text-xs font-medium text-gray-300 mb-1">Try asking:</p>
-                      <p className="text-sm text-gray-400">"Who in my network can help with fundraising?"</p>
+                      <p className="text-sm text-gray-400">&ldquo;Who in my network can help with fundraising?&rdquo;</p>
                     </div>
                     <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                       <p className="text-xs font-medium text-gray-300 mb-1">Or command:</p>
-                      <p className="text-sm text-gray-400">"Show me dormant connections to revive"</p>
+                      <p className="text-sm text-gray-400">&ldquo;Show me dormant connections to revive&rdquo;</p>
                     </div>
                   </div>
                 </div>

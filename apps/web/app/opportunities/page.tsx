@@ -31,6 +31,7 @@ import {
   Flame
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PageNavigation } from '@/app/components/PageNavigation';
 
 // Mock data for opportunities
 const mockOpportunities = [
@@ -226,6 +227,9 @@ export default function OpportunitiesPage() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
       </div>
 
+      {/* Page Navigation */}
+      <PageNavigation />
+
       {/* Main Content */}
       <div className="relative z-10">
         {/* Header */}
@@ -329,7 +333,7 @@ export default function OpportunitiesPage() {
                       <Flame className="w-4 h-4 text-orange-500" />
                       <p className="text-sm font-medium text-orange-400">Time Sensitive</p>
                     </div>
-                    <p className="text-sm text-gray-300">Mike's Series B window closes in 2 weeks. Connect him with investors before momentum is lost.</p>
+                    <p className="text-sm text-gray-300">Mike&apos;s Series B window closes in 2 weeks. Connect him with investors before momentum is lost.</p>
                     <button className="mt-3 text-xs text-blue-400 hover:text-blue-300">Rush Execute →</button>
                   </div>
                   

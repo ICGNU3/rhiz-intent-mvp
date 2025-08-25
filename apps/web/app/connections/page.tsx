@@ -30,6 +30,7 @@ import {
   SortAsc
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PageNavigation } from '@/app/components/PageNavigation';
 
 // Mock data for connections
 const mockConnections = [
@@ -161,6 +162,9 @@ export default function ConnectionsPage() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl" />
       </div>
 
+      {/* Page Navigation */}
+      <PageNavigation />
+
       {/* Main Content */}
       <div className="relative z-10">
         {/* Header */}
@@ -277,7 +281,7 @@ export default function ConnectionsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-white/5 rounded-lg border border-white/10">
                     <p className="text-sm text-gray-400 mb-2">Reconnect Opportunity</p>
-                    <p className="text-sm">David Kim hasn't been contacted in 3 weeks. He just became VP at Stripe - perfect time to congratulate.</p>
+                    <p className="text-sm">David Kim hasn&apos;t been contacted in 3 weeks. He just became VP at Stripe - perfect time to congratulate.</p>
                     <button className="mt-3 text-xs text-blue-400 hover:text-blue-300">Draft Message →</button>
                   </div>
                   

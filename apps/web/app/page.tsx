@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Activity
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
   const [chatMessage, setChatMessage] = useState('');
@@ -42,7 +43,11 @@ export default function HomePage() {
           <div className="flex h-16 items-center justify-between px-6">
             <div className="flex items-center space-x-4">
               <h1 className="text-xl font-semibold">Network Overview</h1>
-              <Badge variant="secondary">127 connections</Badge>
+              <Link href="/connections">
+                <Badge variant="secondary" className="hover:bg-blue-100 transition-colors cursor-pointer">
+                  127 connections
+                </Badge>
+              </Link>
             </div>
             
             <div className="flex items-center space-x-2">
@@ -204,7 +209,7 @@ export default function HomePage() {
                 <div className="flex-1">
                   <div className="bg-blue-50 rounded-lg p-3">
                     <p className="text-sm text-gray-900 mb-2">
-                      *Graph highlights connection* Here's a draft:
+                      *Graph highlights connection* Here&apos;s a draft:
                     </p>
                     <div className="bg-white rounded border p-3 text-sm">
                       <p className="text-gray-700">
@@ -242,7 +247,7 @@ export default function HomePage() {
                   placeholder="Type a command or question..."
                   value={chatMessage}
                   onChange={(e) => setChatMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   className="flex-1"
                 />
                 <Button size="sm" onClick={handleSendMessage}>

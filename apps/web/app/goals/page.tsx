@@ -27,6 +27,7 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PageNavigation } from '@/app/components/PageNavigation';
 
 // Mock data for goals
 const mockGoals = [
@@ -179,6 +180,9 @@ export default function GoalsPage() {
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
       </div>
+
+      {/* Page Navigation */}
+      <PageNavigation />
 
       {/* Main Content */}
       <div className="relative z-10">
