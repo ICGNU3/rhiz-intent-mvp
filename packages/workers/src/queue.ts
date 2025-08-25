@@ -17,6 +17,11 @@ export const QUEUE_NAMES = {
   SUGGESTIONS_PROPOSED: 'suggestions.proposed',
   N8N_CLEANUP: 'n8n.cleanup',
   EVENTS: 'events',
+  // Agent system queues
+  AGENT_PRIORITIZE: 'agent.prioritize',
+  AGENT_SENSE: 'agent.sense',
+  AGENT_OUTREACH: 'agent.outreach',
+  SIGNALS_COMPUTE: 'signals.compute',
 } as const;
 
 // Create queues
@@ -32,6 +37,11 @@ export const queues = {
   suggestionsProposed: new Queue(QUEUE_NAMES.SUGGESTIONS_PROPOSED, { connection: redis }),
   n8nCleanup: new Queue(QUEUE_NAMES.N8N_CLEANUP, { connection: redis }),
   events: new Queue(QUEUE_NAMES.EVENTS, { connection: redis }),
+  // Agent system queues
+  agentPrioritize: new Queue(QUEUE_NAMES.AGENT_PRIORITIZE, { connection: redis }),
+  agentSense: new Queue(QUEUE_NAMES.AGENT_SENSE, { connection: redis }),
+  agentOutreach: new Queue(QUEUE_NAMES.AGENT_OUTREACH, { connection: redis }),
+  signalsCompute: new Queue(QUEUE_NAMES.SIGNALS_COMPUTE, { connection: redis }),
 };
 
 // Create schedulers for delayed jobs
@@ -47,6 +57,11 @@ export const schedulers = {
   suggestionsProposed: new QueueScheduler(QUEUE_NAMES.SUGGESTIONS_PROPOSED, { connection: redis }),
   n8nCleanup: new QueueScheduler(QUEUE_NAMES.N8N_CLEANUP, { connection: redis }),
   events: new QueueScheduler(QUEUE_NAMES.EVENTS, { connection: redis }),
+  // Agent system schedulers
+  agentPrioritize: new QueueScheduler(QUEUE_NAMES.AGENT_PRIORITIZE, { connection: redis }),
+  agentSense: new QueueScheduler(QUEUE_NAMES.AGENT_SENSE, { connection: redis }),
+  agentOutreach: new QueueScheduler(QUEUE_NAMES.AGENT_OUTREACH, { connection: redis }),
+  signalsCompute: new QueueScheduler(QUEUE_NAMES.SIGNALS_COMPUTE, { connection: redis }),
 };
 
 // Helper function to start an agent
