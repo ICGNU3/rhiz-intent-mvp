@@ -6,10 +6,13 @@ import {
   Sparkles, MessageCircle, Command, ChevronUp, ChevronDown,
   Zap, Users, Target, Brain, Building2, Mic, Send, Plus, BarChart3, Minus,
   Filter, Settings, MapPin, Building, GraduationCap, Grid3X3, Loader2,
-  PanelRightClose, PanelRightOpen, Expand, Shrink
+  PanelRightClose, PanelRightOpen, Expand, Shrink, Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { CollaborationHub } from '@/app/components/CollaborationHub';
+import { RetentionEngine } from '@/app/components/RetentionEngine';
+import { DiscoveryEngine } from '@/app/components/DiscoveryEngine';
 
 // Mock data - optimized structure
 const mockNetworkData = {
@@ -59,6 +62,9 @@ export default function DashboardPage() {
   
   // Welcome banner for new users
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
+  
+  // Phase 2 components state
+  const [activePhase2Tab, setActivePhase2Tab] = useState<'collaboration' | 'retention' | 'discovery' | null>(null);
   
   useEffect(() => {
     const handleResize = () => {
@@ -423,6 +429,51 @@ export default function DashboardPage() {
               </div>
             </motion.div>
 
+            {/* Phase 2 Components Toggle */}
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="absolute top-4 left-4 z-20 flex flex-col space-y-2"
+            >
+              <button 
+                onClick={() => setActivePhase2Tab(activePhase2Tab === 'collaboration' ? null : 'collaboration')}
+                className={cn(
+                  "p-2 backdrop-blur-xl rounded-lg transition-all",
+                  activePhase2Tab === 'collaboration' 
+                    ? "bg-blue-500/20 text-blue-400" 
+                    : "bg-white/10 text-gray-400 hover:bg-white/20"
+                )}
+                title="Collaboration Hub"
+              >
+                <Users className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setActivePhase2Tab(activePhase2Tab === 'retention' ? null : 'retention')}
+                className={cn(
+                  "p-2 backdrop-blur-xl rounded-lg transition-all",
+                  activePhase2Tab === 'retention' 
+                    ? "bg-yellow-500/20 text-yellow-400" 
+                    : "bg-white/10 text-gray-400 hover:bg-white/20"
+                )}
+                title="Retention Engine"
+              >
+                <Target className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={() => setActivePhase2Tab(activePhase2Tab === 'discovery' ? null : 'discovery')}
+                className={cn(
+                  "p-2 backdrop-blur-xl rounded-lg transition-all",
+                  activePhase2Tab === 'discovery' 
+                    ? "bg-green-500/20 text-green-400" 
+                    : "bg-white/10 text-gray-400 hover:bg-white/20"
+                )}
+                title="Discovery Engine"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+            </motion.div>
+
             {/* Zoom & View Controls */}
             <motion.div
               initial={{ x: 20, opacity: 0 }}
@@ -714,6 +765,23 @@ export default function DashboardPage() {
               </motion.button>
             )}
           </div>
+
+          {/* Phase 2 Components Overlay */}
+          <AnimatePresence>
+            {activePhase2Tab && (
+              <motion.div
+                initial={{ x: -400, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -400, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="absolute top-20 left-4 z-30 max-w-md"
+              >
+                {activePhase2Tab === 'collaboration' && <CollaborationHub />}
+                {activePhase2Tab === 'retention' && <RetentionEngine />}
+                {activePhase2Tab === 'discovery' && <DiscoveryEngine />}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* AI Command Center (Right Side - Collapsible) */}
           <AnimatePresence>
