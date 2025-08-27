@@ -59,22 +59,61 @@ export const ConnectionScore = z.object({
     affiliation: z.number().min(0).max(100),
     mutualInterests: z.number().min(0).max(100),
     goalAlignment: z.number().min(0).max(100),
+    communicationPatterns: z.number().min(0).max(100),
+    expertiseComplementarity: z.number().min(0).max(100),
+    socialInfluence: z.number().min(0).max(100),
+    semanticSimilarity: z.number().min(0).max(100),
   }),
   confidence: z.number().min(0).max(100),
 });
 
 export type ConnectionScore = z.infer<typeof ConnectionScore>;
 
-// Suggestion types
-export const SuggestionKind = z.enum([
-  'introduction',
-  'follow_up',
-  'reconnect',
-  'collaboration',
-  'mentorship',
-  'investment',
-]);
+// Person interface for matching
+export interface Person {
+  id: string;
+  fullName: string;
+  primaryEmail?: string;
+  location?: string;
+  claims: Array<{
+    key: string;
+    value: string;
+    confidence: number;
+    source: string;
+  }>;
+  encounters: Array<{
+    occurredAt: Date;
+    kind: string;
+    summary?: string;
+  }>;
+}
 
+// Goal interface for matching
+export interface Goal {
+  id: string;
+  kind: string;
+  title: string;
+  details?: string;
+}
+
+// Enhanced pair features with semantic similarity
+export interface PairFeatures {
+  recency: number; // Days since last interaction
+  frequency: number; // Interactions per month
+  affiliation: number; // Company/school overlap
+  mutualInterests: number; // Shared interests/topics
+  goalAlignment: number; // How well they match the goal
+  locationProximity: number; // Geographic closeness
+  networkOverlap: number; // Common connections
+  communicationPatterns: number; // Quality of communication
+  expertiseComplementarity: number; // Complementary skills
+  socialInfluence: number; // Network centrality
+  temporalPatterns: number; // Meeting consistency
+  semanticSimilarity: number; // Embedding-based similarity
+}
+
+// Suggestion types
+export const SuggestionKind = z.enum(['introduction', 'follow_up', 'reconnect']);
 export type SuggestionKind = z.infer<typeof SuggestionKind>;
 
 export const Suggestion = z.object({
@@ -105,22 +144,37 @@ export const VoiceExtraction = z.object({
     name: z.string(),
     type: z.enum(['person', 'company', 'location', 'skill', 'goal']),
     confidence: z.number().min(0).max(100),
+    context: z.string().optional(),
   })),
   needs: z.array(z.object({
     description: z.string(),
     urgency: z.enum(['low', 'medium', 'high']),
     confidence: z.number().min(0).max(100),
+    deadline: z.string().optional(),
   })),
   offers: z.array(z.object({
     description: z.string(),
     value: z.string(),
     confidence: z.number().min(0).max(100),
+    targetAudience: z.string().optional(),
   })),
   explicitGoals: z.array(z.object({
     kind: IntentKind,
     title: z.string(),
     details: z.string().optional(),
     confidence: z.number().min(0).max(100),
+    timeline: z.string().optional(),
+  })),
+  sentiment: z.object({
+    overall: z.enum(['positive', 'neutral', 'negative']),
+    confidence: z.number().min(0).max(100),
+    emotions: z.array(z.string()),
+  }),
+  actionItems: z.array(z.object({
+    description: z.string(),
+    assignee: z.string().optional(),
+    deadline: z.string().optional(),
+    priority: z.enum(['low', 'medium', 'high']),
   })),
 });
 
@@ -148,98 +202,15 @@ export const CalendarEvent = z.object({
 
 export type CalendarEvent = z.infer<typeof CalendarEvent>;
 
-// Provider types
-export const EnrichmentProvider = z.enum([
-  'null',
-  'clearbit',
-  'apollo',
-  'hunter',
-  'slack',
-  'google',
-]);
-
-export type EnrichmentProvider = z.infer<typeof EnrichmentProvider>;
-
-export const EnrichmentData = z.object({
-  provider: EnrichmentProvider,
-  personId: z.string(),
-  claims: z.array(z.object({
-    key: z.string(),
-    value: z.string(),
-    confidence: z.number().min(0).max(100),
-    source: z.string(),
-  })),
-  metadata: z.record(z.any()),
+// Introduction outcome tracking
+export const IntroOutcome = z.object({
+  suggestionId: z.string(),
+  accepted: z.boolean(),
+  responded: z.boolean(),
+  meetingScheduled: z.boolean(),
+  goalProgress: z.number().min(0).max(100),
+  notes: z.string().optional(),
+  createdAt: z.date(),
 });
 
-export type EnrichmentData = z.infer<typeof EnrichmentData>;
-
-// Agent system types
-export const AgentTask = z.enum([
-  'capture_note',
-  'find_people', 
-  'suggest_intros',
-  'draft_intro',
-  'followup',
-  'clarify',
-  'set_goal'
-]);
-
-export type AgentTask = z.infer<typeof AgentTask>;
-
-export const Parse = z.object({
-  people: z.array(z.object({
-    name: z.string(),
-    role: z.string().optional(),
-    company: z.string().optional()
-  })).optional(),
-  goals: z.array(z.object({
-    kind: z.string(),
-    title: z.string().optional(),
-    confidence: z.number().min(0).max(100)
-  })).optional(),
-  actions: z.array(AgentTask),
-  facts: z.array(z.object({
-    subject: z.enum(['person', 'org']),
-    key: z.string(),
-    value: z.string()
-  })).optional()
-});
-
-export type Parse = z.infer<typeof Parse>;
-
-export const AgentResponse = z.object({
-  text: z.string(),
-  cards: z.object({
-    people: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      role: z.string().optional(),
-      company: z.string().optional(),
-      lastEncounter: z.string().optional(),
-      actions: z.array(z.object({
-        label: z.string(),
-        action: z.string(),
-        data: z.record(z.any())
-      }))
-    })).optional(),
-    suggestions: z.array(z.object({
-      id: z.string(),
-      score: z.number(),
-      why: z.array(z.string()),
-      actions: z.array(z.object({
-        label: z.string(),
-        action: z.string(),
-        data: z.record(z.any())
-      }))
-    })).optional(),
-    goals: z.array(z.object({
-      id: z.string(),
-      kind: z.string(),
-      title: z.string(),
-      status: z.string()
-    })).optional()
-  }).optional()
-});
-
-export type AgentResponse = z.infer<typeof AgentResponse>;
+export type IntroOutcome = z.infer<typeof IntroOutcome>;

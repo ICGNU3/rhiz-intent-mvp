@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Test basic functionality
     const testResults = {
       timestamp: new Date().toISOString(),
-      elevenLabs: {
+      elevenLabs: { 
         configured: elevenLabsConfigured,
         config: elevenLabsConfig,
         envDebug,

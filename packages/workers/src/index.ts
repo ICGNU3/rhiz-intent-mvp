@@ -1,4 +1,4 @@
-import { startAgent } from './queue';
+import { startAgent, addJob, QUEUE_NAMES } from './queue';
 import { intentRouterHandler } from './agents/intent-router';
 import { captureHandler } from './agents/capture';
 import { enrichmentHandler } from './agents/enrichment';
@@ -10,6 +10,9 @@ import { processAgentPrioritize } from './agents/agent-prioritizer';
 import { processAgentSense } from './agents/agent-sensemaker';
 import { processAgentOutreach } from './agents/agent-outreacher';
 import { processSignalsCompute } from './agents/signals-computer';
+
+// Export queue functions for use in other packages
+export { addJob, QUEUE_NAMES };
 
 // Agent roles
 const ROLES = {

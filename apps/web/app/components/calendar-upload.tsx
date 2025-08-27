@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, Upload, FileText } from 'lucide-react'
 
-export function CalendarUpload() {
+interface CalendarUploadProps {
+  onUpload?: (file: File) => Promise<void>;
+}
+
+export function CalendarUpload({ onUpload }: CalendarUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
 
@@ -23,20 +27,24 @@ export function CalendarUpload() {
 
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('calendar', uploadedFile)
-
-      const response = await fetch('/api/ingest/calendar', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (response.ok) {
-        const result = await response.json()
-        alert(`Calendar uploaded successfully! Processed ${result.events} events.`)
-        setUploadedFile(null)
+      if (onUpload) {
+        await onUpload(uploadedFile)
       } else {
-        throw new Error('Upload failed')
+        const formData = new FormData()
+        formData.append('calendar', uploadedFile)
+
+        const response = await fetch('/api/ingest/calendar', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          alert(`Calendar uploaded successfully! Processed ${result.events} events.`)
+          setUploadedFile(null)
+        } else {
+          throw new Error('Upload failed')
+        }
       }
     } catch (error) {
       console.error('Upload error:', error)

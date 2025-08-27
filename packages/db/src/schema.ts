@@ -77,6 +77,30 @@ export const workspaceMember = pgTable('workspace_member', {
   uniqueMember: index('workspace_member_unique_idx').on(table.workspaceId, table.userId),
 }));
 
+// Subscription table for Stripe billing
+export const subscription = pgTable('subscription', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  userId: text('user_id').notNull(),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  stripePaymentIntentId: text('stripe_payment_intent_id'), // For one-time payments
+  tier: text('tier').notNull(), // 'root_alpha', 'root_beta', 'free'
+  status: text('status').notNull().default('pending'), // 'pending', 'active', 'cancelled', 'expired'
+  currentPeriodStart: timestamp('current_period_start'),
+  currentPeriodEnd: timestamp('current_period_end'),
+  cancelledAt: timestamp('cancelled_at'),
+  metadata: jsonb('metadata'), // Store additional Stripe data
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('subscription_workspace_idx').on(table.workspaceId),
+  userIdx: index('subscription_user_idx').on(table.userId),
+  stripeCustomerIdx: index('subscription_stripe_customer_idx').on(table.stripeCustomerId),
+  tierIdx: index('subscription_tier_idx').on(table.tier),
+  statusIdx: index('subscription_status_idx').on(table.status),
+}));
+
 // Workspace activity feed
 export const workspaceActivity = pgTable('workspace_activity', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -511,6 +535,48 @@ export const messageLink = pgTable('message_link', {
 }, (table) => ({
   messageIdx: index('message_link_message_idx').on(table.messageId),
   subjectIdx: index('message_link_subject_idx').on(table.subjectType, table.subjectId),
+}));
+
+// Introduction outcomes tracking for AI learning
+export const introOutcome = pgTable('intro_outcome', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  ownerId: text('owner_id').notNull(),
+  suggestionId: uuid('suggestion_id').references(() => suggestion.id).notNull(),
+  accepted: boolean('accepted').notNull(),
+  responded: boolean('responded').default(false),
+  meetingScheduled: boolean('meeting_scheduled').default(false),
+  goalProgress: integer('goal_progress').default(0), // 0-100
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('intro_outcome_workspace_idx').on(table.workspaceId),
+  ownerIdx: index('intro_outcome_owner_idx').on(table.ownerId),
+  suggestionIdx: index('intro_outcome_suggestion_idx').on(table.suggestionId),
+  acceptedIdx: index('intro_outcome_accepted_idx').on(table.accepted),
+}));
+
+// AI model performance tracking
+export const aiModelPerformance = pgTable('ai_model_performance', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  workspaceId: uuid('workspace_id').references(() => workspace.id).notNull(),
+  ownerId: text('owner_id').notNull(),
+  modelName: text('model_name').notNull(),
+  taskType: text('task_type').notNull(), // 'voice_extraction', 'intro_generation', 'matching'
+  success: boolean('success').notNull(),
+  confidence: integer('confidence').notNull(), // 0-100
+  latency: integer('latency').notNull(), // milliseconds
+  cost: integer('cost').notNull(), // cents
+  tokens: integer('tokens').notNull(),
+  errorMessage: text('error_message'),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  workspaceIdx: index('ai_model_performance_workspace_idx').on(table.workspaceId),
+  ownerIdx: index('ai_model_performance_owner_idx').on(table.ownerId),
+  modelIdx: index('ai_model_performance_model_idx').on(table.modelName),
+  taskIdx: index('ai_model_performance_task_idx').on(table.taskType),
+  successIdx: index('ai_model_performance_success_idx').on(table.success),
 }));
 
 // Zod schemas for validation

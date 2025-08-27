@@ -1,0 +1,70 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Rhiz Demo//Demo Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Rhiz Demo Calendar
+X-WR-CALDESC:Sample calendar with meetings for testing Rhiz
+X-WR-TIMEZONE:America/Los_Angeles
+
+BEGIN:VEVENT
+UID:demo-meeting-1
+DTSTART:20240115T100000Z
+DTEND:20240115T110000Z
+SUMMARY:Product Strategy Meeting
+DESCRIPTION:Discussing Q1 product roadmap and feature priorities
+LOCATION:Conference Room A
+ORGANIZER;CN=John Doe:mailto:john@company.com
+ATTENDEE;CN=Sarah Chen;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:sarah@techcorp.com
+ATTENDEE;CN=Mike Rodriguez;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:mike@startuphub.io
+ATTENDEE;CN=David Kim;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION:mailto:david@stripe.com
+END:VEVENT
+
+BEGIN:VEVENT
+UID:demo-meeting-2
+DTSTART:20240116T140000Z
+DTEND:20240116T150000Z
+SUMMARY:Investor Pitch Practice
+DESCRIPTION:Practice pitch deck for Series A fundraising
+LOCATION:Virtual Meeting
+ORGANIZER;CN=John Doe:mailto:john@company.com
+ATTENDEE;CN=Emily Johnson;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:emily@innovationlabs.co
+ATTENDEE;CN=Lisa Wang;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:lisa@startuphub.io
+END:VEVENT
+
+BEGIN:VEVENT
+UID:demo-meeting-3
+DTSTART:20240117T090000Z
+DTEND:20240117T100000Z
+SUMMARY:Technical Architecture Review
+DESCRIPTION:Review system architecture and scalability plans
+LOCATION:Engineering Office
+ORGANIZER;CN=John Doe:mailto:john@company.com
+ATTENDEE;CN=Alex Park;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:alex@openai.com
+ATTENDEE;CN=Sarah Chen;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:sarah@techcorp.com
+END:VEVENT
+
+BEGIN:VEVENT
+UID:demo-meeting-4
+DTSTART:20240118T160000Z
+DTEND:20240118T170000Z
+SUMMARY:Customer Success Call
+DESCRIPTION:Follow-up with key customer on feature requests
+LOCATION:Customer Office
+ORGANIZER;CN=John Doe:mailto:john@company.com
+ATTENDEE;CN=Mike Rodriguez;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:mike@startuphub.io
+END:VEVENT
+
+BEGIN:VEVENT
+UID:demo-meeting-5
+DTSTART:20240119T110000Z
+DTEND:20240119T120000Z
+SUMMARY:Team Retrospective
+DESCRIPTION:Weekly team retrospective and planning
+LOCATION:Team Room
+ORGANIZER;CN=John Doe:mailto:john@company.com
+ATTENDEE;CN=David Kim;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:david@stripe.com
+ATTENDEE;CN=Emily Johnson;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED:mailto:emily@innovationlabs.co
+END:VEVENT
+
+END:VCALENDAR

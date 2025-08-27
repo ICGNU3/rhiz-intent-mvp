@@ -429,6 +429,303 @@ export class GoogleCalendarIntegration {
   }
 }
 
+// Real-time calendar sync with webhook support
+export class RealTimeCalendarSync {
+  private config: GoogleCalendarConfig;
+  private syncStatus: Map<string, {
+    lastSync: Date;
+    status: 'active' | 'paused' | 'error';
+    errorCount: number;
+  }> = new Map();
+
+  constructor(config: GoogleCalendarConfig) {
+    this.config = config;
+  }
+
+  async setupWebhook(workspaceId: string, calendarId: string): Promise<boolean> {
+    try {
+      // Set up Google Calendar webhook
+      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/google/calendar/webhook`;
+      
+      const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events/watch`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${await this.getAccessToken(workspaceId)}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: `rhiz-calendar-${workspaceId}`,
+          type: 'web_hook',
+          address: webhookUrl,
+          params: {
+            workspaceId,
+            calendarId,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        this.syncStatus.set(workspaceId, {
+          lastSync: new Date(),
+          status: 'active',
+          errorCount: 0,
+        });
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Failed to setup calendar webhook:', error);
+      return false;
+    }
+  }
+
+  async handleWebhook(payload: any): Promise<void> {
+    try {
+      const { workspaceId, calendarId } = payload.params;
+      const events = payload.events || [];
+
+      // Process each event change
+      for (const event of events) {
+        await this.processEventChange(workspaceId, calendarId, event);
+      }
+
+      // Update sync status
+      const status = this.syncStatus.get(workspaceId);
+      if (status) {
+        status.lastSync = new Date();
+        status.errorCount = 0;
+      }
+    } catch (error) {
+      console.error('Webhook processing failed:', error);
+      
+      // Increment error count
+      const status = this.syncStatus.get(payload.params?.workspaceId);
+      if (status) {
+        status.errorCount++;
+        if (status.errorCount > 5) {
+          status.status = 'error';
+        }
+      }
+    }
+  }
+
+  private async processEventChange(workspaceId: string, calendarId: string, event: any): Promise<void> {
+    const { db, encounter, person, claim, personEncounter } = await import('@rhiz/db');
+    const { addJob, QUEUE_NAMES } = await import('@rhiz/workers');
+
+    try {
+      // Check for conflicts with existing encounters
+      const existingEncounter = await db
+        .select()
+        .from(encounter)
+        .where(({ and, eq }) => 
+          and(
+            eq(encounter.workspaceId, workspaceId),
+            eq(encounter.raw, { eventId: event.id })
+          )
+        )
+        .limit(1);
+
+      if (existingEncounter.length > 0) {
+        // Update existing encounter
+        await this.updateEncounter(existingEncounter[0].id, event);
+      } else {
+        // Create new encounter
+        await this.createEncounter(workspaceId, event);
+      }
+
+      // Queue for goal extraction
+      await addJob(QUEUE_NAMES.EVENTS_INGESTED, {
+        ownerId: 'demo-user-123', // TODO: Get from context
+        type: 'calendar',
+        data: this.convertToCalendarEvent(event),
+        source: 'google_calendar_webhook',
+        timestamp: new Date().toISOString(),
+      });
+
+    } catch (error) {
+      console.error('Event processing failed:', error);
+      throw error;
+    }
+  }
+
+  private async createEncounter(workspaceId: string, event: any): Promise<void> {
+    const { db, encounter, person, claim, personEncounter } = await import('@rhiz/db');
+
+    // Create encounter record
+    const [encounterRecord] = await db.insert(encounter).values({
+      workspaceId,
+      ownerId: 'demo-user-123', // TODO: Get from context
+      kind: 'meeting',
+      title: event.summary || 'Untitled Event',
+      description: event.description || '',
+      occurredAt: new Date(event.start.dateTime || event.start.date),
+      raw: {
+        eventId: event.id,
+        attendees: event.attendees || [],
+        organizer: event.organizer,
+        location: event.location,
+        source: 'google_calendar_webhook'
+      }
+    }).returning();
+
+    // Process attendees
+    if (event.attendees) {
+      for (const attendee of event.attendees) {
+        await this.processAttendee(workspaceId, encounterRecord.id, attendee, event);
+      }
+    }
+  }
+
+  private async updateEncounter(encounterId: string, event: any): Promise<void> {
+    const { db, encounter } = await import('@rhiz/db');
+
+    await db
+      .update(encounter)
+      .set({
+        title: event.summary || 'Untitled Event',
+        description: event.description || '',
+        occurredAt: new Date(event.start.dateTime || event.start.date),
+        raw: {
+          eventId: event.id,
+          attendees: event.attendees || [],
+          organizer: event.organizer,
+          location: event.location,
+          source: 'google_calendar_webhook',
+          updatedAt: new Date().toISOString()
+        }
+      })
+      .where(eq(encounter.id, encounterId));
+  }
+
+  private async processAttendee(workspaceId: string, encounterId: string, attendee: any, event: any): Promise<void> {
+    const { db, person, claim, personEncounter } = await import('@rhiz/db');
+
+    if (!attendee.email) return;
+
+    // Find or create person
+    let personRecord = await db
+      .select()
+      .from(person)
+      .where(({ and, eq }) => 
+        and(
+          eq(person.workspaceId, workspaceId),
+          eq(person.primaryEmail, attendee.email)
+        )
+      )
+      .limit(1);
+
+    if (personRecord.length === 0) {
+      // Create new person
+      [personRecord] = await db.insert(person).values({
+        workspaceId,
+        ownerId: 'demo-user-123', // TODO: Get from context
+        fullName: attendee.displayName || attendee.email.split('@')[0],
+        primaryEmail: attendee.email,
+      }).returning();
+    }
+
+    // Create person-encounter relationship
+    await db.insert(personEncounter).values({
+      personId: personRecord[0].id,
+      encounterId,
+      role: attendee.email === event.organizer?.email ? 'organizer' : 'attendee',
+    });
+
+    // Create claims from attendee info
+    if (attendee.displayName) {
+      await db.insert(claim).values({
+        workspaceId,
+        ownerId: 'demo-user-123', // TODO: Get from context
+        subjectType: 'person',
+        subjectId: personRecord[0].id,
+        key: 'full_name',
+        value: attendee.displayName,
+        confidence: 95,
+        source: 'google_calendar',
+        lawfulBasis: 'legitimate_interest',
+        provenance: {
+          source: 'google_calendar_event',
+          eventId: event.id,
+          attendeeEmail: attendee.email,
+        },
+      });
+    }
+
+    // Extract company from email domain
+    const domain = attendee.email.split('@')[1];
+    if (domain && !domain.includes('gmail.com') && !domain.includes('yahoo.com')) {
+      await db.insert(claim).values({
+        workspaceId,
+        ownerId: 'demo-user-123', // TODO: Get from context
+        subjectType: 'person',
+        subjectId: personRecord[0].id,
+        key: 'company',
+        value: domain.split('.')[0].replace(/[^a-zA-Z]/g, ' ').trim(),
+        confidence: 70,
+        source: 'google_calendar',
+        lawfulBasis: 'legitimate_interest',
+        provenance: {
+          source: 'google_calendar_event',
+          eventId: event.id,
+          attendeeEmail: attendee.email,
+          inferredFrom: 'email_domain',
+        },
+      });
+    }
+  }
+
+  private convertToCalendarEvent(event: any): any {
+    return {
+      id: event.id,
+      title: event.summary || 'Untitled Event',
+      description: event.description || '',
+      startTime: new Date(event.start.dateTime || event.start.date),
+      endTime: new Date(event.end.dateTime || event.end.date),
+      attendees: (event.attendees || []).map((att: any) => ({
+        email: att.email,
+        name: att.displayName,
+        responseStatus: att.responseStatus || 'needsAction'
+      })),
+      organizer: event.organizer ? {
+        email: event.organizer.email,
+        name: event.organizer.displayName
+      } : { email: 'unknown@example.com', name: 'Unknown' },
+      location: event.location || '',
+      source: 'google'
+    };
+  }
+
+  async getSyncStatus(workspaceId: string): Promise<any> {
+    return this.syncStatus.get(workspaceId) || {
+      lastSync: null,
+      status: 'inactive',
+      errorCount: 0,
+    };
+  }
+
+  async pauseSync(workspaceId: string): Promise<void> {
+    const status = this.syncStatus.get(workspaceId);
+    if (status) {
+      status.status = 'paused';
+    }
+  }
+
+  async resumeSync(workspaceId: string): Promise<void> {
+    const status = this.syncStatus.get(workspaceId);
+    if (status) {
+      status.status = 'active';
+      status.errorCount = 0;
+    }
+  }
+
+  private async getAccessToken(workspaceId: string): Promise<string> {
+    // TODO: Implement OAuth token retrieval
+    return 'mock-access-token';
+  }
+}
+
 // Factory function to create Google Calendar integration
 export function createGoogleCalendarIntegration(): GoogleCalendarIntegration | null {
   const clientId = process.env.GOOGLE_CLIENT_ID;

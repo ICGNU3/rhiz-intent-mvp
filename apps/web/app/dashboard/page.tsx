@@ -57,6 +57,9 @@ export default function DashboardPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [panelWidth, setPanelWidth] = useState(420);
   
+  // Welcome banner for new users
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
+  
   useEffect(() => {
     const handleResize = () => {
       if (typeof window !== 'undefined' && window.innerWidth < 768) {
@@ -226,6 +229,40 @@ export default function DashboardPage() {
 
       {/* Main Content - Full Width */}
       <div className="relative z-10 h-screen flex flex-col">
+        {/* Welcome Banner for New Users */}
+        <AnimatePresence>
+          {showWelcomeBanner && (
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-blue-500/30 backdrop-blur-xl"
+            >
+              <div className="px-4 md:px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">Welcome to Rhiz! 🎉</h3>
+                      <p className="text-sm text-blue-200">
+                        Your network is being analyzed. Check back tomorrow for your first personalized insights.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowWelcomeBanner(false)}
+                    className="text-blue-300 hover:text-white transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Top Navigation Bar - Collapsible */}
         <AnimatePresence>
           {showTopBar && (
